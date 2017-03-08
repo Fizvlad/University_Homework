@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1488997730 source:p:\Универ\Программирование\c++\hw\2semestr\triad\triad\main.cpp
+	<iostream>
+	"triad.h"
+
+1488988916 p:\Универ\Программирование\c++\hw\2semestr\triad\triad\triad.h
+	"triad.cpp"
+
+1488999897 p:\Универ\Программирование\c++\hw\2semestr\triad\triad\triad.cpp
+	<iostream>
+
