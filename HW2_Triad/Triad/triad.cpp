@@ -1,5 +1,3 @@
-#include <iostream>
-
 using namespace std;
 
 typedef class triad {
@@ -18,42 +16,40 @@ public:
         num[pos] = in;
     }
     // Operators
-    triad& operator +=(triad& in) {
+    const triad& operator +=(const triad& in) {
         for (int i = 0; i < 3; i++) {
-            this->num[i] += in.getNum(i);
+            this->num[i] += in.num[i];
         }
         return *this;
     }
-    triad& operator -=(triad& in) {
+    const triad& operator -=(const triad& in) {
         for (int i = 0; i < 3; i++) {
-            this->num[i] -= in.getNum(i);
+            this->num[i] -= in.num[i];
         }
         return *this;
     }
-
-    triad& operator + (triad& in) {
-        triad* out = new triad;
+    const triad& operator *=(const int& in) {
         for (int i = 0; i < 3; i++) {
-            out->num[i] = num[i] + in.getNum(i);
+            this->num[i] *= in;
         }
-        return *out;
+        return *this;
     }
-    //Constructor/Destructor
+    // Constructor/Destructor
     triad(int in0 = 0, int in1 = 0, int in2 = 0) {
         num = new int[3];
         num[0] = in0;
         num[1] = in1;
         num[2] = in2;
     }
-    triad(triad& in) {
+    triad(const triad& in) {
         num = new int[3];
         for (int i = 0; i < 3; i++) {
-            this->num[i] = in.getNum(i);
+            this->num[i] = in.num[i];
         }
     }
-    triad& operator = (triad& in) {
+    triad& operator = (const triad& in) {
         for (int i = 0; i < 3; i++) {
-            this->num[i] = in.getNum(i);
+            this->num[i] = in.num[i];
         }
         return *this;
     }
@@ -61,3 +57,16 @@ public:
         delete num;
     }
 };
+
+const triad& operator + (triad in1, const triad& in2) {
+    return in1 += in2;
+}
+const triad& operator - (triad in1, const triad& in2) {
+    return in1 -= in2;
+}
+const triad& operator * (triad in, const int& i) {
+    return in *= i;
+}
+const triad& operator * (const int& i, triad in) {
+    return in *= i;
+}

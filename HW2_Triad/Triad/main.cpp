@@ -3,20 +3,20 @@
 
 using namespace std;
 
-void printT(triad a, string name) {
+void printT(triad& a, string name) {
     cout << name << ": " << a.getNum(0) << " " << a.getNum(1) << " " << a.getNum(2) << endl;
 }
 
 int main()
 {
-    triad a;
-    a.set(2, 4, 7);
-    triad b(4, 8, 14);
-    triad c(0,0,0);
-    c = a + b;
-    cout << "c = a + b" << endl;
+    triad a(1, 2, 3);
     printT(a, "a");
+    triad b(a);
+    b = b - a;
     printT(b, "b");
+    triad c(0, 0, 0);
+    c = 2 * a * 2 + b;
+    printT(a, "a");
     printT(c, "c");
     return 0;
 }
