@@ -20,6 +20,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="errlog.txt" />
 		<Unit filename="indexedList.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

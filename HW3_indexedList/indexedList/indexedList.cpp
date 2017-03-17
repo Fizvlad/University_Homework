@@ -1,4 +1,8 @@
+#include <cstdio>
+
 using namespace std;
+
+const char* NO_ELEM_ERROR = "No element on position ";
 
 struct node {
     int data_;
@@ -28,12 +32,15 @@ class inList {
 
         node* out;
         out = start_;
-        for (int i = 0; i < pos; i++) {
+        for (unsigned i = 0; i < pos; i++) {
             out = out->next_;
         }
         return out;
     }
 public:
+    unsigned getSize() {
+        return size_;
+    }
     void push (int input) { // to end_
         node* newNode = new node;
         newNode->data_ = input;
@@ -42,7 +49,8 @@ public:
             start_ = newNode;
             end_ = newNode;
         } else {
-            newNode->next_ = end_;
+            newNode->prev_ = end_;
+            end_->next_ = newNode;
             end_ = newNode;
         }
         size_++;
@@ -50,7 +58,7 @@ public:
     void pushBefore (int input, unsigned pos) {
         node* target = nodeByPos(pos);
         if (target == NULL) {
-            << "No element on position " << pos << endl;
+            fprintf(stderr, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
             return;
         }
 
@@ -62,17 +70,19 @@ public:
             newNode->next_ = start_;
             start_ = newNode;
         } else {
-            target->next_->prev_ = newNode;
-            newNode->next_ = target->next_;
-            newNode->prev_ = target;
-            target->next_ = newNode;
+            newNode->prev_ = target->prev_;
+            newNode->next_ = target;
+            target->prev_->next_ = newNode;
+            target->prev_ = newNode;
         }
         size_++;
     }
     int pop (unsigned pos = 0) {
         node* target = nodeByPos(pos);
         if (target == NULL) {
-            << "No element on position " << pos << endl;
+            FILE* err = fopen("errlog.txt", "");
+            fprintf(err, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
+            fclose(err);
             return 0;
         }
 
@@ -98,14 +108,34 @@ public:
         return out;
     }
 
+    void print(const char* prefix) {
+        fprintf(stdout, "%s%s", prefix, ":\n");
+        for (unsigned i = 0; i < size_; i++) {
+            fprintf(stdout, "%d%s%d%c", i, ". ", operator[](i), '\n');
+        }
+    }
+
+    int& operator[] (unsigned pos) {
+        node* target = nodeByPos(pos);
+        if (target == NULL) {
+            fprintf(stderr, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
+        }
+        return target->data_;
+    }
+
     inList() {
         start_ = NULL;
         end_ = NULL;
+        size_ = 0;
     }
-    /*inList(const inList& in) {
-        start_ = in.start_;
-        end_ = in.end_;
-    }*/
+    inList(inList& in) {
+        start_ = NULL;
+        end_ = NULL;
+        size_ = 0;
+        for (unsigned i = 0; i < in.size_; i++) {
+            this->push(in[i]);
+        }
+    }
     ~inList() {
         if (start_ == NULL) {
             return;
