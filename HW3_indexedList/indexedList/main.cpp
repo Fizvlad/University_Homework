@@ -5,6 +5,7 @@ using namespace std;
 
 int main()
 {
+    FILE* e = freopen("errlog.txt", "a", stderr);
     inList a;
     a.push(123);
     a.print("a");
@@ -21,6 +22,10 @@ int main()
     cout << "pop: " << b.pop(1) << endl;
     b.print("b");
     cout << "Trying to pop something out of range" << endl;
-    cout << b.pop(99);
+    cout << b.pop(99) << endl;
+    // Following code won't be executed
+    cout << "Trying to access something out of range with []" << endl;
+    cout << b[99] << endl;
+    fclose(e);
     return 0;
 }

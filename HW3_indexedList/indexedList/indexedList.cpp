@@ -1,8 +1,9 @@
 #include <cstdio>
+#include <cstdlib>
 
 using namespace std;
 
-const char* NO_ELEM_ERROR = "No element on position ";
+const char* NO_ELEM_ERROR = "Error: No element on position ";
 
 struct node {
     int data_;
@@ -59,7 +60,7 @@ public:
         node* target = nodeByPos(pos);
         if (target == NULL) {
             fprintf(stderr, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
-            return;
+            exit(EXIT_FAILURE);
         }
 
         node* newNode = new node;
@@ -80,10 +81,8 @@ public:
     int pop (unsigned pos = 0) {
         node* target = nodeByPos(pos);
         if (target == NULL) {
-            FILE* err = fopen("errlog.txt", "");
-            fprintf(err, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
-            fclose(err);
-            return 0;
+            fprintf(stderr, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
+            exit(EXIT_FAILURE);
         }
 
         int out = target->data_;
@@ -119,6 +118,7 @@ public:
         node* target = nodeByPos(pos);
         if (target == NULL) {
             fprintf(stderr, "%s%d%c", NO_ELEM_ERROR, pos, '\n');
+            exit(EXIT_FAILURE);
         }
         return target->data_;
     }

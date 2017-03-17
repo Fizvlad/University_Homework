@@ -3,4 +3,12 @@
 
 #include "indexedList.cpp"
 
+struct node;
+class inList;
+
+/*
+Errors:
+1 - element is out of range
+*/
+
 #endif // INDEXEDLIST_H_INCLUDED
