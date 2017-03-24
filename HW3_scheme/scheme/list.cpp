@@ -6,7 +6,7 @@ using namespace std;
 
 const char* NO_ELEM_ERROR = "Error: No element on position ";
 
-struct node {
+class node {
     Figure* data_;
     node* next_;
     node* prev_;
@@ -20,6 +20,8 @@ struct node {
     }
     ~node() {
     }
+
+    friend class inList;
 };
 
 class inList {

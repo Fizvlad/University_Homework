@@ -26,11 +26,23 @@
 		<Unit filename="figures.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="list.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="list.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="main.cpp" />
 		<Unit filename="scheme.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="scheme.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="utility.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="utility.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>
