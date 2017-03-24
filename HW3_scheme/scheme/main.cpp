@@ -5,10 +5,10 @@ using namespace std;
 
 int main()
 {
-    point a(1, 1);
-    point b(2, 1);
-    point c(3, 2);
-    point d(5, 5);
+    point a(1, 1.337);
+    point b(2, 4);
+    point c(18, 18);
+    point d(5.5, 5);
     cut cu;
     cu.set(a, b);
     cu.setColor(123);
@@ -17,7 +17,7 @@ int main()
     qadrangle q;
     q.set(a, b, c, d);
     rectangle r;
-    r.set(a, c, 3.33);
+    r.set(a, b, 3.33);
     square s;
     s.set(a, b);
     circle ci;

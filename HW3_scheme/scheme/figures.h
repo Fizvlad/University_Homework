@@ -16,6 +16,12 @@ oY
 */
 typedef class point;
 
+const point& operator+ (point a, const point& b);
+const point& operator- (point a, const point& b);
+const point& operator* (point a, const point& b);
+const point& operator* (point a, const float& b);
+const point& operator* (const float& a, point b);
+
 typedef class line;
 
 typedef class triangle;

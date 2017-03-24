@@ -20,6 +20,12 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="bmp.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="bmp.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="figures.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

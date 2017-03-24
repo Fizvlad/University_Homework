@@ -9,8 +9,8 @@ typedef class Figure {
 protected:
     float X;
     float Y;
-    unsigned sizeX;
-    unsigned sizeY;
+    float sizeX;
+    float sizeY;
     short color; // R(0-7)G(0-7)B(0-7)
 public:
     short getColor() {
@@ -56,8 +56,9 @@ public:
 
 typedef class point : public Figure {
     /*
+    This class have +, * operators, so it can be used as vector
     X and Y are equal to Figure's one
-    sizeX, sizeY constantly 0
+    sizeX, sizeY constantly 1
     */
 public:
     float x() {
@@ -70,7 +71,7 @@ public:
         X = x;
         Y = y;
     }
-    unsigned distance(const point& in) {
+    float distance(const point& in) {
         return sqrt(pow(X - in.X, 2) + pow(Y - in.Y, 2));
     }
 
@@ -91,17 +92,60 @@ public:
         return out;
     }
 
+    point& ortogonalize() {
+        float t = X;
+        X = Y;
+        Y = -1 * t;
+        return *this;
+    }
+
+    point& operator += (const point& in) {
+        X += in.X;
+        Y += in.Y;
+        return *this;
+    }
+    point& operator -= (const point& in) {
+        X -= in.X;
+        Y -= in.Y;
+        return *this;
+    }
+    point& operator *= (const float& in) {
+        X *= in;
+        Y *= in;
+        return *this;
+    }
+
     point(float x = -1, float y = -1) {
         X = x;
         Y = y;
+        sizeX = 1;
+        sizeY = 1;
     }
     point(const point& in) {
         X = in.X;
         Y = in.Y;
+        sizeX = 1;
+        sizeY = 1;
     }
     ~point() {
     }
 };
+
+const point& operator+ (point a, const point& b) {
+    return a += b;
+}
+const point& operator- (point a, const point& b) {
+    return a -= b;
+}
+float operator* (point& a, point& b) {
+    return a.x() * b.x() + a.y() * b.y();
+}
+const point& operator* (point a, const float& b) {
+    return a *= b;
+}
+const point& operator* (const float& a, point b) {
+    return b *= a;
+}
 
 typedef class cut : public Figure {
     point Begin;
@@ -247,7 +291,7 @@ public:
 typedef class rectangle : public Figure {
     point pA;
     point pB;
-    unsigned Length;
+    float Length;
 public:
     point A() {
         return pA;
@@ -262,7 +306,9 @@ public:
             return pC;
         }
         float k = Length / pB.distance(pA);
-        pC.set(pB.x() + (pA.y() - pB.y()) * k, pB.y() + (pB.x() - pA.x()) * k);
+        point t = (pB - pA) * k;
+        t.ortogonalize();
+        pC = pB + t;
         return pC;
     }
     point D() {
@@ -272,16 +318,18 @@ public:
             return pD;
         }
         float k = Length / pB.distance(pA);
-        pD.set(pA.x() + (pA.y() - pB.y()) * k, pA.y() + (pB.x() - pA.x()) * k);
+        point t = (pB - pA) * k;
+        t.ortogonalize();
+        pD = pA + t;
         return pD;
     }
-    unsigned length() {
+    float length() {
         return Length;
     }
-    unsigned height() {
+    float height() {
         return pB.distance(pA);
     }
-    void set(point a, point b, unsigned l) {
+    void set(point a, point b, float l) {
         pA = a;
         pB = b;
         Length = l;
@@ -324,7 +372,13 @@ public:
     }
     point B() {
         point pB;
-        pB.set((pA.x() + pC.x() + pC.y() - pA.y()) / 2, (pA.y() + pC.y() - pC.x() + pA.x()) / 2);
+        if (pC.distance(pA) == 0) {
+            pB = pA;
+            return pB;
+        }
+        point t = (pC - pA) * 0.5;
+        t.ortogonalize();
+        pB = (pA + pC) * 0.5 + t;
         return pB;
     }
     point C() {
@@ -332,7 +386,13 @@ public:
     }
     point D() {
         point pD;
-        pD.set((pA.x() + pC.x() - pC.y() + pA.y()) / 2, (pA.y() + pC.y() + pC.x() - pA.x()) / 2);
+        if (pC.distance(pA) == 0) {
+            pD = pA;
+            return pD;
+        }
+        point t = (pC - pA) * 0.5;
+        t.ortogonalize();
+        pD = (pA + pC) * 0.5 - t;
         return pD;
     }
     void set(point a, point c) {
