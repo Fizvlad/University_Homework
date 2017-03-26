@@ -5,32 +5,29 @@ using namespace std;
 
 int main()
 {
-    point a(1, 1.337);
-    point b(2, 4);
-    point c(18, 18);
-    point d(5.5, 5);
-    cut cu;
-    cu.set(a, b);
-    cu.setColor(123);
-    triangle t;
-    t.set(a, b, c);
-    qadrangle q;
-    q.set(a, b, c, d);
-    rectangle r;
-    r.set(a, b, 3.33);
-    square s;
-    s.set(a, b);
-    circle ci;
-    ci.set(d, 13);
+    scheme s;
+    cut cu(point(20,10), point(33, 37));
+    cu.setColor("aaaaaa");
+    s.push(&cu);
 
-    scheme s1;
-    s1.push(&t);
-    s1.push(&q);
-    s1.push(&r);
-    s1.push(&s);
-    s1.push(&ci);
-    s1.push(&cu);
-    s1.push(&c);
-    s1.print();
+    triangle tr(point(60, 50), point(100, 9.111), point(70, 10));
+    tr.setColor("0000ff");
+    s.push(&tr);
+
+    qadrangle qa(point(50, 300), point(70, 320), point(100, 150), point(10, 10));
+    s.push(&qa);
+
+    rectangle re(point(20, 189), point(25, 190), 50.37);
+    re.setColor("ff00aa");
+    s.push(&re);
+
+    square sq(point (10, 200), point(18, 210));
+    s.push(&sq);
+
+    circle ci(point(60, 150), 25);
+    s.push(&ci);
+
+    s.print();
+    s.draw("output.bmp");
     return 0;
 }
