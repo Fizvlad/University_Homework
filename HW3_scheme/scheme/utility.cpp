@@ -57,7 +57,7 @@ char* merge(char* in1, char* in2) {
 char* merge(unsigned amount, char* in, ...) {
     char* out = "";
     char** curr = &in;
-    for (int i = 0; i < amount; i++) {
+    for (unsigned i = 0; i < amount; i++) {
         out = merge(out, *curr);
         curr++;
     }
