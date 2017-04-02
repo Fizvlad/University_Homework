@@ -1,11 +1,11 @@
-main:
-	g++ main.o mergesort.o comparion.o -o randomStrSorter
+strSorter:
+	g++ main.o mergesort.o comparion.o -o strSorter
 test_mergeSort: main.o mergeSort.o comparison.o
-	g++ main.o mergesort.o comparion.o -o main_test
+	g++ main.o mergesort.o comparion.o -o Testing/main_test/main_test
 test_comparison: comparison.o
-	g++ test_comparison.cpp -o comparison_test
+	g++ test_comparison.cpp -o Testing/comparison_test/comparison_test
 test_strSwap: comparison.o
-	g++ test_strSwap.cpp -o strSwap_test
+	g++ test_strSwap.cpp -o Testing/strSwap_test/strSwap_test
 main.o:
 	g++ main.cpp -c
 test_comparison.o: comparison.o
@@ -17,4 +17,4 @@ mergeSort.o: comparison.o
 comparison.o:
 	g++ comparison.* -c
 clear:
-	rm -f *.o *.h.gch *_test randomStrSorter
+	rm -f *.o *.h.gch strSorter

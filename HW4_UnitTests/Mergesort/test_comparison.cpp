@@ -3,7 +3,8 @@
 
 using namespace std;
 
-int main() {
+int main()
+{
     char** str = new char*[2];
 
     unsigned length1;
