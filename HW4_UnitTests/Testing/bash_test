@@ -1,0 +1,27 @@
+#!/bin/bash
+
+folder=Testing/"$1"
+programm="$1"
+
+right=0
+echo ""
+echo "Testing $programm"
+echo ""
+for i in 0 1 2 3 4 5 6 7 8 9
+do  
+  ./"$folder"/"$programm" 1> "$folder"/txt/"$i"_test_out.txt 2> "$folder"/txt/Errors.txt < "$folder"/txt/"$i"_test_in.txt
+  echo "Test #$i"
+  echo "Programm answer: "
+  cat "$folder"/txt/"$i"_test_out.txt
+  echo "Right answer: "
+  cat "$folder"/txt/"$i"_test_res.txt
+  echo ""
+  if cmp "$folder"/txt/"$i"_test_out.txt "$folder"/txt/"$i"_test_res.txt
+  then
+    let "right++"
+  else
+    echo "Wrong answer!"    
+  fi
+done
+
+echo "Done right $right task out of 10"
