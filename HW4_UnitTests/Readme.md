@@ -28,7 +28,7 @@
       
       String
       
-    Two unsigned numbers (from 0 to amount - 1) - strings to swap in array
+    Two unsigned numbers (from 0 to amount-1) - strings to swap in array
 
   *Output*:
   
