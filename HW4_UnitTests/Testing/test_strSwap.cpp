@@ -3,23 +3,24 @@
 
 using namespace std;
 
-int main() {
-    char** str = new char*[2];
-
-    unsigned length1;
-    cin >> length1;
-    char* str[0] = new char[length1 + 1];
-    cin >> str[0];
-    str[0][length1] = '\0';
-
-    unsigned length2;
-    cin >> length2;
-    char* str[1] = new char[length2 + 1];
-    cin >> str[1];
-    str[1][length2] = '\0';
-
-    strSwap(str, str + 1);
-
-    cout << str[0] << " " << str[1];
+int main()
+{
+    unsigned amount;
+    cin >> amount; // String amount
+    char** arr = new char*[amount];
+    for (unsigned i = 0; i < amount; i++) {
+        unsigned l;
+        //cout << "Set string size: " << endl;
+        cin >> l;
+        arr[i] = new char[l + 1];
+        cin >> arr[i];
+        arr[i][l] = '\0';
+    }
+    unsigned i, j;
+    cin >> i >> j;
+    strSwap(str + i, str + j);
+    for (int i = 0; i < amount; i++) {
+        cout << arr[i] << endl;
+    }
     return 0;
 }
