@@ -1,3 +1,5 @@
+#include "comparison.h"
+
 using namespace std;
 
 void mergeSort (char** arr, unsigned amount) {

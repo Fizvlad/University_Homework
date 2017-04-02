@@ -18,7 +18,7 @@ int main()
     }
     unsigned i, j;
     cin >> i >> j;
-    strSwap(str + i, str + j);
+    strSwap(arr + i, arr + j);
     for (int i = 0; i < amount; i++) {
         cout << arr[i] << endl;
     }

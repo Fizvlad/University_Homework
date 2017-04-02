@@ -9,16 +9,20 @@ int main()
 
     unsigned length1;
     cin >> length1;
-    char* str[0] = new char[length1 + 1];
+    str[0] = new char[length1 + 1];
     cin >> str[0];
     str[0][length1] = '\0';
 
     unsigned length2;
     cin >> length2;
-    char* str[1] = new char[length2 + 1];
+    str[1] = new char[length2 + 1];
     cin >> str[1];
     str[1][length2] = '\0';
 
-    cout << isFirstBigger(str[0], str[1]);
+    if (isFirstBigger(str[0], str[1])) {
+        cout << "1\n";
+    } else {
+        cout << "0\n";
+    }
     return 0;
 }
