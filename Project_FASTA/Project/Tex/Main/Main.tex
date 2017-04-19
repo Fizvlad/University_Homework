@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{cmap} % Улучшенный поиск русских слов в полученном pdf-файле
+\usepackage[T2A]{fontenc} % Поддержка русских букв
+\usepackage[utf8]{inputenc} % Кодировка utf8
+\usepackage[english, russian]{babel} % Языки: русский, английский
+\usepackage[left = 2cm, right = 2cm, top = 2cm, bottom = 2cm, bindingoffset = 0cm]{geometry} % Отступы
+
+\begin{document}
+    \part{FASTA файлы}
+        \section{Общая информация о файлах FASTA}
+            \paragraph{}
+                    \emph{FASTA} - формат файлов, содержащих информацию о некоторой нуклеотидной или полипептидной последовательности.
+                    Помимо самой \textbf{последовательности} FASTA файл способен хранить её \textbf{идентификатор и описание} в заголовке.
+        \section {Структура файла}
+            \subsection{Заголовок файла}
+                \subsubsection{Пример заголовка FASTA файла:}
+                    \begin{quote}
+                        >M57671.1 Octodon degus insulin mRNA, complete cds
+                    \end{quote}
+                    \paragraph{В нашем случае:}
+                        \begin{itemize}
+                          \item \emph{<<M57671>>} - идентификатор данной последовательности.
+                          \item \emph{<<.1>>} - версия
+                          \item \emph{<<Octodon degus insulin mRNA, complete cds>>} - описание последовательности
+                        \end{itemize}
+                \subsubsection{Идентификатор}
+                    В начале каждого FASTA файла находиться его идентификатор (AC, accession).\\
+                    Идентификатор позволяет легко найти последовательность в генетический базах (например, GenBank)
+                \subsubsection{Версия}
+                    Версия генетической последовательности
+                \subsubsection{Описание}
+                    Краткое описание генетической последовательности:
+                    \begin{itemize}
+                      \item \emph{<<Octodon degus>>} - вид животного (грызун Дегу)
+                      \item \emph{<<Insulin mRNA>>} - мРНК, кодирующая инсулин
+                      \item \emph{<<Complete cds>>} - последовательность описана полностью от старт-кодона до стоп-кодона
+                    \end{itemize}
+            \subsection{Последовательность}    
+\end{document} 
