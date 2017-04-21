@@ -1,0 +1,6 @@
+#ifndef FASTA_H_INCLUDED
+#define FASTA_H_INCLUDED
+
+
+
+#endif // FASTA_H_INCLUDED
