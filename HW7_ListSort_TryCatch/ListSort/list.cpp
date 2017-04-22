@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
 
+const char* NULL_ITERATOR_ERROR = "NULL iterator. Probably you went out of borders";
 const char* NO_ELEM_ERROR = "No element on position ";
 const char* BORDER_READCHED_ERROR = "Border of list reached";
 const char* EQUAL_ELEMENTS = "Duplicated element";
 const char* UNKNOWN_ERROR = "Unknown error";
 const char* NO_COMPARISON_FUNCTIONS_ERROR = "Comparison of this types are not defined";
+const char* NULL_ELEMENT_ERROR = "NULL element recieved";
 
 template <typename T> class node {
     template <typename T_> friend class list; // List gains access
@@ -39,25 +41,37 @@ public:
     bool operator!=(const listIterator <T>& in) {
         return !(operator==(in));
     }
-    (in
-    }
     listIterator <T>& operator++() {
-        if (p_->next_ != NULL) {
-            p_ = p_->next_;
-        } else {
-            fprintf(stderr, "%s%s%c", "    !- Error: ", BORDER_READCHED_ERROR, '\n');
+        if (p_ == NULL) {
+            return *this;
         }
+        p_ = p_->next_;
         return *this;
     }
     listIterator <T>& operator--() {
-        if (p_->prev_ != NULL) {
-            p_ = p_->prev_;
-        } else {
-            fprintf(stderr, "%s%s%c", "    !- Error: ", BORDER_READCHED_ERROR, '\n');
+        if (p_ == NULL) {
+            return *this;
         }
+        p_ = p_->prev_;
         return *this;
     }
     T& operator*() {
+        try {
+            if (p_ == NULL) {
+                throw -11;
+            }
+        } catch (int error_code) {
+            switch (error_code) {
+            case -11:
+                fprintf(stderr, "%s%s%c", "    !- Error: ", NULL_ITERATOR_ERROR, '\n');
+                exit(EXIT_FAILURE);
+                break;
+            default:
+                fprintf(stderr, "%s%s%c", "    !- Error: ", UNKNOWN_ERROR, '\n');
+                fprintf(stderr, "%s%d%c", "    !- Error code : ", error_code, '\n');
+            }
+        }
+
         return p_->data_;
     }
 
@@ -165,12 +179,13 @@ public:
     }
 
     listIterator <T> end() {
-        return listIterator <T> (end_);
+        return listIterator <T> (NULL);
     }
 
     void sort() {
         try {
-            bool t = begin_->data_ > end_->data_;
+            bool t;
+            t = begin_->data_ > end_->data_;
             t = begin_->data_ == end_->data_;
         } catch (int error_code) {
             fprintf(stderr, "%s%s%c", "    !- Error: ", NO_COMPARISON_FUNCTIONS_ERROR, '\n');
@@ -185,22 +200,29 @@ public:
         }
         for (unsigned i = 0; i < size - 1; i++) {
             bool isSorted = true;
-            for (unsigned j = 0; j < size - 1 - i; j++) {
+            for (int j = 0; j < size - 1 - i; j++) {
                 node <T>* n1 = nodeByPos(j);
                 node <T>* n2 = nodeByPos(j + 1);
                 try {
+                    if (n1 == NULL || n2 == NULL) {
+                        throw -12;
+                    }
                     if (n1->data_ > n2->data_) {
                         n1->swapData(*n2);
                         isSorted = false;
                     } else if (n1->data_ == n2->data_) {
                         pop(j + 1);
+                        size--;
                         j--;
-                        throw(-1);
+                        throw -11;
                     }
                 } catch (int error_code) {
                     switch(error_code) {
-                    case -1:
+                    case -11:
                         fprintf(stderr, "%s%s%c", "    !- Error: ", EQUAL_ELEMENTS, '\n');
+                        break;
+                    case -12:
+                        fprintf(stderr, "%s%s%c", "    !- Error: ", NULL_ELEMENT_ERROR, '\n');
                         break;
                     default:
                         fprintf(stderr, "%s%s%c", "    !- Error: ", UNKNOWN_ERROR, '\n');

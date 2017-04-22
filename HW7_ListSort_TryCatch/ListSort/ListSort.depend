@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1492841741 source:p:\Универ\Программирование\c++\hw\2semestr\hw7_listsort_trycatch\listsort\main.cpp
+	<iostream>
+	"list.cpp"
+
+1492843505 p:\Универ\Программирование\c++\hw\2semestr\hw7_listsort_trycatch\listsort\list.cpp
+	<cstdio>
+	<cstdlib>
+
