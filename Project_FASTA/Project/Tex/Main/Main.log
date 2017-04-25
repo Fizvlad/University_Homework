@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  19 APR 2017 08:13
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  22 APR 2017 11:15
 entering extended mode
 **./Main.tex
 (Main.tex
@@ -661,14 +661,14 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 22.
  [1
 
-] (Main.aux) ) 
+] [2] (Main.aux) ) 
 Here is how much of TeX's memory you used:
  2200 strings out of 493334
  24843 string characters out of 3142689
- 90158 words of memory out of 3000000
+ 91158 words of memory out of 3000000
  5735 multiletter control sequences out of 15000+200000
  10194 words of font info for 22 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 23i,4n,23p,400b,150s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 23i,4n,23p,400b,189s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on Main.dvi (1 page, 3040 bytes).
+Output written on Main.dvi (2 pages, 4672 bytes).

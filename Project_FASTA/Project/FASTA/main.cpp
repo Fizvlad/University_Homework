@@ -5,24 +5,9 @@ using namespace std;
 
 int main()
 {
-    FILE* a = fopen("../Samples/OctodonDegus_mRNA.fasta", "rt");
-    cout << (unsigned char) getc(a) << endl;
-    char* s = new char[128];
-    fscanf(a, "%s", s);
-    cout << s << endl;
-    getc(a); // skipping space
-    fgets(s, 128, a);
-    cout << s << endl;
-    unsigned l = 0;
-    int c;
-    c = getc(a);
-    while (c > 0) {
-        if ((c >= 65 && c <= 90) || c == 42 || c == 45) {
-            cout << (unsigned char)c;
-            l++;
-        }
-        c = getc(a);
-    }
-    cout << endl << l << endl;
+    FASTA f1;
+    f1.print();
+    f1.open("../Samples/OctodonDegus_mRNA_noDescription.fasta");
+    f1.print();
     return 0;
 }
