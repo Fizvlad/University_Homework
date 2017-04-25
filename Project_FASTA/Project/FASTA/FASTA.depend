@@ -1,9 +1,9 @@
 # depslib dependency file v1.0
-1493067259 source:p:\Универ\Программирование\c++\project_fasta\project\fasta\main.cpp
+1493144361 source:p:\Универ\Программирование\c++\project_fasta\project\fasta\main.cpp
 	<iostream>
 	"fasta.cpp"
 
-1493067288 p:\Универ\Программирование\c++\project_fasta\project\fasta\fasta.cpp
+1493144434 p:\Универ\Программирование\c++\project_fasta\project\fasta\fasta.cpp
 	<cstdlib>
 	<cstdio>
 

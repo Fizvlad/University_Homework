@@ -1,23 +1,45 @@
 #include <cstdlib>
 #include <cstdio>
 
-char* copyStr(char* in) {
-    if (in == NULL) {
-        return NULL;
+void closeFile(FILE* file)
+{
+    try {
+        // Closing file
+        int re = fclose(file);
+        if (re != 0) {
+            throw -12;
+        }
+    } catch (int error_code_) {
+        switch (error_code_) {
+        case -12:
+            fprintf(stderr, "%s", "    !Error: Unable to close file\n");
+            exit(EXIT_FAILURE);
+            break;
+        default:
+            fprintf(stderr, "%s", "    !Error: Unknown error\n");
+            exit(EXIT_FAILURE);
+        }
     }
+}
 
-    unsigned long length = 0;
-    while(*(in + length) != '\0') {
+unsigned long getStrLength(char* in)
+{
+    if (in == NULL) {
+        return 0;
+    }
+    unsigned long out = 0;
+    while(*(in + out) != '\0') {
         try {
-            length++;
-            if (length == -1) {
+            out++;
+            // Checking length to prevent overflow
+            if (out == -1) {
                 throw -11;
             }
         } catch (int error_code) {
             switch(error_code) {
             case -11:
-                fprintf(stderr, "%s", "    !Error: String is too big. Returned NULL\n");
-                return NULL;
+                fprintf(stderr, "%s", "    !Error: String is too big. Returned 0\n");
+                return 0;
                 break;
             default:
                 fprintf(stderr, "%s", "    !Error: Unknown error\n");
@@ -25,6 +47,16 @@ char* copyStr(char* in) {
             }
         }
     }
+    return out;
+}
+
+char* copyStr(char* in)
+{
+    if (in == NULL) {
+        return NULL;
+    }
+
+    unsigned long length = getStrLength(in);
     char* out = new char[length + 1];
     for (unsigned long i = 0; i < length; i++) {
         out[i] = in[i];
@@ -33,77 +65,111 @@ char* copyStr(char* in) {
     return out;
 }
 
-unsigned long getStrLength(char* in) {
-    try {
-        if (in == NULL) {
-            throw -11;
-        }
-    } catch (int error_code) {
-        switch(error_code) {
-        case -11:
-            fprintf(stderr, "%s", "    !Error: NULL input. Returned 0\n");
-            return 0;
-            break;
-        default:
-            fprintf(stderr, "%s", "    !Error: Unknown error\n");
-            exit(EXIT_FAILURE);
-        }
+char* merge(char* in1, char* in2)
+{
+    if (in1 == NULL || in2 == NULL) {
+        fprintf(stderr, "%s", "    !Error: NULL input. Returned NULL\n");
+        return NULL;
     }
-    unsigned long out = 0;
-    while (in[out] != '\0') {
-        out++;
+    unsigned l1 = getStrLength(in1);
+    unsigned l2 = getStrLength(in2);
+
+    char* out = new char[l1 + l2 + 1];
+    out[l1 + l2] = '\0';
+
+    unsigned i = 0;
+    for (; i < l1; i++) {
+        out[i] = in1[i];
+    }
+    for (; i < l1 + l2; i++) {
+        out[i] = in2[i - l1];
+    }
+
+    delete in1;
+    delete in2;
+
+    return out;
+};
+
+char* merge(unsigned amount, char* in, ...)
+{
+    if (amount == 0) {
+        fprintf(stderr, "%s", "    !Error: Wrong input. Returned NULL\n");
+        return NULL;
+    } else if (amount == 1) {
+        return in;
+    }
+    char* out = new char[1];
+    out[0] = '\0';
+    char** curr = &in;
+    for (unsigned i = 0; i < amount; i++) {
+        out = merge(out, *curr);
+        curr++;
     }
     return out;
 }
 
-typedef class FASTA {
+typedef class FASTA
+{
     char*         id_; // id
     unsigned      id_length_; // id length
     unsigned      version_; // version
     char*         description_; // description
     unsigned      description_length_; // description length
     char*         sequence_; // sequence
-    unsigned long sequence_length_; // sequence_length_
-    void clear() {
+    unsigned long sequence_length_; // sequence_length
+    void clear()
+    {
         if (id_ != NULL) {
             delete id_;
+            id_ = NULL;
         }
         id_length_ = 0;
         if (description_ != NULL) {
             delete description_;
+            description_ = NULL;
         }
         description_length_ = 0;
         if (sequence_ != NULL) {
             delete sequence_;
+            sequence_ = NULL;
         }
         sequence_length_ = 0;
     }
 public:
-    void print(FILE* stream = stdout) {
+    void print(FILE* stream = stdout)
+    {
+        const char LINE_END = ';';
         if (id_ != NULL) {
-            fprintf(stream, "%s%s%c", "Id: ", id_, '\n');
+            fprintf(stream, "%s%s%c%c", "Id: ", id_, LINE_END, '\n');
         } else {
-            fprintf(stream, "%s%s%c", "Description: ", "No Id", '\n');
+            fprintf(stream, "%s%s%c%c", "Id: ", "No Id", LINE_END, '\n');
         }
         if (description_ != NULL) {
-            fprintf(stream, "%s%s%c", "Description: ", description_, '\n');
+            fprintf(stream, "%s%s%c%c", "Description: ", description_, LINE_END, '\n');
         } else {
-            fprintf(stream, "%s%s%c", "Description: ", "No description", '\n');
+            fprintf(stream, "%s%s%c%c", "Description: ", "No description", LINE_END, '\n');
         }
         if (sequence_ != NULL) {
-            fprintf(stream, "%s%s%c", "Sequence: ", sequence_, '\n');
+            fprintf(stream, "%s%s%c%c", "Sequence: ", sequence_, LINE_END, '\n');
         } else {
-            fprintf(stream, "%s%s%c", "Description: ", "No data", '\n');
+            fprintf(stream, "%s%s%c%c", "Sequence: ", "No data", LINE_END, '\n');
         }
-        fprintf(stream, "%s%lu%c", "Sequence size: ", sequence_length_, '\n');
+        fprintf(stream, "%s%lu%c%c", "Sequence size: ", sequence_length_, LINE_END, '\n');
     }
 
-    void save (const char* path) { // !!! MUST DO
+    void save (const char* path)
+    {
+        // !!! MUST DO
     }
 
-    void open (const char* path) {
+    void open (const char* path)
+    {
+        const unsigned BUFFER_SIZE = 512; // Equal to maximum size of Id and description
         FILE* file = fopen(path, "rt");
+
         try {
+            // Checking if succeed opening file
             if (file == NULL) {
                 throw -11;
             }
@@ -114,51 +180,40 @@ public:
                 return;
                 break;
             default:
-                fprintf(stderr, "%s", "    !Error: Unknown error");
+                fprintf(stderr, "%s", "    !Error: Unknown error\n");
                 exit(EXIT_FAILURE);
             }
         }
 
         unsigned char firstSymbol = getc(file); // Must be '>'
+
         try {
+            // Checking if file matches standart
             if (firstSymbol != '>') {
                 throw -13;
             }
         } catch (int error_code) {
             switch (error_code) {
             case -13:
-                fprintf(stderr, "%s", "    !Error: Not a FASTA file or have no description\n");
-                // Closing file
-                try {
-                    int re = fclose(file);
-                    if (re != 0) {
-                        throw -12;
-                    }
-                } catch (int error_code_) {
-                    switch (error_code_) {
-                    case -12:
-                        fprintf(stderr, "%s", "    !Error: Unable to close file\n");
-                        exit(EXIT_FAILURE);
-                        break;
-                    default:
-                        fprintf(stderr, "%s", "    !Error: Unknown error");
-                        exit(EXIT_FAILURE);
-                    }
-                }
+                fprintf(stderr, "%s", "    !Error: Not a FASTA file (please check file format documentation)\n");
+                closeFile(file);
+                return;
                 break;
             default:
-                fprintf(stderr, "%s", "    !Error: Unknown error");
+                fprintf(stderr, "%s", "    !Error: Unknown error\n");
                 exit(EXIT_FAILURE);
             }
         }
 
         clear(); // Now ready to work with file. Deleting previous data
-
+        char* buffer = new char[BUFFER_SIZE];
 
         // Copying ID
-        char* id = new char[256];
-        int id_r = fscanf(file, "%s", id); // Response
+        // !!! NEED TO REPLACE fscanf WITH gets TO PREVENT OVERFLOW
+        int id_r = fscanf(file, "%s", buffer); // Response
+
         try {
+            // Checking if successfully read string
             if (id_r != 1) {
                 throw -14;
             }
@@ -166,42 +221,27 @@ public:
             switch (error_code) {
             case -14:
                 fprintf(stderr, "%s", "    !Error: Error occured while reading id\n");
-                //Closing file
-                try {
-                    int re = fclose(file);
-                    if (re != 0) {
-                        throw -12;
-                    }
-                } catch (int error_code_) {
-                    switch (error_code_) {
-                    case -12:
-                        fprintf(stderr, "%s", "    !Error: Unable to close file\n");
-                        exit(EXIT_FAILURE);
-                        break;
-                    default:
-                        fprintf(stderr, "%s", "    !Error: Unknown error");
-                        exit(EXIT_FAILURE);
-                    }
-                }
+                closeFile(file);
+                clear();
+                delete buffer;
+                return;
                 break;
             default:
-                fprintf(stderr, "%s", "    !Error: Unknown error");
+                fprintf(stderr, "%s", "    !Error: Unknown error\n");
                 exit(EXIT_FAILURE);
             }
         }
 
-        id_ = copyStr(id);
+        id_ = copyStr(buffer);
         id_length_ = getStrLength(id_);
-        delete id;
 
         // Copying description
         int skip = getc(file); // Skipping one symbol and checking whether description exists
         if (skip == 32) { // ' ' - description exists
-            unsigned DESCRIPTION_MAX_LENGTH = 256;
-            char* description = new char[DESCRIPTION_MAX_LENGTH];
-            char* description_r = fgets(description, DESCRIPTION_MAX_LENGTH, file); // Response
+            char* description_r = fgets(buffer, BUFFER_SIZE, file); // Response
 
             try {
+                // Checking if succeed reading string
                 if (description_r == NULL) {
                     throw -14;
                 }
@@ -209,85 +249,67 @@ public:
                 switch (error_code) {
                 case -14:
                     fprintf(stderr, "%s", "    !Error: Error occured while reading id\n");
-                    //Closing file
-                    try {
-                        int re = fclose(file);
-                        if (re != 0) {
-                            throw -12;
-                        }
-                    } catch (int error_code_) {
-                        switch (error_code_) {
-                        case -12:
-                            fprintf(stderr, "%s", "    !Error: Unable to close file\n");
-                            exit(EXIT_FAILURE);
-                            break;
-                        default:
-                            fprintf(stderr, "%s", "    !Error: Unknown error");
-                            exit(EXIT_FAILURE);
-                        }
-                    }
+                    closeFile(file);
+                    clear();
+                    delete buffer;
+                    return;
                     break;
                 default:
-                    fprintf(stderr, "%s", "    !Error: Unknown error");
+                    fprintf(stderr, "%s", "    !Error: Unknown error\n");
                     exit(EXIT_FAILURE);
                 }
             }
 
-            description_length_ = getStrLength(description);
-            if (description[description_length_ - 1] == '\n') { // Must delete \n at the end of string if it exists. Normally it should
-                description[description_length_ - 1] = '\0';
+            description_length_ = getStrLength(buffer);
+            if (buffer[description_length_ - 1] == '\n') { // Must delete \n at the end of string if it exists. Normally it should
+                buffer[description_length_ - 1] = '\0';
                 description_length_--;
-            } else {
-                /*
-                    !!! MUST PROCESS CASE OF TOO BIG DESCRIPTION
-                */
+            } else { // No end of the line symbol. Occures when description is too big
+                fprintf(stderr, "%s", "    !Error: Too big description. Description can't be bigger than 500 characters\n");
+                clear();
+                delete buffer;
+                return;
             }
-            description_ = copyStr(description);
-            delete description;
+            description_ = copyStr(buffer);
         } else if (skip == 10) { // '\n' - no description
             description_ = NULL;
             description_length_ = 0;
-        } else { // Unexcepted symbol. This occures when id is too big
-            /*
-                !!! MUST PROCESS CASE OF TOO BIG ID
-            */
+        } else { // Unexcepted symbol. Occures when id is too big
+            fprintf(stderr, "%s", "    !Error: Too big Id. Id can't be bigger than 500 characters\n");
+            clear();
+            delete buffer;
+            return;
         }
 
-        //Copying sequence
-        unsigned long SEQUENCE_MAX_LENGTH = 1024; // !!! MUST GET RID OF THIS RESTRICTION
+        // Copying sequence
+        sequence_ = new char[1];
+        sequence_[0] = '\0';
         sequence_length_ = 0;
-        char* sequence = new char[SEQUENCE_MAX_LENGTH];
-        int ch; // Will step-by-step read each char
-        ch = getc(file);
+        int ch = 1;
+        unsigned long l = 0;
         while (ch > 0) {
-            if ((ch >= 65 && ch <= 90) || ch == 42 || ch == 45) { // Adding only symbols, which allowed by documentation
-                sequence[sequence_length_] = (unsigned char)ch;
-                sequence_length_++;
+            // Reading sequence by blocks size of BUFFER_SIZE - 1. When met \0 - stop
+            while (ch > 0 && l < BUFFER_SIZE - 1) {
+                ch = getc(file); // if \0 met. Nothing will happen (watch "if" below)
+                if ((ch >= 65 && ch <= 90) || ch == 42 || ch == 45) { // Adding only symbols, which allowed by documentation
+                    buffer[l] = (unsigned char)ch;
+                    sequence_length_++;
+                    l++;
+                }
             }
-            ch = getc(file);
+            buffer[l] = '\0';
+            char* temp = copyStr(buffer); // Need to create temp, so buffer won't be deleted after merging
+            l = 0;
+            sequence_ = merge(sequence_, temp);
+            // if ch == 0 => exiting "while"
         }
-        sequence_ = copyStr(sequence);
-        delete sequence;
 
-        // Closing file
-        try {
-            int re = fclose(file);
-            if (re != 0) {
-                throw -12;
-            }
-        } catch (int error_code) {
-            switch (error_code) {
-            case -12:
-                fprintf(stderr, "%s", "    !Error: Unable to close file\n");
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                fprintf(stderr, "%s", "    !Error: Unknown error");
-                exit(EXIT_FAILURE);
-            }
-        }
+        closeFile(file);
+        delete buffer;
     }
-    FASTA() {
+
+    FASTA()
+    {
         id_ = NULL;
         id_length_ = 0;
         description_ = NULL;
@@ -295,7 +317,9 @@ public:
         sequence_ = NULL;
         sequence_length_ = 0;
     }
-    FASTA(const FASTA& in) {
+
+    FASTA(const FASTA& in)
+    {
         id_ = copyStr(in.id_);
         id_length_ = in.id_length_;
         description_ = copyStr(in.description_);
@@ -303,7 +327,9 @@ public:
         sequence_ = copyStr(in.sequence_);
         sequence_length_ = in.sequence_length_;
     }
-    ~FASTA() {
+
+    ~FASTA()
+    {
         clear();
     }
 };
