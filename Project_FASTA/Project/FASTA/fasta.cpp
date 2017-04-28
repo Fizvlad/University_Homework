@@ -1,6 +1,31 @@
 #include <cstdlib>
 #include <cstdio>
 
+char* fgetw(char* string, int size, FILE* file, char splitter = ' ')
+{
+    if (size <= 1 || file == NULL || string == NULL) {
+        return NULL;
+    }
+    int i = 0;
+    int ch = getc(file);
+    if (ch == EOF) {
+        return NULL;
+    }
+    while ((unsigned char)ch != splitter && (unsigned char)ch != '\n' && ch != EOF && i < size - 2) {
+        string[i] = (unsigned char)ch;
+        i++;
+        ch = getc(file);
+    }
+    // Now ch = -1 OR splitter OR '\n' OR last char to be saved
+    if (ch == EOF) {
+        string[i] ='\0';
+    } else {
+        string[i] = (unsigned char)ch;
+        string[i + 1] = '\0';
+    }
+    return string;
+}
+
 void closeFile(FILE* file)
 {
     try {
@@ -209,12 +234,11 @@ public:
         char* buffer = new char[BUFFER_SIZE];
 
         // Copying ID
-        // !!! NEED TO REPLACE fscanf WITH gets TO PREVENT OVERFLOW
-        int id_r = fscanf(file, "%s", buffer); // Response
+        char* id_r = fgetw(buffer, 256, file, ' '); // Response
 
         try {
             // Checking if successfully read string
-            if (id_r != 1) {
+            if (id_r == NULL) {
                 throw -14;
             }
         } catch (int error_code) {
@@ -232,12 +256,14 @@ public:
             }
         }
 
+        id_length_ = getStrLength(buffer);
+        char skip = buffer[id_length_ - 1]; // Taking last buffer symbol (normally ' ' or '\n') to check whether description exists later
+        buffer[id_length_ - 1] = '\0';
+        id_length_--;
         id_ = copyStr(buffer);
-        id_length_ = getStrLength(id_);
 
         // Copying description
-        int skip = getc(file); // Skipping one symbol and checking whether description exists
-        if (skip == 32) { // ' ' - description exists
+        if (skip == ' ') { // ' ' - description exists
             char* description_r = fgets(buffer, BUFFER_SIZE, file); // Response
 
             try {
@@ -271,11 +297,11 @@ public:
                 return;
             }
             description_ = copyStr(buffer);
-        } else if (skip == 10) { // '\n' - no description
+        } else if (skip == '\n') { // '\n' - no description
             description_ = NULL;
             description_length_ = 0;
         } else { // Unexcepted symbol. Occures when id is too big
-            fprintf(stderr, "%s", "    !Error: Too big Id. Id can't be bigger than 500 characters\n");
+            fprintf(stderr, "%s", "    !Error: Probably too big Id. Id can't be bigger than 500 characters\n");
             clear();
             delete buffer;
             return;
