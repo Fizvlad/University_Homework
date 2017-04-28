@@ -185,10 +185,57 @@ public:
 
     void save (const char* path)
     {
-        // !!! MUST DO
+        try {
+            if (id_ == NULL || sequence_ == NULL) {
+                throw -11;
+            }
+        } catch (int error_code) {
+            switch (error_code) {
+            case -11:
+                fprintf(stderr, "%s", "    !Error: Nothing to save\n");
+                return;
+                break;
+            default:
+                fprintf(stderr, "%s", "    !Error: Unknown error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+        FILE* file = fopen(path, "w");
+        try {
+            if (file == NULL) {
+                throw -12;
+            }
+            if (fprintf(file, "%c%s", '>', id_) != 1 + id_length_) {
+                throw -13;
+            }
+            if (description_ != NULL) {
+                if (fprintf(file, "%c%s", ' ', description_) != 1 + description_length_) {
+                    throw -13;
+                }
+            }
+            if (fprintf(file, "%c%s", '\n', sequence_) != 1 + sequence_length_) {
+                throw -13;
+            }
+            closeFile(file);
+        } catch (int error_code) {
+            switch (error_code) {
+            case -12:
+                fprintf(stderr, "%s", "    !Error: Can not open file\n");
+                return;
+                break;
+            case -13:
+                fprintf(stderr, "%s", "    !Error: Error occured while fprintf\n");
+                closeFile(file);
+                return;
+                break;
+            default:
+                fprintf(stderr, "%s", "    !Error: Unknown error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
-    void open (const char* path)
+    void read (const char* path)
     {
         const unsigned BUFFER_SIZE = 512; // Equal to maximum size of Id and description
         FILE* file = fopen(path, "rt");

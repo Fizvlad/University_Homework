@@ -17,10 +17,12 @@ int main()
     WrongFormat_wrongFirstSymbol
 
     */
+
     FASTA f1;
+    f1.read("../Samples/OctodonDegus_mRNA.fasta");
     f1.print();
-    cout << endl;
-    f1.open("../Samples/OctodonDegus_mRNA.fasta");
+    //f1.save("../Samples/Saved/myFile.fasta");
+    f1.read("../Samples/Saved/myFile.fasta");
     f1.print();
     return 0;
 }
