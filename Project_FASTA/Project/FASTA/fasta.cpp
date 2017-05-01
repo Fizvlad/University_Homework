@@ -143,6 +143,7 @@ typedef class FASTA
     unsigned      description_length_; // description length
     char*         sequence_; // sequence
     unsigned long sequence_length_; // sequence_length
+public:
     void clear()
     {
         if (id_ != NULL) {
@@ -161,7 +162,7 @@ typedef class FASTA
         }
         sequence_length_ = 0;
     }
-public:
+
     void print(FILE* stream = stdout)
     {
         const char LINE_END = ';';
@@ -185,6 +186,7 @@ public:
 
     void save (const char* path)
     {
+
         try {
             if (id_ == NULL || sequence_ == NULL) {
                 throw -11;
@@ -200,20 +202,31 @@ public:
                 exit(EXIT_FAILURE);
             }
         }
-        FILE* file = fopen(path, "w");
+
+        FILE* file = fopen(path, "wt");
+
         try {
             if (file == NULL) {
                 throw -12;
             }
-            if (fprintf(file, "%c%s", '>', id_) != 1 + id_length_) {
+            if (fputc((int)'>', file) == EOF) {
+                throw -13;
+            }
+            if (fputs(id_, file) == EOF) {
                 throw -13;
             }
             if (description_ != NULL) {
-                if (fprintf(file, "%c%s", ' ', description_) != 1 + description_length_) {
+                if (fputc((int)' ', file) == EOF) {
+                    throw -13;
+                }
+                if (fputs(description_, file) == EOF) {
                     throw -13;
                 }
             }
-            if (fprintf(file, "%c%s", '\n', sequence_) != 1 + sequence_length_) {
+            if (fputc((int)'\n', file) == EOF) {
+                throw -13;
+            }
+            if (fputs(sequence_, file) == EOF) {
                 throw -13;
             }
             closeFile(file);
@@ -224,7 +237,7 @@ public:
                 return;
                 break;
             case -13:
-                fprintf(stderr, "%s", "    !Error: Error occured while fprintf\n");
+                fprintf(stderr, "%s", "    !Error: Error occured while writing\n");
                 closeFile(file);
                 return;
                 break;
@@ -233,6 +246,7 @@ public:
                 exit(EXIT_FAILURE);
             }
         }
+        fprintf(stdout, "%s", "    File successfully saved.\n");
     }
 
     void read (const char* path)
@@ -379,6 +393,40 @@ public:
 
         closeFile(file);
         delete buffer;
+        fprintf(stdout, "%s", "    File successfully read.\n");
+    }
+
+    void setId (char* in)
+    {
+        if (id_ != NULL) {
+            delete id_;
+            id_ = NULL;
+            id_length_ = 0;
+        }
+        id_ = copyStr(in);
+        id_length_ = getStrLength(id_);
+    }
+
+    void setDescription (char* in)
+    {
+        if (description_ != NULL) {
+            delete description_;
+            description_ = NULL;
+            description_length_ = 0;
+        }
+        description_ = copyStr(in);
+        description_length_ = getStrLength(description_);
+    }
+
+    void setSequence (char* in)
+    {
+        if (sequence_ != NULL) {
+            delete sequence_;
+            sequence_ = NULL;
+            sequence_length_ = 0;
+        }
+        sequence_ = copyStr(in);
+        sequence_length_ = getStrLength(sequence_);
     }
 
     FASTA()
