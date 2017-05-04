@@ -7,6 +7,7 @@ int main()
 {
     /*
     Files:
+    240MB
     BigSequence
     NP_852610
     OctodonDegus_mRNA
@@ -15,18 +16,21 @@ int main()
     WrongFormat_bigId
     WrongFormat_empty
     WrongFormat_wrongFirstSymbol
+    UnknownSymbols
     */
 
-    FASTA f1;
-    f1.save("../Samples/Saved/Empty.fasta");
-    f1.setId("MySequence");
-    f1.setDescription("Description");
-    f1.setSequence("ABCDEFG");
+    FASTA f1, f2;
+    /*
+    f1.read("../Samples/BigSequence.fasta");
     f1.print();
-    f1.save("../Samples/Saved/MySequence.fasta");
+    f1.save("../Samples/Saved/BigSequence.fasta");
+    */
 
-    FASTA f2;
-    f2.read("../Samples/Saved/MySequence.fasta");
+    f1.setSequence("GACG");
+    f1.print();
+    f2.setSequence("ACAG");
     f2.print();
+    f1.align(f2);
+
     return 0;
 }
