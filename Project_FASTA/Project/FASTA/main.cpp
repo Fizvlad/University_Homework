@@ -6,8 +6,8 @@ using namespace std;
 int main()
 {
     /*
+    "../Samples/__________.fasta"
     Files:
-    240MB
     BigSequence
     NP_852610
     OctodonDegus_mRNA
@@ -20,17 +20,20 @@ int main()
     */
 
     FASTA f1, f2;
-    /*
-    f1.read("../Samples/BigSequence.fasta");
-    f1.print();
-    f1.save("../Samples/Saved/BigSequence.fasta");
-    */
-
-    f1.setSequence("GACG");
-    f1.print();
-    f2.setSequence("ACAG");
-    f2.print();
+    f1.read("../Samples/OctodonDegus_mRNA.fasta");
+    cout << endl << endl;
+    f2.read("../Samples/NP_852610.fasta");
+    cout << endl << endl;
     f1.align(f2);
 
+    /*
+    FASTA f1;
+    f1.read("../Samples/OctodonDegus_mRNA.fasta");
+    f1.print();
+    f1.save("../Samples/Saved/OctodonDegus_mRNA.fasta");
+    FASTA f2;
+    f2.read("../Samples/Saved/OctodonDegus_mRNA.fasta");
+    f2.print();
+    */
     return 0;
 }
