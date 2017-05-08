@@ -1,7 +1,33 @@
 #include <cstdlib>
 #include <cstdio>
 
-int maximum(int a, int b, int c) {
+long indexOf(char* base, char* targ)
+{
+    /*
+        Returns position of first substring equal to targ in base.
+        -1 if was not found
+    */
+    long out = 0; // Symbol of base
+    unsigned k = 0; // Symbol of targ
+    while (base[out] != '\0' && targ[k] != '\0') {
+        if (base[out] == targ[k]) {
+            k++;
+        } else {
+            k = 0;
+        }
+        out++;
+        if (targ[k] == '\0') {
+            return out - k;
+        }
+    }
+    return -1;
+}
+
+int maximum(int a, int b, int c)
+{
+    /*
+        Maximum of three int
+    */
     int t = a;
     if (b > a) {
         t = b;
@@ -12,9 +38,13 @@ int maximum(int a, int b, int c) {
     return t;
 }
 
-int find(int t, int* array, int size)
+long find(int t, int* array, long size)
 {
-    for (int i = 0; i < size; i++) {
+    /*
+        Return position of symbol t in array
+        -1 if was not found
+    */
+    for (long i = 0; i < size; i++) {
         if (array[i] == t) {
             return i;
         }
@@ -24,6 +54,11 @@ int find(int t, int* array, int size)
 
 char* fgetw(char* string, int size, FILE* file, char splitter = ' ')
 {
+    /*
+        Reading symbols from file until meet splitter or EOF or '\n' or until read size - 1 symbol.
+        Read symbols are saved into string
+        String returned on success, NULL otherwise
+    */
     if (size <= 1 || file == NULL || string == NULL) {
         return NULL;
     }
@@ -49,6 +84,9 @@ char* fgetw(char* string, int size, FILE* file, char splitter = ' ')
 
 void closeFile(FILE* file)
 {
+    /*
+        Closing file. Throws error and message on failure
+    */
     try {
         // Closing file
         int re = fclose(file);
@@ -70,6 +108,9 @@ void closeFile(FILE* file)
 
 unsigned getStrLength(char* in)
 {
+    /*
+        Return size of string
+    */
     if (in == NULL) {
         return 0;
     }
@@ -98,6 +139,10 @@ unsigned getStrLength(char* in)
 
 char* copyStr(char* in, unsigned long length = 0)
 {
+    /*
+        Copying input string if length is 0 and length of symbols otherwise.
+        Return string
+    */
     if (in == NULL) {
         return NULL;
     }
@@ -114,6 +159,9 @@ char* copyStr(char* in, unsigned long length = 0)
 
 char* merge(char* in1, char* in2)
 {
+    /*
+        Merging strings, deleting them and return new one
+    */
     if (in1 == NULL || in2 == NULL) {
         fprintf(stderr, "%s", "    !Error: NULL input. Returned NULL\n");
         return NULL;
@@ -140,6 +188,9 @@ char* merge(char* in1, char* in2)
 
 char* merge(unsigned amount, char* in, ...)
 {
+    /*
+        Merging strings, deleting them and return new one
+    */
     if (amount == 0) {
         fprintf(stderr, "%s", "    !Error: Wrong input. Returned NULL\n");
         return NULL;
