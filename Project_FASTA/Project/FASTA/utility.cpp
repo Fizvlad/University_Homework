@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-long indexOf(char* base, char* targ)
+long indexOf(char* base, char* targ, unsigned from)
 {
     /*
         Returns position of first substring equal to targ in base.
@@ -24,7 +24,7 @@ long indexOf(char* base, char* targ)
         }
     }
 
-    long out = 0; // Symbol of base
+    long out = from; // Symbol of base
     unsigned k = 0; // Symbol of targ
     while (base[out] != '\0' && targ[k] != '\0') {
         if (base[out] == targ[k]) {

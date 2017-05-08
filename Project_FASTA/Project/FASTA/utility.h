@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-long indexOf(char* base, char* targ); //Returns position of first substring equal to targ in base. -1 if was not found
+long indexOf(char* base, char* targ, unsigned from = 0); //Returns position of first substring equal to targ in base. -1 if was not found
 
 int maximum(int a, int b, int c); //Maximum of three int
 

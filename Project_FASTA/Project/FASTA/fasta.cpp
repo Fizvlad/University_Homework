@@ -38,8 +38,8 @@ public:
         list_size_ = 0;
     }
 
-    long indexOf(char* in) {
-        if (list_ == NULL) {
+    long indexOf(char* in, unsigned from = 0) {
+        if (list_ == NULL || from > length_) {
             return -1;
         }
 
@@ -59,7 +59,7 @@ public:
             }
         }
 
-        long out = 0; // Symbol of sequence
+        long out = from; // Symbol of sequence
         unsigned k = 0; // Symbol of input
         while (out < length_ && in[k] != '\0') {
             if (operator[](out) == in[k]) {
