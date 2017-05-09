@@ -1,6 +1,10 @@
 #ifndef SEQUENCE_H_INCLUDED
 #define SEQUENCE_H_INCLUDED
 
+#include <cstdlib>
+#include <cstdio>
+#include "utility.h"
+
 typedef class sequence
 {
     char** list_;

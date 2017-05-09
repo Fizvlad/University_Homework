@@ -1,5 +1,5 @@
 #include <iostream>
-#include "fasta.cpp"
+#include "fasta.h"
 
 using namespace std;
 

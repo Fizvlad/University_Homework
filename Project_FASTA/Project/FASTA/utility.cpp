@@ -1,6 +1,3 @@
-#include <cstdlib>
-#include <cstdio>
-
 #include "utility.h"
 
 long indexOf(char* base, char* targ, unsigned from)

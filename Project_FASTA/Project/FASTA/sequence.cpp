@@ -1,7 +1,3 @@
-#include <cstdlib>
-#include <cstdio>
-#include "utility.h"
-
 #include "sequence.h"
 
 void sequence::addStr (unsigned amount)
