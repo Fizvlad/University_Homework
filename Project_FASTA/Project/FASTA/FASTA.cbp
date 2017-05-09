@@ -3,8 +3,10 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="FASTA" />
+		<Option execution_dir="../FASTA" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option extended_obj_names="1" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/FASTA" prefix_auto="1" extension_auto="1" />
@@ -21,22 +23,16 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="fasta.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="fasta.cpp" />
 		<Unit filename="fasta.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="main.cpp" />
-		<Unit filename="sequence.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="sequence.cpp" />
 		<Unit filename="sequence.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="utility.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="utility.cpp" />
 		<Unit filename="utility.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

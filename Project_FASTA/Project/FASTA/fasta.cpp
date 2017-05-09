@@ -69,7 +69,7 @@ void FASTA::print (FILE* stream)
     }
     fprintf(stream, "%s", "Sequence: ");
     sequence_.print(stream);
-    fprintf(stream, "%c%c%s%lu%c%c", LINE_END, '\n', "Sequence size: ", sequence_.getLength(), LINE_END, '\n');
+    fprintf(stream, "%c%c%s%u%c%c", LINE_END, '\n', "Sequence size: ", sequence_.getLength(), LINE_END, '\n');
 }
 
 void FASTA::printStat (FILE* stream)
@@ -268,7 +268,7 @@ void FASTA::read (const char* path)
 
     // Copying sequence
     int ch = 1;
-    unsigned long l = 0;
+    unsigned l = 0;
     while (ch > 0) {
         // Reading sequence by blocks size of BUFFER_SIZE - 1. When met \0 - stop
         while (ch > 0 && l < BUFFER_SIZE - 1) {
@@ -333,18 +333,18 @@ void FASTA::align (FASTA in)
 
     int**  F  = new  int*[sequence_.getLength() + 1];
     char** F_ = new char*[sequence_.getLength() + 1];
-    for (unsigned long i = 0; i < sequence_.getLength() + 1; i++) {
+    for (unsigned i = 0; i < sequence_.getLength() + 1; i++) {
         F[i]  = new  int[in.sequence_.getLength() + 1];
         F_[i] = new char[in.sequence_.getLength() + 1];
         F[i][0] = gap * i;
     }
 
-    for (unsigned long i = 0; i < in.sequence_.getLength() + 1; i++) {
+    for (unsigned i = 0; i < in.sequence_.getLength() + 1; i++) {
         F[0][i] = gap * i;
     }
 
-    for (unsigned long i = 1; i < sequence_.getLength() + 1; i++) {
-        for (unsigned long j = 1; j < in.sequence_.getLength() + 1; j++) {
+    for (unsigned i = 1; i < sequence_.getLength() + 1; i++) {
+        for (unsigned j = 1; j < in.sequence_.getLength() + 1; j++) {
             int f, s;
             switch (sequence_[i - 1]) {
             case 'A':
@@ -405,10 +405,10 @@ void FASTA::align (FASTA in)
     char* inAlignment = new char[1];
     inAlignment[0] = '\0';
 
-    unsigned long i = sequence_.getLength();
-    unsigned long j = in.sequence_.getLength();
+    unsigned i = sequence_.getLength();
+    unsigned j = in.sequence_.getLength();
 
-    unsigned long matches = 0;
+    unsigned matches = 0;
 
     while (i > 0 && j > 0) {
         if (F_[i][j] == 'M') {
@@ -463,7 +463,7 @@ void FASTA::align (FASTA in)
     fprintf(stdout, "%s%c", alignment,   '\n');
     fprintf(stdout, "%s%c", inAlignment, '\n');
     fprintf(stdout, "%s%c", matchesLine, '\n');
-    fprintf(stdout, "%s%d%c", "Amount of matching nucleotides: ", matches, '\n');
+    fprintf(stdout, "%s%u%c", "Amount of matching nucleotides: ", matches, '\n');
 
     delete [] alignment;
     delete [] inAlignment;

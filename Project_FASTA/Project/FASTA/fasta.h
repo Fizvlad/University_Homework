@@ -9,8 +9,8 @@
 class statistic
 {
     friend class FASTA;
-    static const unsigned ACCEPTED_SYMBOLS_AMOUNT_ = 18; // Static member must be defined out of class
-    static constexpr int ACCEPTED_SYMBOLS_[ACCEPTED_SYMBOLS_AMOUNT_] = {65, 67, 71, 84, 86, 82, 89, 75, 77, 83, 87, 66, 68, 72, 86, 78, 88, 45}; // Static member must be defined out of class
+    static const unsigned ACCEPTED_SYMBOLS_AMOUNT_ = 18;
+    static constexpr int ACCEPTED_SYMBOLS_[ACCEPTED_SYMBOLS_AMOUNT_] = {65, 67, 71, 84, 86, 82, 89, 75, 77, 83, 87, 66, 68, 72, 86, 78, 88, 45};
     unsigned symbols_amounts_[ACCEPTED_SYMBOLS_AMOUNT_]; // Contains amount of ACCEPTED_SYMBOLS_[i]
 
     void clear();
