@@ -54,7 +54,7 @@ void FASTA::clear()
     statistic_.clear();
 }
 
-void FASTA::print (FILE* stream = stdout)
+void FASTA::print (FILE* stream)
 {
     const char LINE_END = ';';
     if (id_ != NULL) {
@@ -72,7 +72,7 @@ void FASTA::print (FILE* stream = stdout)
     fprintf(stream, "%c%c%s%lu%c%c", LINE_END, '\n', "Sequence size: ", sequence_.getLength(), LINE_END, '\n');
 }
 
-void FASTA::printStat (FILE* stream = stdout)
+void FASTA::printStat (FILE* stream)
 {
     fprintf(stream, "%s", "Nucleotide frequencies: \n");
     const char LINE_END = ';';
