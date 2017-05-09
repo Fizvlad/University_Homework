@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "utility.h"
+
 long indexOf(char* base, char* targ, unsigned from)
 {
     /*
@@ -55,7 +57,7 @@ int maximum(int a, int b, int c)
     return t;
 }
 
-long find(int t, int* array, long size)
+long find(const int t, const int* array, const long size)
 {
     /*
         Return position of symbol t in array
