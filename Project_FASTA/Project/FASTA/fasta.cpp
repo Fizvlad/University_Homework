@@ -11,6 +11,10 @@ void statistic::clear()
 
 statistic::statistic()
 {
+    int s[ACCEPTED_SYMBOLS_AMOUNT_] = {65, 67, 71, 84, 86, 82, 89, 75, 77, 83, 87, 66, 68, 72, 86, 78, 88, 45};
+    for (int i = 0; i < ACCEPTED_SYMBOLS_AMOUNT_; i++) {
+        ACCEPTED_SYMBOLS_[i] = s[i];
+    }
     clear();
 }
 

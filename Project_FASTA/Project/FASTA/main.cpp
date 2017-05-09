@@ -28,14 +28,17 @@ int main()
     f1.align(f2);
     cout << endl << endl;
 
-    f1.printStat();
 
-    /*
+
+
     f1.read("../Samples/OctodonDegus_mRNA.fasta");
     f1.print();
+    f1.printStat();
+    /*
     f1.save("../Samples/Saved/OctodonDegus_mRNA.fasta");
     f2.read("../Samples/Saved/OctodonDegus_mRNA.fasta");
     f2.print();
     */
+
     return 0;
 }
