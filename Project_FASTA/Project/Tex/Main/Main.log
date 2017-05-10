@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  29 APR 2017 12:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  9 MAY 2017 23:43
 entering extended mode
 **./Main.tex
 (Main.tex
@@ -653,19 +653,20 @@ LaTeX Font Info:    ... okay on input line 9.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 23.
-(P:\Programms\MiKTeX\tex\latex\base\omscmr.fd
+[1
+
+]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 31.
+ (P:\Programms\MiKTeX\tex\latex\base\omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 23.
- [1
-
-]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 31.
+ [1]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 54.
+(Font)              <7> on input line 62.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 54.
+(Font)              <5> on input line 62.
  [2] (Main.aux) ) 
 Here is how much of TeX's memory you used:
  2203 strings out of 493334
@@ -676,4 +677,4 @@ Here is how much of TeX's memory you used:
  1141 hyphenation exceptions out of 8191
  23i,7n,23p,400b,251s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on Main.dvi (2 pages, 7136 bytes).
+Output written on Main.dvi (3 pages, 7416 bytes).

@@ -18,10 +18,13 @@ int main()
     WrongFormat_wrongFirstSymbol
     UnknownSymbols
     */
+
     FASTA f1, f2;
+    f1.setId("Example1");
     f1.setSequence("ACGTCAGACGACTACTACGATCGACGACTATCTATATATCTCGAGCTACGACTTACGAGCATCAT");
     f1.print();
     cout << endl << endl;
+    f2.setId("Example2");
     f2.setSequence("ATCGTATCGCGCTATAGGGCGGCAGACACACACGGTATGGACAGAGGCAGT");
     f2.print();
     cout << endl << endl;
@@ -31,7 +34,8 @@ int main()
 
 
 
-    f1.read("../Samples/OctodonDegus_mRNA.fasta");
+
+    f1.setSequence("AAAGGGCCC-");
     f1.print();
     f1.printStat();
     /*

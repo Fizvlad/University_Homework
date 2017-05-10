@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  9 APR 2017 16:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=latex 2017.4.9)  9 MAY 2017 23:39
 entering extended mode
 **./Task.tex
 (Task.tex
@@ -573,37 +573,31 @@ Package babel Info: Making " an active character on input line 111.
 )) (Task.aux)
 \openout1 = `Task.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 10.
-
-(P:\Programms\MiKTeX\tex\latex\base\omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 10.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
+LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 9.
+LaTeX Font Info:    ... okay on input line 9.
  [1
 
-] (Task.aux) ) 
+]
+[1] (Task.aux) ) 
 Here is how much of TeX's memory you used:
- 1669 strings out of 493334
- 17064 string characters out of 3142689
- 74267 words of memory out of 3000000
- 5232 multiletter control sequences out of 15000+200000
- 4437 words of font info for 15 fonts, out of 3000000 for 9000
+ 1662 strings out of 493334
+ 16913 string characters out of 3142689
+ 76267 words of memory out of 3000000
+ 5223 multiletter control sequences out of 15000+200000
+ 8573 words of font info for 20 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 23i,4n,23p,228b,146s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 23i,4n,23p,329b,192s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on Task.dvi (1 page, 664 bytes).
+Output written on Task.dvi (2 pages, 2808 bytes).
