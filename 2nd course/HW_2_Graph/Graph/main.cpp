@@ -3,19 +3,39 @@
 
 using namespace std;
 
+void f (int &data, unsigned index)
+{
+    data++;
+    cout << "Data #" << index << " increased" << endl;
+}
+
 int main()
 {
     Graph <int> g;
-    g.push(101); // 0
-    g.push(102, 1, 0); // 1
-    g.push(103, 1, 0); // 2
-    g.push(104, 1, 1); // 3
-    g.push(105, 1, 2); // 4
-    g.push(106, 1, 1); // 5
+    /*
+        0 - 1 - 2
+        |   |   |
+        3 - 4 - 5
+        |   |   |
+        6 - 7 - 8
+    */
+    g.push(100); // 0
+    g.push(101, 1, 0); // 1
+    g.push(102, 1, 1); // 2
+
+    g.push(103, 1, 0); // 3
+    g.push(104, 2, 1, 3); // 4
+    g.push(105, 2, 2, 4); // 5
+
+    g.push(106, 1, 3); // 6
+    g.push(107, 2, 4, 6); // 7
+    g.push(108, 2, 5, 7); // 8
     g.printInfo();
 
-    cout << "In order: " << endl;
-    g.inOrder([](int data, unsigned index){ cout << "Data #" << index << ": " << data << endl; }); // In order of adding
     cout << "In depth: " << endl;
-    g.inDepth([](int data, unsigned index){ cout << "Data #" << index << ": " << data << endl; }, 5); // In depth
+    g.inDepth(f, 4); // In depth
+
+
+    cout << "In order: " << endl;
+    g.inOrder([](int &data, unsigned index){ cout << "Data #" << index << ": " << data << endl; }); // In order of adding
 }

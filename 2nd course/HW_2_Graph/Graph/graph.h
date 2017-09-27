@@ -5,20 +5,25 @@
 #include <string>
 #include <cstdlib>
 
+#include <thread>
+#include <mutex>
+
 // Init
 template <typename _T> class _Graph_node; // Access to this class elements is only for Graph class
 template <typename _T> class Graph; // Usual graph class with same data type in each node
 
+std::mutex _Graph_mutex; // Mutex
+
 // Def
-template <typename __T> class _Graph_node
+template <typename _T> class _Graph_node
 {
-    friend class Graph <__T>;
+    friend class Graph <_T>;
 
-    __T _data; // Data stored in graph element
-    Graph <__T> *_parent; // Graph class that owns this node
-    std::vector < _Graph_node <__T> *> _neighborList; // Array of pointers to neighbors
+    _T _data; // Data stored in graph element
+    Graph <_T> *_parent; // Graph class that owns this node
+    std::vector < _Graph_node <_T> *> _neighborList; // Array of pointers to neighbors
 
-    _Graph_node (__T d, Graph <__T> *p) // Constructor
+    _Graph_node (_T d, Graph <_T> *p) // Constructor
     {
         _data = d;
         _parent = p;
@@ -35,7 +40,7 @@ template <typename __T> class _Graph_node
         exit(EXIT_FAILURE);
     }
 
-    unsigned _neighborPositionByPtr(_Graph_node <__T> *ptr) // Returns position of neighbor in neighborList
+    unsigned _neighborPositionByPtr(_Graph_node <_T> *ptr) // Returns position of neighbor in neighborList
     {
         for (unsigned i = 0; i < _neighborList.size(); i++) {
             if (_neighborList[i] == ptr) {
@@ -138,19 +143,23 @@ public:
     }
 
 
-    void inOrder (void (*func)(_T, unsigned)) {
+    void inOrder (void (*func)(_T &, unsigned)) {
         for (unsigned i = 0; i < _list.size(); i++) {
             func(_list[i]->_data, i);
         }
     }
 
-    void inDepth (void (*func)(_T, unsigned), unsigned startIndex = 0) {
+    void inDepth (void (*func)(_T &, unsigned), unsigned startIndex = 0) {
         if (startIndex >= _list.size()) {
             std::cerr << "    inDepth(): No node with such index: " << startIndex << std::endl;
             exit(EXIT_FAILURE);
         }
-        std::vector <unsigned> visitedNodesIndexes; // Saving data about
-        _inDepth(func, startIndex, visitedNodesIndexes); // Calling for private function
+        bool *ifVisitedNode = new bool[_list.size()]; // Saving data about nodes
+        for (unsigned i = 0; i < _list.size(); i++) {
+            ifVisitedNode[i] = false; // Filling array
+        }
+        _inDepth(func, startIndex, ifVisitedNode); // Calling for private recursion
+        delete [] ifVisitedNode; // Clearing memory
     }
 
 
@@ -256,23 +265,22 @@ private:
 
     std::vector <_Graph_node <_T> *> _list; // Array of pointers to graph nodes
 
-    void _inDepth (void (*func)(_T, unsigned), unsigned startIndex, std::vector <unsigned> &visitedNodesIndexes) // Utility function for in-depth
+    void _inDepth (void (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode) // Utility function for in-depth
     {
         if (startIndex >= _list.size()) {
             std::cerr << "    _inDepth(): No node with such index: " << startIndex << std::endl;
             exit(EXIT_FAILURE);
         }
-        for (unsigned i = 0; i < visitedNodesIndexes.size(); i++) {
-            // Looking for startIndex
-            if (visitedNodesIndexes[i] == startIndex) {
-                // Already have been here
-                return;
-            }
+        if (ifVisitedNode[startIndex]) {
+            // Already have been here
+            return;
         }
+        ifVisitedNode[startIndex] = true; // Adding index to visited
         func(_list[startIndex]->_data, startIndex); // Executing
-        visitedNodesIndexes.push_back(startIndex); // Adding index to visited
         for (unsigned i = 0; i < _list[startIndex]->_neighborList.size(); i++) {
-            _inDepth(func, _list[startIndex]->_neighborList[i]->_index(), visitedNodesIndexes); // Recursively executing for neighbors
+            /*std::thread inDepthThread(_inDepth, func, _list[startIndex]->_neighborList[i]->_index(), ifVisitedNode);
+            inDepthThread.join(); // Recursively executing for neighbors*/
+            _inDepth(func, _list[startIndex]->_neighborList[i]->_index(), ifVisitedNode);
         }
     }
 };
