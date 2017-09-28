@@ -1,0 +1,6 @@
+#ifndef NONOGRAM_H_INCLUDED
+#define NONOGRAM_H_INCLUDED
+
+
+
+#endif // NONOGRAM_H_INCLUDED
