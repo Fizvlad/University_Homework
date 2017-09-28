@@ -296,9 +296,10 @@ private:
         obj.ifVisitedNode[obj.startIndex] = true; // Adding index to visited
         obj.func(_list[obj.startIndex]->_data, obj.startIndex); // Executing
         for (unsigned i = 0; i < _list[obj.startIndex]->_neighborList.size(); i++) {
-            std::thread inDepthThread(this->_inDepth, _Graph_goThroughObj <_T> (obj.func, _list[obj.startIndex]->_neighborList[i]->_index(), obj.ifVisitedNode));
+            _Graph_goThroughObj <_T> newObj (obj.func, _list[obj.startIndex]->_neighborList[i]->_index(), obj.ifVisitedNode);
+            std::thread inDepthThread(this->_inDepth, newObj);
             inDepthThread.join(); // Recursively executing for neighbors
-            //_inDepth(_Graph_goThroughObj <_T> (obj.func, _list[obj.startIndex]->_neighborList[i]->_index(), obj.ifVisitedNode));
+            //_inDepth(newObj);
         }
     }
 };
