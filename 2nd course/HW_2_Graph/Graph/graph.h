@@ -9,8 +9,10 @@
 #include <mutex>
 
 // Init
-template <typename _T> class _Graph_node; // Access to this class elements is only for Graph class
 template <typename _T> class Graph; // Usual graph class with same data type in each node
+
+template <typename _T> class _Graph_node; // Access to this class elements is only for Graph class
+template <typename _T> class _Graph_goThroughObj; // Object to perform inDepth and inWidth
 
 std::mutex _Graph_mutex; // Mutex
 
@@ -62,6 +64,22 @@ template <typename _T> class _Graph_node
         exit(EXIT_FAILURE);
     }
 
+};
+
+template <typename _T> class _Graph_goThroughObj
+{
+    friend class Graph <_T>;
+
+    bool* ifVisitedNode;
+    unsigned startIndex;
+    void (*func) (_T &, unsigned);
+
+    _Graph_goThroughObj(void (*f)(_T &, unsigned), unsigned s, bool *i)
+    {
+        func = f;
+        startIndex = s;
+        ifVisitedNode = i;
+    }
 };
 
 template <typename _T> class Graph
@@ -158,7 +176,7 @@ public:
         for (unsigned i = 0; i < _list.size(); i++) {
             ifVisitedNode[i] = false; // Filling array
         }
-        _inDepth(func, startIndex, ifVisitedNode); // Calling for private recursion
+        _inDepth(_Graph_goThroughObj <_T> (func, startIndex, ifVisitedNode)); // Calling for private recursion
         delete [] ifVisitedNode; // Clearing memory
     }
 
@@ -265,22 +283,22 @@ private:
 
     std::vector <_Graph_node <_T> *> _list; // Array of pointers to graph nodes
 
-    void _inDepth (void (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode) // Utility function for in-depth
+    void _inDepth (_Graph_goThroughObj <_T> obj) // Utility function for in-depth
     {
-        if (startIndex >= _list.size()) {
-            std::cerr << "    _inDepth(): No node with such index: " << startIndex << std::endl;
+        if (obj.startIndex >= _list.size()) {
+            std::cerr << "    _inDepth(): No node with such index: " << obj.startIndex << std::endl;
             exit(EXIT_FAILURE);
         }
-        if (ifVisitedNode[startIndex]) {
+        if (obj.ifVisitedNode[obj.startIndex]) {
             // Already have been here
             return;
         }
-        ifVisitedNode[startIndex] = true; // Adding index to visited
-        func(_list[startIndex]->_data, startIndex); // Executing
-        for (unsigned i = 0; i < _list[startIndex]->_neighborList.size(); i++) {
-            /*std::thread inDepthThread(_inDepth, func, _list[startIndex]->_neighborList[i]->_index(), ifVisitedNode);
-            inDepthThread.join(); // Recursively executing for neighbors*/
-            _inDepth(func, _list[startIndex]->_neighborList[i]->_index(), ifVisitedNode);
+        obj.ifVisitedNode[obj.startIndex] = true; // Adding index to visited
+        obj.func(_list[obj.startIndex]->_data, obj.startIndex); // Executing
+        for (unsigned i = 0; i < _list[obj.startIndex]->_neighborList.size(); i++) {
+            std::thread inDepthThread(this->_inDepth, _Graph_goThroughObj <_T> (obj.func, _list[obj.startIndex]->_neighborList[i]->_index(), obj.ifVisitedNode));
+            inDepthThread.join(); // Recursively executing for neighbors
+            //_inDepth(_Graph_goThroughObj <_T> (obj.func, _list[obj.startIndex]->_neighborList[i]->_index(), obj.ifVisitedNode));
         }
     }
 };
