@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Nonogram.h"
+#include "Nonogram.cpp"
 #include <vector>
 
 using namespace std;
@@ -35,5 +35,10 @@ int main()
         }
         columns.push_back(groups);
     }
+
+    Nonogram n(lines, columns);
+    n.print(true);
+    cout << endl;
+    n.print(false);
     return 0;
 }
