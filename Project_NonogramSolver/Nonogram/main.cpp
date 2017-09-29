@@ -37,6 +37,9 @@ int main()
     }
 
     Nonogram n(lines, columns);
+
+    n.solve();
+
     n.print(true);
     cout << endl;
     n.print(false);
