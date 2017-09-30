@@ -3,35 +3,53 @@
 #include <vector>
 #include <cstdlib>
 
-const short _CELL_VALUE_FILLED = 1,
-            _CELL_VALUE_EMPTY = 0,
-            _CELL_VALUE_UNKNOWN = 2;
-
-const unsigned short _CELL_SIZE = 2;
-
 class Nonogram
 {
+    const unsigned short _CELL_VALUE_FILLED = 1,
+                         _CELL_VALUE_EMPTY = 0,
+                         _CELL_VALUE_UNKNOWN = 2,
+
+                         _CELL_VALUE_CHECK_CONFLICT = 3;
+
+    const unsigned short _CELL_SIZE = 2;
+
     std::vector < std::vector <unsigned short> > _table;
     std::vector < std::vector <unsigned> > _lines_data;
     std::vector < std::vector <unsigned> > _columns_data;
 
-    bool _goThroughLines () // Goes through  lines. Return true if changed _table
+    bool _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &tableLine, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> &groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
+    {
+        bool ifChanged = false; // Return statement
+        std::vector <unsigned short> line (tableLine.size(), _CELL_VALUE_UNKNOWN); // Copy of tableLine. Will be filling with values to determine empty or filled cells
+
+        unsigned shiftableGroupsMinimumLength = 0; // Minimum length (Including previous to interval group)
+        for (unsigned i = index - 1; i < tableLine_data.size(); i++) {
+            shiftableGroupsMinimumLength += tableLine_data[i]; // Adding sizes of groups
+        }
+        shiftableGroupsMinimumLength += tableLine_data.size() - index; // Minimum space between groups
+
+        unsigned amountOfFixedCells = 0; // Amount of fixed cells on left
+        for (unsigned i = 0; i < index - 1; i++) {
+            amountOfFixedCells += tableLine_data[i]; // Adding sizes of groups
+            amountOfFixedCells += groupsIntervals[i]; // Adding intervals
+        }
+        amountOfFixedCells += groupsIntervals[index]; // Adding last fixed interval
+
+        for (unsigned i = 0; i < tableLine.size() - amountOfFixedCells - shiftableGroupsMinimumLength; i++) {
+            // Shifting first available group. Recursively calling for next interval OR checking combination if this is last interval
+        }
+
+        return ifChanged;
+    }
+
+    bool _goThroughLines () // Goes through lines. Return true if changed _table
     {
         bool ifChanged = false;
         for (unsigned i = 0; i < height(); i++) {
-            if (_lines_data[i].size() == 0) {
-                // Can not normally happen due to rules but better take into account
-                for (unsigned j = 0; j < width(); j++) {
-                    _table[i][j] = _CELL_VALUE_EMPTY;
-                }
-                ifChanged = true;
-            }
-            if (_lines_data[i].size() == 1 && width() - _lines_data[i][0] < _lines_data[i][0]) {
-                for (unsigned j = width() - _lines_data[i][0]; j < _lines_data[i][0]; j++) {
-                    _table[i][j] = _CELL_VALUE_FILLED;
-                }
-                ifChanged = true;
-            }
+            std::vector <unsigned> groupsIntervals (_lines_data[i].size(), 1); // groupsIntervals[i] = amount of cells between group #i-1 (or left corner) and group #i
+            groupsIntervals[0] = 0; // First group
+
+            _goTrough_ShiftIntervalsFrom(0, _table[i], _lines_data[i], groupsIntervals);
         }
         return ifChanged;
     }
@@ -84,16 +102,13 @@ public:
             }
             for (unsigned j = 0; j < width(); j++) {
                 char c = ' ';
-                switch (_table[i][j]) {
-                case _CELL_VALUE_FILLED:
+                unsigned short cellValue = _table[i][j];
+                if (cellValue == _CELL_VALUE_FILLED) {
                     c = '#';
-                break;
-                case _CELL_VALUE_EMPTY:
+                } else if (cellValue == _CELL_VALUE_EMPTY) {
                     c = ' ';
-                break;
-                case _CELL_VALUE_UNKNOWN:
+                } else if (cellValue == _CELL_VALUE_UNKNOWN) {
                     c = '?';
-                break;
                 }
                 std::cout << std::setw( ifBeautify?_CELL_SIZE:1 ) << c;
             }
@@ -113,7 +128,10 @@ public:
 
     void solve()
     {
-        _goThroughLines();
+        bool ifChanged = true;
+        while (ifChanged) {
+            ifChanged = _goThroughLines() && _goThroughColumns();
+        }
     }
 
     unsigned short cell(unsigned line, unsigned column)
