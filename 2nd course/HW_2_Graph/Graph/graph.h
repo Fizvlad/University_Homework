@@ -12,7 +12,7 @@
 template <typename _T> class Graph; // Usual graph class with same data type in each node
 
 template <typename _T> class _Graph_node; // Access to this class elements is only for Graph class
-template <typename _T> class _Graph_goThroughObj; // Object to perform inDepth and inWidth
+template <typename _T> void _Graph__inDepth_wrapper (Graph <_T> *graph, int (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode, unsigned *createdThreadsAmount, unsigned *finishedThreadsAmount); // Wrapper used in thread
 
 std::mutex _Graph_mutex; // Mutex
 
@@ -20,6 +20,7 @@ std::mutex _Graph_mutex; // Mutex
 template <typename _T> class _Graph_node
 {
     friend class Graph <_T>;
+    friend void _Graph__inDepth_wrapper <_T> (Graph <_T> *graph, int (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode, unsigned *createdThreadsAmount, unsigned *finishedThreadsAmount);
 
     _T _data; // Data stored in graph element
     Graph <_T> *_parent; // Graph class that owns this node
@@ -65,43 +66,6 @@ template <typename _T> class _Graph_node
     }
 
 };
-
-
-template <typename _T> class _Graph_goThroughObj
-{
-    friend class Graph <_T>;
-
-    bool* ifVisitedNode;
-    unsigned startIndex;
-
-    /*
-        int (*func) (_T &, unsigned);
-
-            Possibility of using custom function disabled due to unsolved error:
-            ||=== Build: Debug in Graph (compiler: GNU GCC Compiler) ===|
-                    *\CodeBlocks\MinGW\lib\gcc\mingw32\4.9.2\include\c++\functional||In instantiation of 'struct std::_Bind_simple<std::_Mem_fn<int (Graph<int>::*)(_Graph_goThroughObj<int>)>(_Graph_goThroughObj<int>)>':|
-                    *\CodeBlocks\MinGW\lib\gcc\mingw32\4.9.2\include\c++\thread|137|required from 'std::thread::thread(_Callable&&, _Args&& ...) [with _Callable = int (Graph<int>::*)(_Graph_goThroughObj<int>); _Args = {_Graph_goThroughObj<int>&}]'|
-                    *\Graph\graph.h|307|required from 'int Graph<_T>::_inDepth(_Graph_goThroughObj<_T>) [with _T = int]'|
-                    *\Graph\graph.h|180|required from 'void Graph<_T>::inDepth(int (*)(_T&, unsigned int), unsigned int) [with _T = int]'|
-                    *\Graph\main.cpp|43|required from here|
-                *\CodeBlocks\MinGW\lib\gcc\mingw32\4.9.2\include\c++\functional|1665|error: no type named 'type' in 'class std::result_of<std::_Mem_fn<int (Graph<int>::*)(_Graph_goThroughObj<int>)>(_Graph_goThroughObj<int>)>'|
-                *\CodeBlocks\MinGW\lib\gcc\mingw32\4.9.2\include\c++\functional|1695|error: no type named 'type' in 'class std::result_of<std::_Mem_fn<int (Graph<int>::*)(_Graph_goThroughObj<int>)>(_Graph_goThroughObj<int>)>'|
-            ||=== Build failed: 2 error(s), 5 warning(s) (0 minute(s), 0 second(s)) ===|
-    */
-    int func (_T &data, unsigned index)
-    {
-        std::cout << "Data #" << index << ": " << data << std::endl;
-        return 0;
-    }
-
-    _Graph_goThroughObj (/*int (*f)(_T &, unsigned), */unsigned s, bool *i)
-    {
-        /*func = f;*/
-        startIndex = s;
-        ifVisitedNode = i;
-    }
-};
-
 
 template <typename _T> class Graph
 {
@@ -182,13 +146,13 @@ public:
     }
 
 
-    void inOrder (/*int (*func)(_T &, unsigned)*/) {
+    void inOrder (int (*func)(_T &, unsigned)) {
         for (unsigned i = 0; i < _list.size(); i++) {
-            std::cout << "Data #" << i << ": " << _list[i]->_data << std::endl;
+            func(_list[i]->_data, i);
         }
     }
 
-    void inDepth (/*int (*func)(_T &, unsigned), */unsigned startIndex = 0)
+    void inDepth (int (*func)(_T &, unsigned), unsigned startIndex = 0)
     {
         if (startIndex >= _list.size()) {
             std::cerr << "    inDepth(): No node with such index: " << startIndex << std::endl;
@@ -198,7 +162,13 @@ public:
         for (unsigned i = 0; i < _list.size(); i++) {
             ifVisitedNode[i] = false; // Filling array
         }
-        _inDepth(_Graph_goThroughObj <_T> (/*func, */startIndex, ifVisitedNode)); // Calling for private recursion
+        unsigned *createdThreadsAmount = new unsigned(1);
+        unsigned *finishedThreadsAmount = new unsigned(0);
+        /*
+            We have to use wrapper function to pass to thread
+        */
+        _Graph__inDepth_wrapper(this, func, startIndex, ifVisitedNode, createdThreadsAmount, finishedThreadsAmount); // Calling for private recursion
+        while (*createdThreadsAmount != *finishedThreadsAmount) {}
         delete [] ifVisitedNode; // Clearing memory
     }
 
@@ -301,32 +271,39 @@ public:
 
 private:
     friend class _Graph_node <_T>;
+    friend void _Graph__inDepth_wrapper <_T> (Graph <_T> *graph, int (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode, unsigned *createdThreadsAmount, unsigned *finishedThreadsAmount);
 
     std::vector <_Graph_node <_T> *> _list; // Array of pointers to graph nodes
-
-    int _inDepth (_Graph_goThroughObj <_T> obj) // Utility function for in-depth
-    {
-        if (obj.startIndex >= _list.size()) {
-            std::cerr << "    _inDepth(): No node with such index: " << obj.startIndex << std::endl;
-            exit(EXIT_FAILURE);
-        }
-        _Graph_mutex.lock(); // Locking data because we are checking shared array ifVisited
-        if (obj.ifVisitedNode[obj.startIndex]) {
-            // Already have been here
-            _Graph_mutex.unlock(); // Unlocking because we are leaving
-            return -1;
-        }
-        obj.ifVisitedNode[obj.startIndex] = true; // Adding index to visited
-        _Graph_mutex.unlock(); // Unlocking because we have finished working with shared data
-        obj.func(_list[obj.startIndex]->_data, obj.startIndex); // Executing
-        for (unsigned i = 0; i < _list[obj.startIndex]->_neighborList.size(); i++) {
-            obj.startIndex = _list[obj.startIndex]->_neighborList[i]->_index(); // Updating index
-            std::thread inDepthThread (_inDepth, obj);
-            inDepthThread.join(); // Recursively executing for neighbors
-            //_inDepth(obj);
-        }
-        return 0;
-    }
 };
+
+template <typename _T> void _Graph__inDepth_wrapper (Graph <_T> *graph, int (*func)(_T &, unsigned), unsigned startIndex, bool *ifVisitedNode, unsigned *createdThreadsAmount, unsigned *finishedThreadsAmount)
+{
+    _Graph_mutex.lock(); // Locking data because we are checking shared array ifVisited
+
+    if (startIndex >= graph->_list.size()) {
+        std::cerr << "    _Graph__inDepth_wrapper(): No node with such index: " << startIndex << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    //std::cout << "Finished threads: " << *finishedThreadsAmount << "/" << *createdThreadsAmount << std::endl;
+    if (!ifVisitedNode[startIndex]) {
+        ifVisitedNode[startIndex] = true; // Adding index to visited
+        func(graph->_list[startIndex]->_data, startIndex); // Executing
+        _Graph_mutex.unlock(); // Unlocking because we will be creating new threads
+        for (unsigned i = 0; i < graph->_list[startIndex]->_neighborList.size(); i++) {
+             _Graph_mutex.lock(); // Locking to update created threads amount
+            *createdThreadsAmount = *createdThreadsAmount + 1;
+            _Graph_mutex.unlock(); // Unlocking back
+
+            unsigned newIndex = graph->_list[startIndex]->_neighborList[i]->_index();
+            std::thread inDepthThread (_Graph__inDepth_wrapper <_T>, graph, func, newIndex, ifVisitedNode, createdThreadsAmount, finishedThreadsAmount);
+            inDepthThread.detach(); // Recursively executing for neighbors
+            //_Graph__inDepth_wrapper(graph, func, newIndex, ifVisitedNode, createdThreadsAmount, finishedThreadsAmount);
+        }
+        _Graph_mutex.lock(); // Locking back
+    }
+    *finishedThreadsAmount = *finishedThreadsAmount + 1;
+    _Graph_mutex.unlock(); // Unlocking because we are leaving
+}
+
 
 #endif // GRAPH_H_INCLUDED

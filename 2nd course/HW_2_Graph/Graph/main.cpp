@@ -3,7 +3,6 @@
 
 using namespace std;
 
-/*
 int f (int &data, unsigned index)
 {
     data++;
@@ -16,7 +15,6 @@ int f2 (int &data, unsigned index)
     cout << "Data #" << index << ": " << data << endl;
     return 0;
 }
-*/
 
 int main()
 {
@@ -42,9 +40,9 @@ int main()
     g.printInfo();
 
     cout << "In depth: " << endl;
-    g.inDepth(4); // In depth
+    g.inDepth(f, 1); // In depth
 
 
     cout << "In order: " << endl;
-    g.inOrder(); // In order of adding
+    g.inOrder(f2); // In order of adding
 }
