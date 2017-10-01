@@ -3,11 +3,20 @@
 
 using namespace std;
 
-void f (int &data, unsigned index)
+/*
+int f (int &data, unsigned index)
 {
     data++;
     cout << "Data #" << index << " increased" << endl;
+    return 0;
 }
+
+int f2 (int &data, unsigned index)
+{
+    cout << "Data #" << index << ": " << data << endl;
+    return 0;
+}
+*/
 
 int main()
 {
@@ -33,9 +42,9 @@ int main()
     g.printInfo();
 
     cout << "In depth: " << endl;
-    g.inDepth(f, 4); // In depth
+    g.inDepth(4); // In depth
 
 
     cout << "In order: " << endl;
-    g.inOrder([](int &data, unsigned index){ cout << "Data #" << index << ": " << data << endl; }); // In order of adding
+    g.inOrder(); // In order of adding
 }
