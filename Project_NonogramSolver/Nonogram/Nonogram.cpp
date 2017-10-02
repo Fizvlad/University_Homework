@@ -5,11 +5,13 @@
 
 class Nonogram
 {
-    const unsigned short _CELL_VALUE_FILLED = 1,
+    const unsigned short _CELL_VALUE_FILLED = 1, // Usually used to fill cells
                          _CELL_VALUE_EMPTY = 0,
                          _CELL_VALUE_UNKNOWN = 2,
 
-                         _CELL_VALUE_CHECK_CONFLICT = 3;
+                         _CELL_VALUE_CHECK_FILLED = 3, // Special values for go through
+                         _CELL_VALUE_CHECK_EMPTY = 4,
+                         _CELL_VALUE_CHECK_CONFLICT = 5;
 
     const unsigned short _CELL_SIZE = 2;
 
@@ -17,29 +19,78 @@ class Nonogram
     std::vector < std::vector <unsigned> > _lines_data;
     std::vector < std::vector <unsigned> > _columns_data;
 
-    bool _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &tableLine, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> &groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
+    void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
-        bool ifChanged = false; // Return statement
-        std::vector <unsigned short> line (tableLine.size(), _CELL_VALUE_UNKNOWN); // Copy of tableLine. Will be filling with values to determine empty or filled cells
-
-        unsigned shiftableGroupsMinimumLength = 0; // Minimum length (Including previous to interval group)
-        for (unsigned i = index - 1; i < tableLine_data.size(); i++) {
-            shiftableGroupsMinimumLength += tableLine_data[i]; // Adding sizes of groups
+        // >0[00]111[1]2[2]___<
+        unsigned shiftableGroupsMinimumLength = 0; // Minimum length (Not including previous to interval group)
+        for (unsigned i = index; i < tableLine_data.size(); i++) {
+            shiftableGroupsMinimumLength += 1; // Minimum space before group
+            shiftableGroupsMinimumLength += tableLine_data[i]; // Adding size of group
         }
-        shiftableGroupsMinimumLength += tableLine_data.size() - index; // Minimum space between groups
+        if (index == 0) {
+            // We have counted space before first group which can be 0
+            shiftableGroupsMinimumLength--;
+        }
 
         unsigned amountOfFixedCells = 0; // Amount of fixed cells on left
-        for (unsigned i = 0; i < index - 1; i++) {
+        for (unsigned i = 0; i < index; i++) {
             amountOfFixedCells += tableLine_data[i]; // Adding sizes of groups
-            amountOfFixedCells += groupsIntervals[i]; // Adding intervals
+            amountOfFixedCells += groupsIntervals[i]; // Adding intervals before them
         }
-        amountOfFixedCells += groupsIntervals[index]; // Adding last fixed interval
 
-        for (unsigned i = 0; i < tableLine.size() - amountOfFixedCells - shiftableGroupsMinimumLength; i++) {
+        unsigned initialInterval = groupsIntervals[index];
+        unsigned maximumPossibleShift = line.size() - amountOfFixedCells - shiftableGroupsMinimumLength;
+        for (unsigned shift = 0; shift <= maximumPossibleShift; shift++) {
             // Shifting first available group. Recursively calling for next interval OR checking combination if this is last interval
-        }
+            groupsIntervals[index] = initialInterval + shift;
 
-        return ifChanged;
+            // Checking to prevent conflicts with already saved data
+            // Enough to check current interval and group next to it
+            bool ifConflict = false;
+            for (unsigned i = 0; i < groupsIntervals[index] + tableLine_data[index]; i++) {
+                if (i < groupsIntervals[index] && line[amountOfFixedCells + i] == _CELL_VALUE_FILLED) {
+                    ifConflict = true;
+                    break;
+                }
+                if (i >= groupsIntervals[index] && line[amountOfFixedCells + i] == _CELL_VALUE_EMPTY) {
+                    ifConflict = true;
+                    break;
+                }
+            }
+            if (ifConflict) {
+                // Mismatch. Current shift is impossible
+                continue;
+            }
+
+            if (index != tableLine_data.size() - 1) {
+                _goTrough_ShiftIntervalsFrom(index + 1, line, tableLine_data, groupsIntervals);
+            } else {
+                // Creating current line
+                std::vector <unsigned short> currentLine(line.size(), _CELL_VALUE_CHECK_EMPTY); // Line for current intervals
+                unsigned currPos = 0;
+                for (unsigned i = 0; i < groupsIntervals.size(); i++) {
+                    currPos += groupsIntervals[i];
+                    for (unsigned j = 0; j < tableLine_data[i]; j++) {
+                        currentLine[currPos] = _CELL_VALUE_CHECK_FILLED;
+                        currPos++;
+                    }
+                }
+                // It was last interval. Comparing
+                for (unsigned i = 0; i < line.size(); i++) {
+                    if (line[i] == _CELL_VALUE_UNKNOWN) {
+                        // First check. Simply adding our data
+                        line[i] = currentLine[i];
+                    } else if (line[i] == _CELL_VALUE_CHECK_CONFLICT) {
+                        // Conflict (May be filled or empty). Skipping
+                    } else if (line[i] != currentLine[i]) {
+                        // Conflict
+                        line[i] = _CELL_VALUE_CHECK_CONFLICT;
+                    } else {
+                        // Match. If all the lines will match in this cell. Will take as right value
+                    }
+                }
+            }
+        }
     }
 
     bool _goThroughLines () // Goes through lines. Return true if changed _table
@@ -48,15 +99,47 @@ class Nonogram
         for (unsigned i = 0; i < height(); i++) {
             std::vector <unsigned> groupsIntervals (_lines_data[i].size(), 1); // groupsIntervals[i] = amount of cells between group #i-1 (or left corner) and group #i
             groupsIntervals[0] = 0; // First group
-
-            _goTrough_ShiftIntervalsFrom(0, _table[i], _lines_data[i], groupsIntervals);
+            std::vector <unsigned short> line = _table[i]; // Copy of table line. Will be filling with values to determine empty or filled cells
+            _goTrough_ShiftIntervalsFrom(0, line, _lines_data[i], groupsIntervals);
+            // Analyzed line
+            for (unsigned j = 0; j < line.size(); j++) {
+                if (line[j] == _CELL_VALUE_CHECK_FILLED) {
+                    _table[i][j] = _CELL_VALUE_FILLED;
+                    ifChanged = true;
+                }
+                if (line[j] == _CELL_VALUE_CHECK_EMPTY) {
+                    _table[i][j] = _CELL_VALUE_EMPTY;
+                    ifChanged = true;
+                }
+            }
         }
         return ifChanged;
     }
 
     bool _goThroughColumns() // Goes through  columns. Return true if changed _table
     {
-        return false;
+        bool ifChanged = false;
+        for (unsigned i = 0; i < width(); i++) {
+            std::vector <unsigned> groupsIntervals (_columns_data[i].size(), 1); // groupsIntervals[i] = amount of cells between group #i-1 (or left corner) and group #i
+            groupsIntervals[0] = 0; // First group
+            std::vector <unsigned short> line (height()); // Copy of table column. Will be filling with values to determine empty or filled cells
+            for (unsigned j = 0; j < line.size(); j++) {
+                line[j] = _table[j][i];
+            }
+            _goTrough_ShiftIntervalsFrom(0, line, _columns_data[i], groupsIntervals);
+            // Analyzed line
+            for (unsigned j = 0; j < line.size(); j++) {
+                if (line[j] == _CELL_VALUE_CHECK_FILLED) {
+                    _table[j][i] = _CELL_VALUE_FILLED;
+                    ifChanged = true;
+                }
+                if (line[j] == _CELL_VALUE_CHECK_EMPTY) {
+                    _table[j][i] = _CELL_VALUE_EMPTY;
+                    ifChanged = true;
+                }
+            }
+        }
+        return ifChanged;
     }
 public:
     void print(bool ifBeautify = false)
