@@ -65,6 +65,7 @@ class Nonogram
             if (index != tableLine_data.size() - 1) {
                 _goTrough_ShiftIntervalsFrom(index + 1, line, tableLine_data, groupsIntervals);
             } else {
+                // Last interval
                 // Creating current line
                 std::vector <unsigned short> currentLine(line.size(), _CELL_VALUE_CHECK_EMPTY); // Line for current intervals
                 unsigned currPos = 0;
@@ -75,7 +76,7 @@ class Nonogram
                         currPos++;
                     }
                 }
-                // It was last interval. Comparing
+                // Comparing
                 for (unsigned i = 0; i < line.size(); i++) {
                     if (line[i] == _CELL_VALUE_UNKNOWN) {
                         // First check. Simply adding our data
@@ -213,7 +214,12 @@ public:
     {
         bool ifChanged = true;
         while (ifChanged) {
-            ifChanged = _goThroughLines() && _goThroughColumns();
+            // Doing while at least one of methods gives changes
+            bool b1 = _goThroughLines();
+            print(true);
+            bool b2 = _goThroughColumns();
+            print(true);
+            ifChanged = b1 || b2;
         }
     }
 
