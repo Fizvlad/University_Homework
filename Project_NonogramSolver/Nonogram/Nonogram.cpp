@@ -5,8 +5,8 @@
 
 class Nonogram
 {
-    const unsigned short _CELL_VALUE_FILLED = 1, // Usually used to fill cells
-                         _CELL_VALUE_EMPTY = 0,
+    const unsigned short _CELL_VALUE_EMPTY = 0, // Usually used to fill cells
+                         _CELL_VALUE_FILLED = 1,
                          _CELL_VALUE_UNKNOWN = 2,
 
                          _CELL_VALUE_CHECK_FILLED = 3, // Special values for go through
@@ -45,7 +45,8 @@ class Nonogram
             groupsIntervals[index] = initialInterval + shift;
 
             // Checking to prevent conflicts with already saved data
-            // Enough to check current interval and group next to it
+            // Enough to check current interval and group next to it for first intervals (because its recursion)
+            // Also need to check space after last group if index == tableLine_data.size() - 1
             bool ifConflict = false;
             for (unsigned i = 0; i < groupsIntervals[index] + tableLine_data[index]; i++) {
                 if (i < groupsIntervals[index] && line[amountOfFixedCells + i] == _CELL_VALUE_FILLED) {
@@ -57,11 +58,21 @@ class Nonogram
                     break;
                 }
             }
+            if (index == tableLine_data.size() - 1) {
+                // Checking space after last group
+                for (unsigned i = amountOfFixedCells + groupsIntervals[index] + tableLine_data[index]; i < line.size(); i++) {
+                    if (line[i] == _CELL_VALUE_FILLED) {
+                        ifConflict = true;
+                        break;
+                    }
+                }
+            }
             if (ifConflict) {
-                // Mismatch. Current shift is impossible
+                // Mismatch with known cells. Current shift is impossible
                 continue;
             }
 
+            // No conflicts. Proceed
             if (index != tableLine_data.size() - 1) {
                 _goTrough_ShiftIntervalsFrom(index + 1, line, tableLine_data, groupsIntervals);
             } else {
@@ -78,13 +89,15 @@ class Nonogram
                 }
                 // Comparing
                 for (unsigned i = 0; i < line.size(); i++) {
-                    if (line[i] == _CELL_VALUE_UNKNOWN) {
+                    if (line[i] == _CELL_VALUE_FILLED || line[i] == _CELL_VALUE_EMPTY) {
+                        // This cell is already filled. Skipping
+                    } else if (line[i] == _CELL_VALUE_UNKNOWN) {
                         // First check. Simply adding our data
                         line[i] = currentLine[i];
                     } else if (line[i] == _CELL_VALUE_CHECK_CONFLICT) {
                         // Conflict (May be filled or empty). Skipping
                     } else if (line[i] != currentLine[i]) {
-                        // Conflict
+                        // Conflict with previous variant
                         line[i] = _CELL_VALUE_CHECK_CONFLICT;
                     } else {
                         // Match. If all the lines will match in this cell. Will take as right value
@@ -98,6 +111,9 @@ class Nonogram
     {
         bool ifChanged = false;
         for (unsigned i = 0; i < height(); i++) {
+            if (_lines_data[i].size() == 0) {
+                continue; // Should not happen due game rules
+            }
             std::vector <unsigned> groupsIntervals (_lines_data[i].size(), 1); // groupsIntervals[i] = amount of cells between group #i-1 (or left corner) and group #i
             groupsIntervals[0] = 0; // First group
             std::vector <unsigned short> line = _table[i]; // Copy of table line. Will be filling with values to determine empty or filled cells
@@ -121,6 +137,9 @@ class Nonogram
     {
         bool ifChanged = false;
         for (unsigned i = 0; i < width(); i++) {
+            if (_columns_data[i].size() == 0) {
+                continue; // Should not happen due game rules
+            }
             std::vector <unsigned> groupsIntervals (_columns_data[i].size(), 1); // groupsIntervals[i] = amount of cells between group #i-1 (or left corner) and group #i
             groupsIntervals[0] = 0; // First group
             std::vector <unsigned short> line (height()); // Copy of table column. Will be filling with values to determine empty or filled cells
@@ -128,6 +147,7 @@ class Nonogram
                 line[j] = _table[j][i];
             }
             _goTrough_ShiftIntervalsFrom(0, line, _columns_data[i], groupsIntervals);
+
             // Analyzed line
             for (unsigned j = 0; j < line.size(); j++) {
                 if (line[j] == _CELL_VALUE_CHECK_FILLED) {
@@ -141,6 +161,21 @@ class Nonogram
             }
         }
         return ifChanged;
+    }
+
+    bool _ifLineCorrect(unsigned index) // Checking line by its index
+    {
+        return true;
+    }
+
+    bool _ifColumnCorrect(unsigned index) // Checking column by its index
+    {
+        return true;
+    }
+
+    bool _ifCorrect() // Checking whole table
+    {
+        return true;
     }
 public:
     void print(bool ifBeautify = false)
@@ -215,11 +250,7 @@ public:
         bool ifChanged = true;
         while (ifChanged) {
             // Doing while at least one of methods gives changes
-            bool b1 = _goThroughLines();
-            print(true);
-            bool b2 = _goThroughColumns();
-            print(true);
-            ifChanged = b1 || b2;
+            ifChanged = _goThroughLines() || _goThroughColumns();
         }
     }
 
