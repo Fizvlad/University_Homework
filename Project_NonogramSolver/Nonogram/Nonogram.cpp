@@ -8,20 +8,19 @@ class Nonogram
     const unsigned short _CELL_VALUE_EMPTY = 0, // Usually used to fill cells
                          _CELL_VALUE_FILLED = 1,
                          _CELL_VALUE_UNKNOWN = 2,
+                         _CELL_VALUE_CHECK_EMPTY = 3, // Special values for go through
+                         _CELL_VALUE_CHECK_FILLED = 4,
+                         _CELL_VALUE_CHECK_CONFLICT = 5,
 
-                         _CELL_VALUE_CHECK_FILLED = 3, // Special values for go through
-                         _CELL_VALUE_CHECK_EMPTY = 4,
-                         _CELL_VALUE_CHECK_CONFLICT = 5;
-
-    const unsigned short _CELL_SIZE = 2;
+                         _CELL_SIZE = 2; // Used in beauty print only
 
     std::vector < std::vector <unsigned short> > _table;
-    std::vector < std::vector <unsigned> > _lines_data;
+
+    std::vector < std::vector <unsigned> > _lines_data; // Groups sizes
     std::vector < std::vector <unsigned> > _columns_data;
 
     void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
-        // >0[00]111[1]2[2]___<
         unsigned shiftableGroupsMinimumLength = 0; // Minimum length (Not including previous to interval group)
         for (unsigned i = index; i < tableLine_data.size(); i++) {
             shiftableGroupsMinimumLength += 1; // Minimum space before group
@@ -30,6 +29,11 @@ class Nonogram
         if (index == 0) {
             // We have counted space before first group which can be 0
             shiftableGroupsMinimumLength--;
+            // Checking length
+            if (shiftableGroupsMinimumLength > line.size()) {
+                // Impossible situation. Not checking
+                return;
+            }
         }
 
         unsigned amountOfFixedCells = 0; // Amount of fixed cells on left
@@ -165,6 +169,50 @@ class Nonogram
 
     bool _ifLineCorrect(unsigned index) // Checking line by its index
     {
+        unsigned groupIndex = 0;
+        unsigned groupSize = 0;
+        for (unsigned i = 0; i < width(); i++) {
+            if (_table[index][i] == _CELL_VALUE_EMPTY) {
+                if (groupSize > 0) {
+                    // Group ended
+                    groupIndex++;
+                    groupSize = 0;
+                } else {
+                    // Group haven't started yet
+                }
+            } else if (_table[index][i] == _CELL_VALUE_FILLED) {
+                if (groupSize > 0) {
+                    // Group
+                    groupSize++;
+                    if (groupSize > _lines_data[index][groupIndex]) {
+                        // Group is too big
+                        std::cout << "Group is too large. Line #" << index << ", group index: " << groupIndex << std::endl;
+                        return false;
+                    }
+                } else {
+                    // Group just started
+                    groupSize++;
+                    if (groupIndex >= _lines_data[index].size()) {
+                        // No such group
+                        std::cout << "Too many groups. Line #" << index << ", group index: " << groupIndex << std::endl;
+                        return false;
+                    }
+                }
+            } else {
+                std::cout << "Unknown cell. Line #" << index << ", group index: " << groupIndex << std::endl;
+                return false;
+            }
+        }
+        if (groupSize != 0) {
+            // Last group ended
+            groupSize = 0;
+            groupIndex++;
+        }
+        if (groupIndex != _lines_data[index].size()) {
+            // Wrong amount of groups
+            std::cout << "Not enough groups. Line #" << index << ", group index: " << groupIndex << std::endl;
+            return false;
+        }
         return true;
     }
 
@@ -172,14 +220,15 @@ class Nonogram
     {
         return true;
     }
-
-    bool _ifCorrect() // Checking whole table
-    {
-        return true;
-    }
 public:
-    void print(bool ifBeautify = false)
+    void print (bool ifBeautify = false, bool ifShowOnUnsolved = false)
     {
+        if (!check()) {
+            std::cout << "impossible" << std::endl;
+            if (!ifShowOnUnsolved) {
+                return;
+            }
+        }
         unsigned maxLineGroupSize = 0,
                  maxColumnGroupSize = 0;
         if (ifBeautify) {
@@ -195,6 +244,8 @@ public:
                 }
             }
         }
+
+        // If don't need beauty output input data won't be printed
         for (unsigned i = 0; i < maxColumnGroupSize; i++) {
             // Top part
             for (unsigned j = 0; j < maxLineGroupSize; j++) {
@@ -235,17 +286,17 @@ public:
         }
     }
 
-    unsigned width()
+    unsigned width ()
     {
         return _columns_data.size();
     }
 
-    unsigned height()
+    unsigned height ()
     {
         return _lines_data.size();
     }
 
-    void solve()
+    void solve ()
     {
         bool ifChanged = true;
         while (ifChanged) {
@@ -254,12 +305,27 @@ public:
         }
     }
 
-    unsigned short cell(unsigned line, unsigned column)
+    unsigned short cell (unsigned line, unsigned column)
     {
         return _table[line][column];
     }
 
-    Nonogram(std::vector < std::vector <unsigned> > l_data, std::vector < std::vector <unsigned> > c_data)
+    bool check ()
+    {
+        for (unsigned i = 0; i < height(); i++) {
+            if (!_ifLineCorrect(i)) {
+                return false;
+            }
+        }
+        for (unsigned i = 0; i < width(); i++) {
+            if (!_ifColumnCorrect(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Nonogram (std::vector < std::vector <unsigned> > l_data, std::vector < std::vector <unsigned> > c_data)
     {
         _lines_data = l_data;
         _columns_data = c_data;

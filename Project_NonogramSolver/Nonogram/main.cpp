@@ -40,8 +40,6 @@ int main()
 
     n.solve();
 
-    n.print(true);
-    cout << endl;
-    n.print(false);
+    n.print(true, true);
     return 0;
 }
