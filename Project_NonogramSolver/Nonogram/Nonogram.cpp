@@ -113,13 +113,17 @@ class Nonogram
         }
     }
 
-    bool _goThroughLines () // Goes through lines. Return true if changed _table
+    bool _goThroughLines_withLength (unsigned length = 0) // Goes through lines with chosen size. Return true if changed _table
     {
         bool ifChanged = false;
 
         for (unsigned i_ = 0; i_ < height(); i_++) {
             unsigned i = _lines_indexes_sizeAscending[i_]; // Real index of line
-            std::cout << "Checking line #" << i << std::endl;
+            if (length != 0 && length != _lines_data[i].size()) {
+                // Zero means any length
+                continue;
+            }
+            std::cout << "Checking line #" << i << ". Groups amount : " << _lines_data[i].size() << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -142,12 +146,17 @@ class Nonogram
         return ifChanged;
     }
 
-    bool _goThroughColumns () // Goes through  columns. Return true if changed _table
+    bool _goThroughColumns_withLength (unsigned length = 0) // Goes through  columns with chosen size. Return true if changed _table
     {
         bool ifChanged = false;
+
         for (unsigned i_ = 0; i_ < width(); i_++) {
             unsigned i = _columns_indexes_sizeAscending[i_]; // Real index of column
-            std::cout << "Checking column #" << i << std::endl;
+            if (length != 0 && length != _columns_data[i].size()) {
+                // Zero means any length
+                continue;
+            }
+            std::cout << "Checking column #" << i << ". Groups amount : " << _lines_data[i].size() << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -271,6 +280,8 @@ class Nonogram
         return true;
     }
 
+    Nonogram () // Not allowing empty constructor
+    {}
 public:
 
     void print (bool ifBeautify = false, bool ifShowOnUnsolved = false) // Printing to std::cout. Will print "impossible" if unsolvable *or haven't been solved yet*
@@ -353,10 +364,19 @@ public:
         if (_ifBadData) {
             return;
         }
+        unsigned maximumGroupsAmount = _lines_data[_lines_indexes_sizeAscending[_lines_indexes_sizeAscending.size() - 1]].size();
+        unsigned maximumColumnGroupsAmount = _columns_data[_columns_indexes_sizeAscending[_columns_indexes_sizeAscending.size() - 1]].size();
+        if (maximumColumnGroupsAmount > maximumGroupsAmount) {
+            maximumGroupsAmount = maximumColumnGroupsAmount;
+        }
         bool ifChanged = true;
         while (ifChanged) {
             // Doing while at least one of methods gives changes
-            ifChanged = _goThroughLines() || _goThroughColumns();
+            ifChanged = false;
+            for (unsigned i = 1 ; i <= maximumGroupsAmount; i++) {
+                ifChanged = ifChanged || _goThroughLines_withLength(i);
+                ifChanged = ifChanged || _goThroughColumns_withLength(i);
+            }
         }
         return;
     }
@@ -389,7 +409,7 @@ public:
         return _table[line][column];
     }
 
-    Nonogram (std::vector < std::vector <unsigned> > l_data, std::vector < std::vector <unsigned> > c_data) // Constructor
+    Nonogram (const std::vector < std::vector <unsigned> > &l_data, const std::vector < std::vector <unsigned> > &c_data) // Constructor
     {
         _lines_data = l_data;
         _columns_data = c_data;
