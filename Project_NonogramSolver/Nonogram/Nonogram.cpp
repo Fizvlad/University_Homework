@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 class Nonogram
 {
@@ -21,6 +22,9 @@ class Nonogram
 
     std::vector < std::vector <unsigned> > _lines_data; // Groups sizes
     std::vector < std::vector <unsigned> > _columns_data;
+
+    std::vector <unsigned> _lines_indexes_sizeAscending; // Indexes in group size ascending order. To optimize going through lines and columns
+    std::vector <unsigned> _columns_indexes_sizeAscending;
 
     void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
@@ -112,7 +116,10 @@ class Nonogram
     bool _goThroughLines () // Goes through lines. Return true if changed _table
     {
         bool ifChanged = false;
-        for (unsigned i = 0; i < height(); i++) {
+
+        for (unsigned i_ = 0; i_ < height(); i_++) {
+            unsigned i = _lines_indexes_sizeAscending[i_]; // Real index of line
+            std::cout << "Checking line #" << i << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -138,7 +145,9 @@ class Nonogram
     bool _goThroughColumns () // Goes through  columns. Return true if changed _table
     {
         bool ifChanged = false;
-        for (unsigned i = 0; i < width(); i++) {
+        for (unsigned i_ = 0; i_ < width(); i_++) {
+            unsigned i = _columns_indexes_sizeAscending[i_]; // Real index of column
+            std::cout << "Checking column #" << i << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -384,6 +393,29 @@ public:
     {
         _lines_data = l_data;
         _columns_data = c_data;
+        std::vector < std::pair <unsigned, unsigned> > tmp; // Temporary array for sorting of lines and columns
+
+        // Sorting lines
+        for (unsigned i = 0; i < _lines_data.size(); i++) {
+            tmp.push_back(std::pair <unsigned, unsigned> (_lines_data[i].size(), i)); // Amount of groups, index
+        }
+        std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
+        _lines_indexes_sizeAscending = std::vector <unsigned> (tmp.size());
+        for (unsigned i = 0; i < _lines_indexes_sizeAscending.size(); i++) {
+            _lines_indexes_sizeAscending[i] = tmp[i].second;
+        }
+
+        tmp.clear();
+        // Sorting columns
+        for (unsigned i = 0; i < _columns_data.size(); i++) {
+            tmp.push_back(std::pair <unsigned, unsigned> (_columns_data[i].size(), i)); // Amount of groups, index
+        }
+        std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
+        _columns_indexes_sizeAscending = std::vector <unsigned> (tmp.size());
+        for (unsigned i = 0; i < _columns_indexes_sizeAscending.size(); i++) {
+            _columns_indexes_sizeAscending[i] = tmp[i].second;
+        }
+
         for (unsigned i = 0; i < height(); i++) {
             std::vector <unsigned short> line (width(), _CELL_VALUE_UNKNOWN);
             _table.push_back(line);
