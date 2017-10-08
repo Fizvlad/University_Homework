@@ -24,8 +24,8 @@ class Nonogram
     std::vector < std::vector <unsigned> > _lines_data; // Groups sizes
     std::vector < std::vector <unsigned> > _columns_data;
 
-    std::vector <unsigned> _lines_indexes_difficultyAscending; // Indexes in group size ascending order. To optimize going through lines and columns
-    std::vector <unsigned> _columns_indexes_difficultyAscending;
+    std::vector < std::pair <unsigned, unsigned> > _lines_indexes_difficultyAscending; // Indexes in difficulty ascending order. Difficulty/Index
+    std::vector < std::pair <unsigned, unsigned> > _columns_indexes_difficultyAscending;
 
     void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
@@ -119,11 +119,11 @@ class Nonogram
         bool ifChanged = false;
 
         for (unsigned i_ = 0; i_ < height(); i_++) {
-            unsigned i = _lines_indexes_difficultyAscending[i_]; // Real index of line
-            if (d != 0 && d != _lines_data[i].size()) {
+            if (d != 0 && d != _lines_indexes_difficultyAscending[i_].first) {
                 // Zero means any difficulty
                 continue;
             }
+            unsigned i = _lines_indexes_difficultyAscending[i_].second; // Real index of line
             std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
@@ -152,11 +152,11 @@ class Nonogram
         bool ifChanged = false;
 
         for (unsigned i_ = 0; i_ < width(); i_++) {
-            unsigned i = _columns_indexes_difficultyAscending[i_]; // Real index of column
-            if (d != 0 && d != _columns_data[i].size()) {
+            if (d != 0 && d != _columns_indexes_difficultyAscending[i_].first) {
                 // Zero means any difficulty
                 continue;
             }
+            unsigned i = _columns_indexes_difficultyAscending[i_].second; // Real index of column
             std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
@@ -417,49 +417,45 @@ public:
         _ifBadData = !_dataCheck(); // Checking
         _maximumDifficulty = 0; // Will be replaced later
 
-        std::vector < std::pair <unsigned, unsigned> > tmp; // Temporary array for sorting of lines and columns
-        // Difficulty = amount of variations at the beginning
+        // Difficulty = unsigned that describes amount of variations
         // Sorting lines
-        for (unsigned i = 0; i < _lines_data.size(); i++) {
+        _lines_indexes_difficultyAscending = std::vector < std::pair <unsigned, unsigned> > (height());
+        for (unsigned i = 0; i < height(); i++) {
             unsigned difficulty = 1;
-            unsigned variations = width();
-            for (unsigned j = 0; j < _lines_data[i].size(); j++) {
-                variations -= _lines_data[i][j];
-            }
-            variations -= _lines_data[i].size() - 1;
-            variations = pow(variations, _lines_data[i].size());
-            difficulty += variations;
-            if (difficulty > _maximumDifficulty) {
-                _maximumDifficulty = difficulty;
-            }
-            tmp.push_back(std::pair <unsigned, unsigned> (difficulty, i)); // Amount of groups, index
-        }
-        std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
-        _lines_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
-        for (unsigned i = 0; i < _lines_indexes_difficultyAscending.size(); i++) {
-            _lines_indexes_difficultyAscending[i] = tmp[i].second;
-        }
 
-        tmp.clear();
-        // Sorting columns
-        for (unsigned i = 0; i < _columns_data.size(); i++) {
-            unsigned difficulty = 1;
-            unsigned variations = height();
-            for (unsigned j = 0; j < _columns_data[i].size(); j++) {
-                variations -= _columns_data[i][j];
+            unsigned shift = width();
+            for (unsigned j = 0; j < _lines_data[i].size(); j++) {
+                shift -= _lines_data[i][j];
             }
-            variations -= _columns_data[i].size() - 1;
-            variations = pow(variations, _columns_data[i].size());
-            difficulty += variations;
+            shift -= _lines_data[i].size() - 1;
+
+            difficulty += shift * _lines_data[i].size();
+
             if (difficulty > _maximumDifficulty) {
                 _maximumDifficulty = difficulty;
             }
-            tmp.push_back(std::pair <unsigned, unsigned> (difficulty, i)); // Amount of groups, index
+            _lines_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
         }
-        std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
-        _columns_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
-        for (unsigned i = 0; i < _columns_indexes_difficultyAscending.size(); i++) {
-            _columns_indexes_difficultyAscending[i] = tmp[i].second;
+        std::sort(_lines_indexes_difficultyAscending.begin(), _lines_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
+
+        // Sorting columns
+        _columns_indexes_difficultyAscending = std::vector < std::pair <unsigned, unsigned> > (height());
+        for (unsigned i = 0; i < width(); i++) {
+            unsigned difficulty = 1;
+
+            unsigned shift = height();
+            for (unsigned j = 0; j < _columns_data[i].size(); j++) {
+                shift -= _columns_data[i][j];
+            }
+            shift -= _columns_data[i].size() - 1;
+
+            difficulty += shift * _columns_data[i].size();
+
+            if (difficulty > _maximumDifficulty) {
+                _maximumDifficulty = difficulty;
+            }
+            _columns_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
         }
+        std::sort(_columns_indexes_difficultyAscending.begin(), _columns_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
     }
 };
