@@ -27,7 +27,7 @@ class Nonogram
     std::vector < std::pair <unsigned, unsigned> > _lines_indexes_difficultyAscending; // Indexes in difficulty ascending order. Difficulty/Index
     std::vector < std::pair <unsigned, unsigned> > _columns_indexes_difficultyAscending;
 
-    void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
+    void _goTrough_ShiftIntervalsFrom (unsigned index, std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
         unsigned shiftableGroupsMinimumLength = 0; // Minimum length (Not including previous to interval group)
         for (unsigned i = index; i < tableLine_data.size(); i++) {
@@ -124,7 +124,7 @@ class Nonogram
                 continue;
             }
             unsigned i = _lines_indexes_difficultyAscending[i_].second; // Real index of line
-            std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
+            // std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -150,14 +150,13 @@ class Nonogram
     bool _goThroughColumns_byDifficulty (unsigned d = 0) // Goes through  columns with chosen size. Return true if changed _table
     {
         bool ifChanged = false;
-
         for (unsigned i_ = 0; i_ < width(); i_++) {
             if (d != 0 && d != _columns_indexes_difficultyAscending[i_].first) {
                 // Zero means any difficulty
                 continue;
             }
             unsigned i = _columns_indexes_difficultyAscending[i_].second; // Real index of column
-            std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
+            // std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -435,11 +434,12 @@ public:
                 _maximumDifficulty = difficulty;
             }
             _lines_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
+            // std::cout << "Line #" << i << "; Difficulty: " << difficulty << std::endl;
         }
         std::sort(_lines_indexes_difficultyAscending.begin(), _lines_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
 
         // Sorting columns
-        _columns_indexes_difficultyAscending = std::vector < std::pair <unsigned, unsigned> > (height());
+        _columns_indexes_difficultyAscending = std::vector < std::pair <unsigned, unsigned> > (width());
         for (unsigned i = 0; i < width(); i++) {
             unsigned difficulty = 1;
 
@@ -455,7 +455,10 @@ public:
                 _maximumDifficulty = difficulty;
             }
             _columns_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
+            // std::cout << "Column #" << i << "; Difficulty: " << difficulty << std::endl;
         }
         std::sort(_columns_indexes_difficultyAscending.begin(), _columns_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
+
+        // std::cout << "Maximum difficulty: " << _maximumDifficulty << std::endl;
     }
 };

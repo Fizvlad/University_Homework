@@ -7,7 +7,9 @@ using namespace std;
 
 int main()
 {
-    ifstream fin("../Examples/4_45x40.txt");
+    const char* filePath = "../Examples/4_45x40.txt";
+    ifstream fin(filePath);
+
     unsigned linesAmount, columnsAmount;
 
     fin >> linesAmount;
