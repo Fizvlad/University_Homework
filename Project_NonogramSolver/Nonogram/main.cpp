@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Nonogram.cpp"
 #include <vector>
 
@@ -6,31 +7,32 @@ using namespace std;
 
 int main()
 {
+    ifstream fin("../Examples/4_45x40.txt");
     unsigned linesAmount, columnsAmount;
 
-    cin >> linesAmount;
+    fin >> linesAmount;
     vector < vector <unsigned> > lines;
     for (unsigned i = 0; i < linesAmount; i++) {
         unsigned groupsAmount;
-        cin >> groupsAmount;
+        fin >> groupsAmount;
         vector <unsigned> groups;
         for (unsigned j = 0; j < groupsAmount; j++) {
             unsigned groupSize;
-            cin >> groupSize;
+            fin >> groupSize;
             groups.push_back(groupSize);
         }
         lines.push_back(groups);
     }
 
-    cin >> columnsAmount;
+    fin >> columnsAmount;
     vector < vector <unsigned> > columns;
     for (unsigned i = 0; i < columnsAmount; i++) {
         unsigned groupsAmount;
-        cin >> groupsAmount;
+        fin >> groupsAmount;
         vector <unsigned> groups;
         for (unsigned j = 0; j < groupsAmount; j++) {
             unsigned groupSize;
-            cin >> groupSize;
+            fin >> groupSize;
             groups.push_back(groupSize);
         }
         columns.push_back(groups);
@@ -41,5 +43,7 @@ int main()
     n.solve();
 
     n.print(true, true);
+
+    fin.close();
     return 0;
 }

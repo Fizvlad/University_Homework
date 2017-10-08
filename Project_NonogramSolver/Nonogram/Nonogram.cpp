@@ -23,8 +23,8 @@ class Nonogram
     std::vector < std::vector <unsigned> > _lines_data; // Groups sizes
     std::vector < std::vector <unsigned> > _columns_data;
 
-    std::vector <unsigned> _lines_indexes_sizeAscending; // Indexes in group size ascending order. To optimize going through lines and columns
-    std::vector <unsigned> _columns_indexes_sizeAscending;
+    std::vector <unsigned> _lines_indexes_difficultyAscending; // Indexes in group size ascending order. To optimize going through lines and columns
+    std::vector <unsigned> _columns_indexes_difficultyAscending;
 
     void _goTrough_ShiftIntervalsFrom (unsigned index,  std::vector <unsigned short> &line, const std::vector <unsigned> &tableLine_data, std::vector <unsigned> groupsIntervals) // Used in go through. Taking all previous intervals as constant. Checking all possible interval combinations and saving into line
     {
@@ -113,14 +113,14 @@ class Nonogram
         }
     }
 
-    bool _goThroughLines_withLength (unsigned length = 0) // Goes through lines with chosen size. Return true if changed _table
+    bool _goThroughLines_byDifficulty (unsigned d = 0) // Goes through lines with chosen size. Return true if changed _table
     {
         bool ifChanged = false;
 
         for (unsigned i_ = 0; i_ < height(); i_++) {
-            unsigned i = _lines_indexes_sizeAscending[i_]; // Real index of line
-            if (length != 0 && length != _lines_data[i].size()) {
-                // Zero means any length
+            unsigned i = _lines_indexes_difficultyAscending[i_]; // Real index of line
+            if (d != 0 && d != _lines_data[i].size()) {
+                // Zero means any difficulty
                 continue;
             }
             std::cout << "Checking line #" << i << ". Groups amount : " << _lines_data[i].size() << std::endl;
@@ -146,17 +146,17 @@ class Nonogram
         return ifChanged;
     }
 
-    bool _goThroughColumns_withLength (unsigned length = 0) // Goes through  columns with chosen size. Return true if changed _table
+    bool _goThroughColumns_byDifficulty (unsigned d = 0) // Goes through  columns with chosen size. Return true if changed _table
     {
         bool ifChanged = false;
 
         for (unsigned i_ = 0; i_ < width(); i_++) {
-            unsigned i = _columns_indexes_sizeAscending[i_]; // Real index of column
-            if (length != 0 && length != _columns_data[i].size()) {
-                // Zero means any length
+            unsigned i = _columns_indexes_difficultyAscending[i_]; // Real index of column
+            if (d != 0 && d != _columns_data[i].size()) {
+                // Zero means any difficulty
                 continue;
             }
-            std::cout << "Checking column #" << i << ". Groups amount : " << _lines_data[i].size() << std::endl;
+            std::cout << "Checking column #" << i << ". Groups amount : " << _columns_data[i].size() << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -364,8 +364,8 @@ public:
         if (_ifBadData) {
             return;
         }
-        unsigned maximumGroupsAmount = _lines_data[_lines_indexes_sizeAscending[_lines_indexes_sizeAscending.size() - 1]].size();
-        unsigned maximumColumnGroupsAmount = _columns_data[_columns_indexes_sizeAscending[_columns_indexes_sizeAscending.size() - 1]].size();
+        unsigned maximumGroupsAmount = _lines_data[_lines_indexes_difficultyAscending[_lines_indexes_difficultyAscending.size() - 1]].size();
+        unsigned maximumColumnGroupsAmount = _columns_data[_columns_indexes_difficultyAscending[_columns_indexes_difficultyAscending.size() - 1]].size();
         if (maximumColumnGroupsAmount > maximumGroupsAmount) {
             maximumGroupsAmount = maximumColumnGroupsAmount;
         }
@@ -374,8 +374,8 @@ public:
             // Doing while at least one of methods gives changes
             ifChanged = false;
             for (unsigned i = 1 ; i <= maximumGroupsAmount; i++) {
-                ifChanged = ifChanged || _goThroughLines_withLength(i);
-                ifChanged = ifChanged || _goThroughColumns_withLength(i);
+                ifChanged = ifChanged || _goThroughLines_byDifficulty(i);
+                ifChanged = ifChanged || _goThroughColumns_byDifficulty(i);
             }
         }
         return;
@@ -415,14 +415,14 @@ public:
         _columns_data = c_data;
         std::vector < std::pair <unsigned, unsigned> > tmp; // Temporary array for sorting of lines and columns
 
-        // Sorting lines
+        // Sorting lines. Difficulty = amount of groups
         for (unsigned i = 0; i < _lines_data.size(); i++) {
             tmp.push_back(std::pair <unsigned, unsigned> (_lines_data[i].size(), i)); // Amount of groups, index
         }
         std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
-        _lines_indexes_sizeAscending = std::vector <unsigned> (tmp.size());
-        for (unsigned i = 0; i < _lines_indexes_sizeAscending.size(); i++) {
-            _lines_indexes_sizeAscending[i] = tmp[i].second;
+        _lines_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
+        for (unsigned i = 0; i < _lines_indexes_difficultyAscending.size(); i++) {
+            _lines_indexes_difficultyAscending[i] = tmp[i].second;
         }
 
         tmp.clear();
@@ -431,9 +431,9 @@ public:
             tmp.push_back(std::pair <unsigned, unsigned> (_columns_data[i].size(), i)); // Amount of groups, index
         }
         std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
-        _columns_indexes_sizeAscending = std::vector <unsigned> (tmp.size());
-        for (unsigned i = 0; i < _columns_indexes_sizeAscending.size(); i++) {
-            _columns_indexes_sizeAscending[i] = tmp[i].second;
+        _columns_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
+        for (unsigned i = 0; i < _columns_indexes_difficultyAscending.size(); i++) {
+            _columns_indexes_difficultyAscending[i] = tmp[i].second;
         }
 
         for (unsigned i = 0; i < height(); i++) {
