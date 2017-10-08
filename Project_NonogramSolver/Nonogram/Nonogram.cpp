@@ -17,6 +17,7 @@ class Nonogram
 
     bool _solved;
     bool _ifBadData;
+    unsigned _maximumDifficulty;
 
     std::vector < std::vector <unsigned short> > _table;
 
@@ -123,7 +124,7 @@ class Nonogram
                 // Zero means any difficulty
                 continue;
             }
-            std::cout << "Checking line #" << i << ". Groups amount : " << _lines_data[i].size() << std::endl;
+            std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -156,7 +157,7 @@ class Nonogram
                 // Zero means any difficulty
                 continue;
             }
-            std::cout << "Checking column #" << i << ". Groups amount : " << _columns_data[i].size() << std::endl;
+            std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -364,16 +365,11 @@ public:
         if (_ifBadData) {
             return;
         }
-        unsigned maximumGroupsAmount = _lines_data[_lines_indexes_difficultyAscending[_lines_indexes_difficultyAscending.size() - 1]].size();
-        unsigned maximumColumnGroupsAmount = _columns_data[_columns_indexes_difficultyAscending[_columns_indexes_difficultyAscending.size() - 1]].size();
-        if (maximumColumnGroupsAmount > maximumGroupsAmount) {
-            maximumGroupsAmount = maximumColumnGroupsAmount;
-        }
         bool ifChanged = true;
         while (ifChanged) {
             // Doing while at least one of methods gives changes
             ifChanged = false;
-            for (unsigned i = 1 ; i <= maximumGroupsAmount; i++) {
+            for (unsigned i = 1 ; i <= _maximumDifficulty; i++) {
                 ifChanged = ifChanged || _goThroughLines_byDifficulty(i);
                 ifChanged = ifChanged || _goThroughColumns_byDifficulty(i);
             }
@@ -413,11 +409,30 @@ public:
     {
         _lines_data = l_data;
         _columns_data = c_data;
-        std::vector < std::pair <unsigned, unsigned> > tmp; // Temporary array for sorting of lines and columns
+        for (unsigned i = 0; i < height(); i++) {
+            std::vector <unsigned short> line (width(), _CELL_VALUE_UNKNOWN);
+            _table.push_back(line);
+        }
+        _solved = false;
+        _ifBadData = !_dataCheck(); // Checking
+        _maximumDifficulty = 0; // Will be replaced later
 
-        // Sorting lines. Difficulty = amount of groups
+        std::vector < std::pair <unsigned, unsigned> > tmp; // Temporary array for sorting of lines and columns
+        // Difficulty = amount of variations at the beginning
+        // Sorting lines
         for (unsigned i = 0; i < _lines_data.size(); i++) {
-            tmp.push_back(std::pair <unsigned, unsigned> (_lines_data[i].size(), i)); // Amount of groups, index
+            unsigned difficulty = 1;
+            unsigned variations = width();
+            for (unsigned j = 0; j < _lines_data[i].size(); j++) {
+                variations -= _lines_data[i][j];
+            }
+            variations -= _lines_data[i].size() - 1;
+            variations = pow(variations, _lines_data[i].size());
+            difficulty += variations;
+            if (difficulty > _maximumDifficulty) {
+                _maximumDifficulty = difficulty;
+            }
+            tmp.push_back(std::pair <unsigned, unsigned> (difficulty, i)); // Amount of groups, index
         }
         std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
         _lines_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
@@ -428,19 +443,23 @@ public:
         tmp.clear();
         // Sorting columns
         for (unsigned i = 0; i < _columns_data.size(); i++) {
-            tmp.push_back(std::pair <unsigned, unsigned> (_columns_data[i].size(), i)); // Amount of groups, index
+            unsigned difficulty = 1;
+            unsigned variations = height();
+            for (unsigned j = 0; j < _columns_data[i].size(); j++) {
+                variations -= _columns_data[i][j];
+            }
+            variations -= _columns_data[i].size() - 1;
+            variations = pow(variations, _columns_data[i].size());
+            difficulty += variations;
+            if (difficulty > _maximumDifficulty) {
+                _maximumDifficulty = difficulty;
+            }
+            tmp.push_back(std::pair <unsigned, unsigned> (difficulty, i)); // Amount of groups, index
         }
         std::sort(tmp.begin(), tmp.end()); // Will be sorted by first element of pair
         _columns_indexes_difficultyAscending = std::vector <unsigned> (tmp.size());
         for (unsigned i = 0; i < _columns_indexes_difficultyAscending.size(); i++) {
             _columns_indexes_difficultyAscending[i] = tmp[i].second;
         }
-
-        for (unsigned i = 0; i < height(); i++) {
-            std::vector <unsigned short> line (width(), _CELL_VALUE_UNKNOWN);
-            _table.push_back(line);
-        }
-        _solved = false;
-        _ifBadData = !_dataCheck(); // Checking
     }
 };
