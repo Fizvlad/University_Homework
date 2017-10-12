@@ -80,6 +80,15 @@ class Nonogram
             }
 
             // No conflicts. Proceed
+            /*
+            std::cout << "No conflicts. Working with line: " << std::endl;
+            for (unsigned i = 0; i < line.size(); i++) {
+                std::cout << line[i] << " ";
+            }
+            std:: cout << std::endl << "Start group index: " << index <<std::endl;
+            */
+
+
             if (index != tableLine_data.size() - 1) {
                 _goTrough_ShiftIntervalsFrom(index + 1, line, tableLine_data, groupsIntervals);
             } else {
@@ -124,7 +133,7 @@ class Nonogram
                 continue;
             }
             unsigned i = _lines_indexes_difficultyAscending[i_].second; // Real index of line
-            // std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
+            //std::cout << "Checking line #" << i << ". Difficulty : " << d << std::endl;
             if (_lines_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -156,7 +165,7 @@ class Nonogram
                 continue;
             }
             unsigned i = _columns_indexes_difficultyAscending[i_].second; // Real index of column
-            // std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
+            //std::cout << "Checking column #" << i << ". Difficulty : " << d << std::endl;
             if (_columns_data[i].size() == 0) {
                 continue; // Should not happen due game rules
             }
@@ -434,7 +443,7 @@ public:
                 _maximumDifficulty = difficulty;
             }
             _lines_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
-            // std::cout << "Line #" << i << "; Difficulty: " << difficulty << std::endl;
+            //std::cout << "Line #" << i << "; Difficulty: " << difficulty << std::endl;
         }
         std::sort(_lines_indexes_difficultyAscending.begin(), _lines_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
 
@@ -455,10 +464,10 @@ public:
                 _maximumDifficulty = difficulty;
             }
             _columns_indexes_difficultyAscending[i] = std::pair <unsigned, unsigned> (difficulty, i); // Amount of groups, index
-            // std::cout << "Column #" << i << "; Difficulty: " << difficulty << std::endl;
+            //std::cout << "Column #" << i << "; Difficulty: " << difficulty << std::endl;
         }
         std::sort(_columns_indexes_difficultyAscending.begin(), _columns_indexes_difficultyAscending.end()); // Will be sorted by first element of pair
 
-        // std::cout << "Maximum difficulty: " << _maximumDifficulty << std::endl;
+        //std::cout << "Maximum difficulty: " << _maximumDifficulty << std::endl;
     }
 };

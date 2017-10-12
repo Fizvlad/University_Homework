@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-    const char* filePath = "../Examples/4_45x40.txt";
+    const char* filePath = "../Examples/13_40x35.txt";
     ifstream fin(filePath);
 
     unsigned linesAmount, columnsAmount;
@@ -44,7 +44,7 @@ int main()
 
     n.solve();
 
-    n.print(true, true);
+    n.print();
 
     fin.close();
     return 0;
