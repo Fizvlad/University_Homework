@@ -1,12 +1,8 @@
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <cstdlib>
-#include <algorithm>
+#include "Nonogram.h"
 
 class Nonogram
 {
-    const unsigned short _CELL_VALUE_EMPTY = 0, // Usually used to fill cells
+    static const unsigned short _CELL_VALUE_EMPTY = 0, // Usually used to fill cells
                          _CELL_VALUE_FILLED = 1,
                          _CELL_VALUE_UNKNOWN = 2,
                          _CELL_VALUE_CHECK_EMPTY = 3, // Special values for go through
@@ -94,7 +90,7 @@ class Nonogram
             } else {
                 // Last interval
                 // Creating current line
-                std::vector <unsigned short> currentLine(line.size(), _CELL_VALUE_CHECK_EMPTY); // Line for current intervals
+                std::vector <unsigned short> currentLine(line.size(), (unsigned short) _CELL_VALUE_CHECK_EMPTY); // Line for current intervals
                 unsigned currPos = 0;
                 for (unsigned i = 0; i < groupsIntervals.size(); i++) {
                     currPos += groupsIntervals[i];
@@ -418,7 +414,7 @@ public:
         _lines_data = l_data;
         _columns_data = c_data;
         for (unsigned i = 0; i < height(); i++) {
-            std::vector <unsigned short> line (width(), _CELL_VALUE_UNKNOWN);
+            std::vector <unsigned short> line (width(), (unsigned short)_CELL_VALUE_UNKNOWN);
             _table.push_back(line);
         }
         _solved = false;
