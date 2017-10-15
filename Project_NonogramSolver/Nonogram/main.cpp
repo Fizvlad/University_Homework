@@ -7,8 +7,8 @@ using namespace std;
 
 int main()
 {
-    const bool ifReadFromFile = true;
-    const char* filePath = "../Examples/19_58x77.txt";
+    const bool ifReadFromFile = false;
+    const char* filePath = "../Examples/20_45x44.txt";
 
     // Using ifstream from <fstream>. To use files as input. Can be disabled with ifReadFromFile
     ifstream fin;

@@ -1,21 +1,24 @@
-9   *  12 = 108   Solving time: ~s = ~m
-14  *  16 = 224   Solving time: ~s = ~m
-15  *  20 = 300   Solving time: ~s = ~m
-25  *  20 = 500   Solving time: ~s = ~m
-24  *  24 = 576   Solving time: ~s = ~m
-25  *  35 = 875   Solving time: ~s = ~m
-45  *  22 = 990   Solving time: ~s = ~m
-38  *  32 = 1216  Solving time: ~s = ~m
-35  *  40 = 1400  Solving time: ~s = ~m
-35  *  40 = 1400  Solving time: ~s = ~m
-35  *  40 = 1400  Solving time: ~s = ~m
-40  *  35 = 1400  Solving time: ~s = ~m
-35  *  45 = 1575  Solving time: ~s = ~m
-40  *  40 = 1600  Solving time: ~s = ~m
-39  *  42 = 1638  Solving time: ~s = ~m
-45  *  40 = 1800  Solving time: ~s = ~m
-45  *  44 = 1980  Solving time: ~s = ~m
-45  *  45 = 2025  Solving time: ~s = ~m
-58  *  77 = 4466  Solving time: ~s = ~m
-87  *  87 = 7569  Solving time: ~s = ~m
-130 * 140 = 18200 Solving time: ~s = ~m
+9   *  12 = 108   Solving time: ~1s
+14  *  16 = 224   Solving time: ~1s
+15  *  20 = 300   Solving time: ~1s
+25  *  20 = 500   Solving time: ~1s
+24  *  24 = 576   Solving time: ~1s
+25  *  35 = 875   Solving time: ~13s
+45  *  22 = 990   Solving time: ~1s
+38  *  32 = 1216  Solving time: ~2s
+35  *  40 = 1400  Solving time: ~3s
+35  *  40 = 1400  Solving time: ~2s
+35  *  40 = 1400  Solving time: ~15s
+40  *  35 = 1400  Solving time: ~4s
+35  *  45 = 1575  Solving time: ~26s
+40  *  40 = 1600  Solving time: ~1s
+40  *  40 = 1600  Solving time: ~304s  = ~6m
+40  *  40 = 1600  Solving time: ~548s  = ~10m
+40  *  40 = 1600  Solving time: ~13s
+39  *  42 = 1638  Solving time: ~4s
+45  *  40 = 1800  Solving time: ~2193s = ~37m
+45  *  44 = 1980  Solving time: ~2s
+45  *  45 = 2025  Solving time: ~26s
+58  *  77 = 4466  Solving time: ~158s  = ~3m
+87  *  87 = 7569  Solving time: ?
+130 * 140 = 18200 Solving time: ?
