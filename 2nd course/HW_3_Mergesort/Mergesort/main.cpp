@@ -2,18 +2,19 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
-#include "Mergesort_Threads.cpp"
+#include "Mergesort_threads.h"
 
 using namespace std;
 
 int main()
 {
     unsigned vector_size = 20;
-    vector <int> arr;
+    unsigned maximumThreads = 20;
+    vector <int> arr(vector_size);
 
     srand(time(0));
-    for (unsigned i = 0; i < vector_size; i++) {
-        arr.push_back(rand() % 1337);
+    for (unsigned i = 0; i < arr.size(); i++) {
+        arr[i] = rand() % 1337;
     }
     cout << "Created array: " << endl;
     for (unsigned i = 0; i < arr.size(); i++) {
@@ -21,7 +22,7 @@ int main()
     }
     cout << endl;
 
-    Mergesort(arr);
+    Mergesort(arr, maximumThreads);
 
     cout << "Sorted array: " << endl;
     for (unsigned i = 0; i < arr.size(); i++) {
