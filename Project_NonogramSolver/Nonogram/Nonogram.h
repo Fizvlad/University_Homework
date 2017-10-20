@@ -4,7 +4,6 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <cstdlib>
 #include <algorithm>
 
 #include "Nonogram.h"
