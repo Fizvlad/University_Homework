@@ -20,6 +20,8 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="CustomAtomic.cpp" />
+		<Unit filename="CustomAtomic.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
