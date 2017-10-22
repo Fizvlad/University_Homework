@@ -6,23 +6,17 @@
 
 using namespace std;
 
-void increase(
-	customAtomic<int>* ptr, 
-	//int* ptr,
-	//atomic<int>* ptr,
-	unsigned s)
+void increase(customAtomic<int>* ptr, unsigned s)
 {
 	for (unsigned i = 0; i < s; i++) {
 		(*ptr)++;
-	}	
+	}
 }
 
-int main() 
+int main()
 {
 	unsigned threadsAmount = 10;
 	customAtomic <int> a(-1);
-	//int a = -1;
-	//atomic <int> a(-1);
 	increase(&a, 1);
 
 	thread* arr = new thread[threadsAmount];
@@ -33,8 +27,8 @@ int main()
 	for (unsigned i = 0; i < threadsAmount; i++) {
 		arr[i].join();
 	}
-	cout << "Final : " << a << endl;
-	system("pause");
+	cout << "Final : " << a.exchange(1234) << endl;
+	cout << "New value : " << a.load() << endl;
 	delete [] arr;
-	return EXIT_SUCCESS;
+	return 0;
 }

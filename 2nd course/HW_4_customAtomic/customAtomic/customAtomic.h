@@ -7,6 +7,7 @@ template <class _T> class customAtomic
 	std::mutex _mutex;
 
 public:
+    // Load, store, exchange
 	_T load ()
 	{
 		_mutex.lock();
@@ -29,6 +30,7 @@ public:
 		return result;
 	}
 
+	// Changing type
 	operator _T()
 	{
 		_mutex.lock();
@@ -37,38 +39,45 @@ public:
 		return result;
 	}
 
+	// Increment
 	customAtomic<_T> &operator++()
 	{
+	    _mutex.lock();
 		_data++;
+		_mutex.unlock();
+		return *this;
+	}
+	customAtomic<_T> &operator++(int)
+	{
+	    _mutex.lock();
+	    customAtomic<_T> result(++_data);
+		_mutex.unlock();
 		return *this;
 	}
 
+	// Constructor. No need to mute
 	customAtomic ()
 	{
-		_mutex.lock();
 		_data = _T();
-		_mutex.unlock();
 	}
 	customAtomic (const _T &d)
 	{
-		_mutex.lock();
 		_data = d;
-		_mutex.unlock();
 	}
-	~customAtomic ()
-	{}
 	customAtomic (const customAtomic <_T> &other)
 	{
-		_mutex.lock();
 		_data = other._data;
-		_mutex.unlock();
 	}
 	customAtomic (customAtomic <_T> &&other)
 	{
-		_mutex.lock();
 		_data = other._data;
-		_mutex.unlock();
 	}
+
+	// Destructor
+	~customAtomic ()
+	{}
+
+	// operator=
 	customAtomic &operator= (const customAtomic <_T> &other)
 	{
 		_mutex.lock();
