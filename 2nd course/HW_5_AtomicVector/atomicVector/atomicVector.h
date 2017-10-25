@@ -1,23 +1,21 @@
 #ifndef ATOMICVECTOR_H_INCLUDED
 #define ATOMICVECTOR_H_INCLUDED
 
+#include <iostream>
 #include <thread>
 #include <mutex>
 
-#define _size_t unsigned
-
-template <typename _T> class atomicVector;
-template <typename _T> void swap (atomicVector <_T> &first, atomicVector <_T> &second);
-
 template <typename _T> class atomicVector
 {
+    typedef unsigned _size_t;
+    typedef _T* _ptr_t;
 public:
     // Pointers get
-    _T* begin()
+    _ptr_t begin()
     {
         return _begin;
     }
-    _T* end()
+    _ptr_t end()
     {
         return _begin + _size;
     }
@@ -38,9 +36,12 @@ public:
         if (_begin == nullptr) {
             throw "empty vector";
         }
+        if (__pos >= _size) {
+            _size = __pos + 1; // Increasing size
+        }
         return _begin[__pos];
     }
-    _T at (_size_t __pos)
+    _T &at (_size_t __pos)
     {
         if (_begin == nullptr) {
             throw "empty vector";
@@ -48,7 +49,7 @@ public:
         if (__pos >= _size) {
             throw "out of range";
         }
-        return _begin[__pos]
+        return _begin[__pos];
     }
 
     void push_back (_T __data)
@@ -62,7 +63,7 @@ public:
     void push_before (_T __data, _size_t __pos)
     {
         if (__pos >= _size) {
-            throw "out of range"
+            throw "out of range";
         }
         if (_capacity <= _size) {
             reserve(1);
@@ -70,7 +71,7 @@ public:
         for (_size_t i = _size; i >= __pos; i--) {
             _begin[i + 1] = _begin[i];
         }
-        _begin[__pos] = __data
+        _begin[__pos] = __data;
         _size++;
     }
     void push_front (_T __data)
@@ -81,6 +82,7 @@ public:
     _T pop (_size_t __pos)
     {
         _T result = _begin[__pos];
+        // !!!
     }
     _T pop_back ()
     {
@@ -94,6 +96,10 @@ public:
     // Data and capacity global changes
     void fill (_T __data)
     {
+        for (_size_t i = 0; i < _capacity; i++) {
+            _begin[i] = __data;
+        }
+        _size = _capacity;
     }
     void clear ()
     {
@@ -105,6 +111,14 @@ public:
     // Memory
     void resize (_size_t __size)
     {
+        if (__size == _size) {
+            return;
+        }
+        atomicVector <_T> other(__size);
+        for (_size_t i = 0; i < __size && i < _size; i++) {
+            other[i] = _begin[i];
+        }
+        swap(*this, other);
     }
     void reserve (_size_t __size)
     {
@@ -141,7 +155,7 @@ public:
     {
         delete [] _begin;
     }
-    atomicVector (const atomicVector &__other)
+    atomicVector (const atomicVector <_T> &__other)
     {
         _size = __other._size;
         _capacity = __other._capacity;
@@ -150,50 +164,51 @@ public:
             _begin[i] = __other._begin[i];
         }
     }
-    atomicVector (atomicVector &&__other)
-    {
-        swap(*this, __other);
-        //??? need delete
-    }
-    atomicVector <_T> operator= (const atomicVector &__other)
+    atomicVector (atomicVector <_T> &&__other)
     {
         delete [] _begin;
-        _size = __other._size;
-        _capacity = __other._capacity;
-        _begin = new _T[_capacity];
-        for (_size_t i = 0; i < _size; i++) {
-            _begin[i] = __other._begin[i];
-        }
-    }
-    atomicVector <_T> operator= (atomicVector &&__other)
-    {
         swap(*this, __other);
-        //??? need delete
+    }
+    atomicVector <_T> operator= (const atomicVector <_T> &__other)
+    {
+        atomicVector <_T> other(__other);
+        swap(*this, other);
+        return *this;
+    }
+    atomicVector <_T> operator= (atomicVector <_T> &&__other)
+    {
+        delete [] _begin;
+        swap(*this, __other);
+        return *this;
+    }
+
+    // iostream
+    friend std::ostream &operator<< (std::ostream &__stream, atomicVector <_T> __vector)
+    {
+        for (_size_t i = 0; i < __vector._size; i++) {
+            __stream << __vector._begin[i] << " ";
+        }
+        return __stream;
     }
 private:
     _T *_begin;
     _size_t _size;
     _size_t _capacity;
     std::mutex _mutex;
-    friend void swap <>(atomicVector <_T> &first, atomicVector <_T> &second); //???
+    friend void swap (atomicVector <_T> &first, atomicVector <_T> &second)
+    {
+        _size_t fSize = first._size;
+        _size_t fCap = first._capacity;
+        _T *fBegin = first._begin;
+
+        first._size = second._size;
+        first._capacity = second._capacity;
+        first._begin = second._begin;
+
+        second._size = fSize;
+        second._capacity = fCap;
+        second._begin = fBegin;
+    }
 };
-
-// Swap function
-template <typename _T> void swap (atomicVector <_T> &first, atomicVector <_T> &second)
-{
-    _size_t fSize = first._size;
-    _size_t fCap = first._capacity;
-    _T *fBegin = first._begin;
-
-    first._size = second._size;
-    first._capacity = second._capacity;
-    first._begin = second._begin;
-
-    second._size = fSize;
-    second._capacity = fCap;
-    second._begin = fBegin;
-}
-
-#undef _size_t
 
 #endif // ATOMICVECTOR_H_INCLUDED
