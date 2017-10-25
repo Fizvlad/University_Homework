@@ -1,15 +1,15 @@
-#ifndef THREADVECTOR_H_INCLUDED
-#define THREADVECTOR_H_INCLUDED
+#ifndef ATOMICVECTOR_H_INCLUDED
+#define ATOMICVECTOR_H_INCLUDED
 
 #include <thread>
 #include <mutex>
 
 #define _size_t unsigned
 
-template <typename _T> class threadVector;
-template <typename _T> void swap (threadVector <_T> &first, threadVector <_T> &second);
+template <typename _T> class atomicVector;
+template <typename _T> void swap (atomicVector <_T> &first, atomicVector <_T> &second);
 
-template <typename _T> class threadVector
+template <typename _T> class atomicVector
 {
 public:
     // Pointers get
@@ -116,19 +116,19 @@ public:
     }
 
     // Constructor
-    threadVector ()
+    atomicVector ()
     {
         _size = 0;
         _capacity = 0;
         _begin = NULL;
     }
-    threadVector (_size_t __capacity)
+    atomicVector (_size_t __capacity)
     {
         _size = 0;
         _capacity = __capacity;
         _begin = new _T[__capacity];
     }
-    threadVector (_size_t __capacity, _T __data)
+    atomicVector (_size_t __capacity, _T __data)
     {
         _size = 0;
         _capacity = __capacity;
@@ -137,11 +137,11 @@ public:
     }
 
     // 5
-    ~threadVector ()
+    ~atomicVector ()
     {
         delete [] _begin;
     }
-    threadVector (const threadVector &__other)
+    atomicVector (const atomicVector &__other)
     {
         _size = __other._size;
         _capacity = __other._capacity;
@@ -150,12 +150,12 @@ public:
             _begin[i] = __other._begin[i];
         }
     }
-    threadVector (threadVector &&__other)
+    atomicVector (atomicVector &&__other)
     {
         swap(*this, __other);
         //??? need delete
     }
-    threadVector <_T> operator= (const threadVector &__other)
+    atomicVector <_T> operator= (const atomicVector &__other)
     {
         delete [] _begin;
         _size = __other._size;
@@ -165,7 +165,7 @@ public:
             _begin[i] = __other._begin[i];
         }
     }
-    threadVector <_T> operator= (threadVector &&__other)
+    atomicVector <_T> operator= (atomicVector &&__other)
     {
         swap(*this, __other);
         //??? need delete
@@ -175,11 +175,11 @@ private:
     _size_t _size;
     _size_t _capacity;
     std::mutex _mutex;
-    friend void swap <>(threadVector <_T> &first, threadVector <_T> &second); //???
+    friend void swap <>(atomicVector <_T> &first, atomicVector <_T> &second); //???
 };
 
 // Swap function
-template <typename _T> void swap (threadVector <_T> &first, threadVector <_T> &second)
+template <typename _T> void swap (atomicVector <_T> &first, atomicVector <_T> &second)
 {
     _size_t fSize = first._size;
     _size_t fCap = first._capacity;
@@ -196,4 +196,4 @@ template <typename _T> void swap (threadVector <_T> &first, threadVector <_T> &s
 
 #undef _size_t
 
-#endif // THREADVECTOR_H_INCLUDED
+#endif // ATOMICVECTOR_H_INCLUDED
