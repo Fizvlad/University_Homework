@@ -17,6 +17,9 @@ public:
     }
     _ptr_t end()
     {
+        if (_begin == nullptr) {
+            return nullptr;
+        }
         return _begin + _size;
     }
 
@@ -36,8 +39,8 @@ public:
         if (_begin == nullptr) {
             throw "empty vector";
         }
-        if (__pos >= _size) {
-            _size = __pos + 1; // Increasing size
+        if (__pos >= _size && __pos < _capacity) {
+            _size = __pos + 1; // Increasing size. If you access element through this, you guarantee all previous elements to be correct as part of array
         }
         return _begin[__pos];
     }
@@ -81,8 +84,15 @@ public:
 
     _T pop (_size_t __pos)
     {
+        if (__pos >= _size) {
+            throw "out of range";
+        }
         _T result = _begin[__pos];
-        // !!!
+        for (_size_t i = __pos; i < _size; i++) {
+            _begin[i] = _begin[i + 1];
+        }
+        _size--;
+        return result;
     }
     _T pop_back ()
     {
@@ -103,19 +113,25 @@ public:
     }
     void clear ()
     {
+        _size = 0;
     }
     void flip ()
     {
+        for (_size_t i = 0; i < (_size / 2); i++) {
+            _T temp = _begin[i];
+            _begin[i] = _begin[_size - i -1];
+            _begin[_size - i - 1] = temp;
+        }
     }
 
     // Memory
-    void resize (_size_t __size)
+    void resize (_size_t __capacity)
     {
-        if (__size == _size) {
+        if (__capacity == _capacity) {
             return;
         }
-        atomicVector <_T> other(__size);
-        for (_size_t i = 0; i < __size && i < _size; i++) {
+        atomicVector <_T> other(__capacity);
+        for (_size_t i = 0; i < __capacity && i < _size; i++) {
             other[i] = _begin[i];
         }
         swap(*this, other);
@@ -134,7 +150,7 @@ public:
     {
         _size = 0;
         _capacity = 0;
-        _begin = NULL;
+        _begin = nullptr;
     }
     atomicVector (_size_t __capacity)
     {
@@ -191,15 +207,17 @@ public:
         return __stream;
     }
 private:
-    _T *_begin;
+    _ptr_t _begin;
     _size_t _size;
     _size_t _capacity;
+
     std::mutex _mutex;
+
     friend void swap (atomicVector <_T> &first, atomicVector <_T> &second)
     {
         _size_t fSize = first._size;
         _size_t fCap = first._capacity;
-        _T *fBegin = first._begin;
+        _ptr_t fBegin = first._begin;
 
         first._size = second._size;
         first._capacity = second._capacity;
