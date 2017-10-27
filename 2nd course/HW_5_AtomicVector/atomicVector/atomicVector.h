@@ -17,10 +17,7 @@ public:
     }
     _ptr_t end()
     {
-        if (_begin == nullptr) {
-            return nullptr;
-        }
-        return _begin + _size;
+        return (_begin == nullptr) ? (nullptr):(_begin + _size);
     }
 
     // Size get
@@ -38,6 +35,7 @@ public:
     {
         _mutex.lock();
         if (_begin == nullptr) {
+            _mutex.unlock();
             throw err_null_vector();
         }
         if (__pos >= _size && __pos < _capacity) {
@@ -50,9 +48,11 @@ public:
     {
         _mutex.lock();
         if (_begin == nullptr) {
+            _mutex.unlock();
             throw err_null_vector();
         }
         if (__pos >= _size) {
+            _mutex.unlock();
             throw err_out_of_range();
         }
         _mutex.unlock();
@@ -73,6 +73,7 @@ public:
     {
         _mutex.lock();
         if (__pos >= _size) {
+            _mutex.unlock();
             throw err_out_of_range();
         }
         if (_capacity <= _size) {
@@ -87,13 +88,14 @@ public:
     }
     void push_front (_T __data)
     {
-        push_before(__data, 0);
+        push_before(__data, 0); // Just redirecting
     }
 
     _T pop (_size_t __pos)
     {
         _mutex.lock();
         if (__pos >= _size) {
+            _mutex.unlock();
             throw err_out_of_range();
         }
         _T result = _begin[__pos];
@@ -145,6 +147,7 @@ public:
     {
         _mutex.lock();
         if (__capacity == _capacity) {
+            _mutex.unlock();
             return;
         }
         atomicVector <_T> other(__capacity);
@@ -191,25 +194,22 @@ public:
     // 5
     ~atomicVector ()
     {
-        delete [] _begin;
+        if (_begin != nullptr) {
+            delete [] _begin;
+        }
     }
     atomicVector (const atomicVector <_T> &__other)
     {
-        _mutex.lock();
         _size = __other._size;
         _capacity = __other._capacity;
         _begin = new _T[_capacity];
         for (_size_t i = 0; i < _size; i++) {
             _begin[i] = __other._begin[i];
         }
-        _mutex.unlock();
     }
     atomicVector (atomicVector <_T> &&__other)
     {
-        _mutex.lock();
-        delete [] _begin;
         swap(*this, __other);
-        _mutex.unlock();
     }
     atomicVector <_T> operator= (const atomicVector <_T> &__other)
     {
@@ -222,7 +222,9 @@ public:
     atomicVector <_T> operator= (atomicVector <_T> &&__other)
     {
         _mutex.lock();
-        delete [] _begin;
+        if (_begin != nullptr) {
+            delete [] _begin;
+        }
         swap(*this, __other);
         _mutex.unlock();
         return *this;
@@ -256,28 +258,34 @@ public:
     };
 
     // Swap
-    friend void swap (atomicVector <_T> &first, atomicVector <_T> &second)
+    friend void swap (atomicVector <_T> &__first, atomicVector <_T> &__second)
     {
         __first._mutex.lock();
-        _size_t fSize = first._size;
-        _size_t fCap = first._capacity;
-        _ptr_t fBegin = first._begin;
 
-        first._size = second._size;
-        first._capacity = second._capacity;
-        first._begin = second._begin;
+        _size_t fSize = __first._size;
+        _size_t fCap = __first._capacity;
+        _ptr_t fBegin = __first._begin;
 
-        second._size = fSize;
-        second._capacity = fCap;
-        second._begin = fBegin;
-        __first._mutex.unlock(); // !!!
+        __second._mutex.lock();
+
+        __first._size = __second._size;
+        __first._capacity = __second._capacity;
+        __first._begin = __second._begin;
+
+        __first._mutex.unlock();
+
+        __second._size = fSize;
+        __second._capacity = fCap;
+        __second._begin = fBegin;
+
+        __second._mutex.unlock();
     }
 private:
     _ptr_t _begin;
     _size_t _size;
     _size_t _capacity;
 
-    std::mutex _mutex;
+    std::recursive_mutex _mutex; // Using recursive mutex to allow same thread lock several times
 };
 
 #endif // ATOMICVECTOR_H_INCLUDED
