@@ -37,7 +37,7 @@ public:
     _T &operator[] (_size_t __pos)
     {
         if (_begin == nullptr) {
-            throw "empty vector";
+            throw err_null_vector();
         }
         if (__pos >= _size && __pos < _capacity) {
             _size = __pos + 1; // Increasing size. If you access element through this, you guarantee all previous elements to be correct as part of array
@@ -47,10 +47,10 @@ public:
     _T &at (_size_t __pos)
     {
         if (_begin == nullptr) {
-            throw "empty vector";
+            throw err_null_vector();
         }
         if (__pos >= _size) {
-            throw "out of range";
+            throw err_out_of_range();
         }
         return _begin[__pos];
     }
@@ -66,7 +66,7 @@ public:
     void push_before (_T __data, _size_t __pos)
     {
         if (__pos >= _size) {
-            throw "out of range";
+            throw err_out_of_range();
         }
         if (_capacity <= _size) {
             reserve(1);
@@ -85,7 +85,7 @@ public:
     _T pop (_size_t __pos)
     {
         if (__pos >= _size) {
-            throw "out of range";
+            throw err_out_of_range();
         }
         _T result = _begin[__pos];
         for (_size_t i = __pos; i < _size; i++) {
@@ -198,7 +198,7 @@ public:
         return *this;
     }
 
-    // iostream
+    // <iostream>
     friend std::ostream &operator<< (std::ostream &__stream, atomicVector <_T> __vector)
     {
         for (_size_t i = 0; i < __vector._size; i++) {
@@ -206,13 +206,24 @@ public:
         }
         return __stream;
     }
-private:
-    _ptr_t _begin;
-    _size_t _size;
-    _size_t _capacity;
 
-    std::mutex _mutex;
+    // Errors
+    class err_null_vector : std::exception
+    {
+        const char* what ()
+        {
+            return "Requested vector was not initialized yet";
+        }
+    };
+    class err_out_of_range : std::exception
+    {
+        const char* what ()
+        {
+            return "Requested element is out of range";
+        }
+    };
 
+    // Swap
     friend void swap (atomicVector <_T> &first, atomicVector <_T> &second)
     {
         _size_t fSize = first._size;
@@ -227,6 +238,12 @@ private:
         second._capacity = fCap;
         second._begin = fBegin;
     }
+private:
+    _ptr_t _begin;
+    _size_t _size;
+    _size_t _capacity;
+
+    std::mutex _mutex;
 };
 
 #endif // ATOMICVECTOR_H_INCLUDED
