@@ -36,46 +36,54 @@ public:
     // Data locally get/set
     _T &operator[] (_size_t __pos)
     {
+        _mutex.lock();
         if (_begin == nullptr) {
             throw err_null_vector();
         }
         if (__pos >= _size && __pos < _capacity) {
             _size = __pos + 1; // Increasing size. If you access element through this, you guarantee all previous elements to be correct as part of array
         }
+        _mutex.unlock();
         return _begin[__pos];
     }
     _T &at (_size_t __pos)
     {
+        _mutex.lock();
         if (_begin == nullptr) {
             throw err_null_vector();
         }
         if (__pos >= _size) {
             throw err_out_of_range();
         }
+        _mutex.unlock();
         return _begin[__pos];
     }
 
     void push_back (_T __data)
     {
+        _mutex.lock();
         if (_capacity <= _size) {
             reserve(1);
         }
         _begin[_size] = __data;
         _size++;
+        _mutex.unlock();
     }
     void push_before (_T __data, _size_t __pos)
     {
+        _mutex.lock();
         if (__pos >= _size) {
             throw err_out_of_range();
         }
         if (_capacity <= _size) {
             reserve(1);
         }
-        for (_size_t i = _size; i >= __pos; i--) {
-            _begin[i + 1] = _begin[i];
+        for (_size_t i = _size; i > __pos; i--) {
+            _begin[i] = _begin[i - 1];
         }
         _begin[__pos] = __data;
         _size++;
+        _mutex.unlock();
     }
     void push_front (_T __data)
     {
@@ -84,6 +92,7 @@ public:
 
     _T pop (_size_t __pos)
     {
+        _mutex.lock();
         if (__pos >= _size) {
             throw err_out_of_range();
         }
@@ -92,6 +101,7 @@ public:
             _begin[i] = _begin[i + 1];
         }
         _size--;
+        _mutex.unlock();
         return result;
     }
     _T pop_back ()
@@ -106,27 +116,34 @@ public:
     // Data and capacity global changes
     void fill (_T __data)
     {
+        _mutex.lock();
         for (_size_t i = 0; i < _capacity; i++) {
             _begin[i] = __data;
         }
         _size = _capacity;
+        _mutex.unlock();
     }
     void clear ()
     {
+        _mutex.lock();
         _size = 0;
+        _mutex.unlock();
     }
     void flip ()
     {
+        _mutex.lock();
         for (_size_t i = 0; i < (_size / 2); i++) {
             _T temp = _begin[i];
             _begin[i] = _begin[_size - i -1];
             _begin[_size - i - 1] = temp;
         }
+        _mutex.unlock();
     }
 
     // Memory
     void resize (_size_t __capacity)
     {
+        _mutex.lock();
         if (__capacity == _capacity) {
             return;
         }
@@ -135,14 +152,19 @@ public:
             other[i] = _begin[i];
         }
         swap(*this, other);
+        _mutex.unlock();
     }
     void reserve (_size_t __size)
     {
+        _mutex.lock();
         resize(_capacity + __size);
+        _mutex.unlock();
     }
     void shrink_to_fit ()
     {
+        _mutex.lock();
         resize(_size);
+        _mutex.unlock();
     }
 
     // Constructor
@@ -173,37 +195,47 @@ public:
     }
     atomicVector (const atomicVector <_T> &__other)
     {
+        _mutex.lock();
         _size = __other._size;
         _capacity = __other._capacity;
         _begin = new _T[_capacity];
         for (_size_t i = 0; i < _size; i++) {
             _begin[i] = __other._begin[i];
         }
+        _mutex.unlock();
     }
     atomicVector (atomicVector <_T> &&__other)
     {
+        _mutex.lock();
         delete [] _begin;
         swap(*this, __other);
+        _mutex.unlock();
     }
     atomicVector <_T> operator= (const atomicVector <_T> &__other)
     {
+        _mutex.lock();
         atomicVector <_T> other(__other);
         swap(*this, other);
+        _mutex.unlock();
         return *this;
     }
     atomicVector <_T> operator= (atomicVector <_T> &&__other)
     {
+        _mutex.lock();
         delete [] _begin;
         swap(*this, __other);
+        _mutex.unlock();
         return *this;
     }
 
     // <iostream>
     friend std::ostream &operator<< (std::ostream &__stream, atomicVector <_T> __vector)
     {
+        __vector._mutex.lock();
         for (_size_t i = 0; i < __vector._size; i++) {
             __stream << __vector._begin[i] << " ";
         }
+        __vector._mutex.unlock();
         return __stream;
     }
 
@@ -226,6 +258,7 @@ public:
     // Swap
     friend void swap (atomicVector <_T> &first, atomicVector <_T> &second)
     {
+        __first._mutex.lock();
         _size_t fSize = first._size;
         _size_t fCap = first._capacity;
         _ptr_t fBegin = first._begin;
@@ -237,6 +270,7 @@ public:
         second._size = fSize;
         second._capacity = fCap;
         second._begin = fBegin;
+        __first._mutex.unlock(); // !!!
     }
 private:
     _ptr_t _begin;
