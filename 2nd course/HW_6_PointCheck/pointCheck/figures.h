@@ -12,6 +12,14 @@ class point;
 class direct;
 class polygon;
 
+// Comparison
+bool operator< (const point &__point, const direct &__direct);
+bool operator== (const point &__point, const direct &__direct);
+bool operator> (const point &__point, const direct &__direct);
+bool operator<= (const point &__point, const direct &__direct);
+bool operator>= (const point &__point, const direct &__direct);
+bool operator!= (const point &__point, const direct &__direct);
+
 struct err_Wrong_direct : std::exception
 {
     const char* what()
@@ -31,6 +39,20 @@ struct err_Polygon_is_not_convex : std::exception
     const char* what()
     {
         return "Polygon is not convex";
+    }
+};
+struct err_Not_polygon : std::exception
+{
+    const char* what()
+    {
+        return "Polygon must have at least 3 points";
+    }
+};
+struct err_Points_in_line : std::exception
+{
+    const char* what()
+    {
+        return "Polygon have several points on one side";
     }
 };
 
@@ -229,14 +251,14 @@ public:
         return point(x, y);
     }
 
-    coord_t y (const coord_t __x) const
+    coord_t y (const coord_t &__x) const
     {
         if (b() == 0) {
             return 0;
         }
         return (-1) * (c() + a() * __x) / b();
     }
-    coord_t x (const coord_t __y) const
+    coord_t x (const coord_t &__y) const
     {
         if (a() == 0) {
             return 0;
@@ -251,13 +273,32 @@ class polygon // Described by N of points
     // Safety
     void _check () const
     {
-        // !!!
+        for (size_t i = 0; i < n(); i++) {
+            direct d = getDirect(i); // Direct connecting i and i+1
+            short position = 0;
+            for (size_t j = 0; j < n() - 2; j++) {
+                point p = getPoint((i + 2 + j) % n()); // Taking point right after points related to side
+                if (p == d) {
+                    throw err_Points_in_line();
+                }
+                short newPosition = -1 + 2 * (p > d); // -1 if below, 1 if above
+                if (position != newPosition) {
+                    throw err_Polygon_is_not_convex();
+                }
+            }
+        }
     }
 
     // Setters
-    void set ()
+    void set (size_t __size, point __point, ...)
     {
-        // !!!
+        if (__size < 3) {
+            throw err_Not_polygon();
+        }
+        _points.resize(__size);
+        for (size_t i = 0; i < __size; i++) {
+            _points[i] = *(&__point + i);
+        }
         _check();
     }
 
@@ -277,6 +318,9 @@ public:
     // Constructor
     polygon (size_t __size, point __point, ...)
     {
+        if (__size < 3) {
+            throw err_Not_polygon();
+        }
         _points.resize(__size);
         for (size_t i = 0; i < __size; i++) {
             _points[i] = *(&__point + i);
@@ -323,14 +367,14 @@ std::ostream &operator<< (std::ostream &st, const direct &__direct)
 // Comparison
 bool operator< (const point &__point, const direct &__direct) // True if below or on the right side
 {
-    if (__direct.b()) {
+    if (__direct.b() == 0) {
         return __point.x() > __direct.x(__point.y()); // point.y can be replaced with any number
     }
     return __point.y() < __direct.y(__point.x());
 }
 bool operator== (const point &__point, const direct &__direct) // True if point lies on direct
 {
-    if (__direct.b()) {
+    if (__direct.b() == 0) {
         return __point.x() == __direct.x(__point.y()); // point.y can be replaced with any number
     }
     return __point.y() == __direct.y(__point.x());
