@@ -2,9 +2,10 @@
 #define FIGURES_H_INCLUDED
 
 #include <cmath>
+#include <vector>
 #include <iostream>
 
-typedef double coord_t;
+typedef float coord_t;
 
 // Definition
 class point;
@@ -25,9 +26,19 @@ struct err_Parallel_directions : std::exception
         return "Parallel or equal directions given";
     }
 };
+struct err_Polygon_is_not_convex : std::exception
+{
+    const char* what()
+    {
+        return "Polygon is not convex";
+    }
+};
 
 class point // (x, y)
 {
+    friend class direct;
+    friend class polygon;
+
     coord_t _x;
     coord_t _y;
 
@@ -54,27 +65,15 @@ class point // (x, y)
         set(__point.x(), __point.y());
         return *this;
     }
-    point &operator= (point &&__point)
-    {
-        set(__point.x(), __point.y());
-        return *this;
-    }
+
 public:
     // Constructor
-    point (coord_t __x, coord_t __y)
+    point (coord_t __x = 0, coord_t __y = 0)
     {
         set(__x, __y);
     }
 
-    // 5. operator= locked. Copying allowed. Default destructor
-    point (const point &__point)
-    {
-        set(__point.x(), __point.y());
-    }
-    point (point &&__point)
-    {
-        set(__point.x(), __point.y());
-    }
+    // 5. operator= locked. Copying default. Default destructor
 
     // Getters
     coord_t x () const
@@ -99,6 +98,8 @@ public:
 
 class direct // ax + by + c = 0
 {
+    friend class polygon;
+
     coord_t _a;
     coord_t _b;
     coord_t _c;
@@ -149,13 +150,14 @@ class direct // ax + by + c = 0
         set(__direct.a(), __direct.b(), __direct.c());
         return *this;
     }
+
 public:
     // Constructor
-    direct (const coord_t __a, const coord_t __b, const coord_t __c)
+    direct (const coord_t &__a, const coord_t &__b, const coord_t &__c)
     {
         set(__a, __b, __c);
     }
-    direct (const point __point1, const point __point2)
+    direct (const point &__point1, const point &__point2)
     {
         if (__point1.x() == __point2.x()) {
             set(1, 0, (-1) * __point1.x());
@@ -226,8 +228,75 @@ public:
         coord_t x = (-1) * (c() + b() * y) / a();
         return point(x, y);
     }
+
+    coord_t y (const coord_t __x) const
+    {
+        if (b() == 0) {
+            return 0;
+        }
+        return (-1) * (c() + a() * __x) / b();
+    }
+    coord_t x (const coord_t __y) const
+    {
+        if (a() == 0) {
+            return 0;
+        }
+        return (-1) * (c() + b() * __y) / a();
+    }
 };
 
+class polygon // Described by N of points
+{
+    std::vector <point> _points;
+    // Safety
+    void _check () const
+    {
+        // !!!
+    }
+
+    // Setters
+    void set ()
+    {
+        // !!!
+        _check();
+    }
+
+    // Operator=
+    polygon &operator= (const polygon &__polygon)
+    {
+        // !!!
+        return *this;
+    }
+    polygon &operator= (polygon &&__polygon)
+    {
+        // !!!
+        return *this;
+    }
+
+public:
+    // Constructor
+    polygon (size_t __size, point __point, ...)
+    {
+        _points.resize(__size);
+        for (size_t i = 0; i < __size; i++) {
+            _points[i] = *(&__point + i);
+        }
+        _check();
+    }
+    // Getters
+    size_t n () const
+    {
+        return _points.size();
+    }
+    point getPoint(size_t __i) const
+    {
+        return _points.at(__i);
+    }
+    direct getDirect(size_t __i) const
+    {
+        return direct(_points.at(__i), _points.at((__i + 1) % _points.size()));
+    }
+};
 
 // iostream
 std::ostream &operator<< (std::ostream &st, const point &__point)
@@ -249,6 +318,38 @@ std::ostream &operator<< (std::ostream &st, const direct &__direct)
         st << " + " << __direct.c();
     }
     return st << " = 0";
+}
+
+// Comparison
+bool operator< (const point &__point, const direct &__direct) // True if below or on the right side
+{
+    if (__direct.b()) {
+        return __point.x() > __direct.x(__point.y()); // point.y can be replaced with any number
+    }
+    return __point.y() < __direct.y(__point.x());
+}
+bool operator== (const point &__point, const direct &__direct) // True if point lies on direct
+{
+    if (__direct.b()) {
+        return __point.x() == __direct.x(__point.y()); // point.y can be replaced with any number
+    }
+    return __point.y() == __direct.y(__point.x());
+}
+bool operator> (const point &__point, const direct &__direct) // True if point lies on direct
+{
+    return !(__point == __direct || __point < __direct);
+}
+bool operator<= (const point &__point, const direct &__direct)
+{
+    return !(__point > __direct);
+}
+bool operator>= (const point &__point, const direct &__direct)
+{
+    return !(__point < __direct);
+}
+bool operator!= (const point &__point, const direct &__direct)
+{
+    return !(__point == __direct);
 }
 
 #endif // FIGURES_H_INCLUDED
