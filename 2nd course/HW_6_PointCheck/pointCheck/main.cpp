@@ -25,6 +25,11 @@ int main()
     cout << p1.getDirect(0) << endl;
     cout << p1.getDirect(3) << endl;
 
-    polygon p2(4, point(-2, 0), point(0,0), point(-1, 2), point(-1, 0.5));
+    polygon p2(4, point(-2, 0), point(0,0), point(-1, 2), point(-2, 1));
+    cout << p2.ifPointLiesIn(point(-100, 0)) << endl;
+    cout << p2.ifPointLiesIn(point(-2, 0.5), false) << endl;
+    cout << p2.ifPointLiesIn(point(-2, 0.5), true) << endl;
+    cout << p2.ifPointLiesIn(point(-1, 2), true) << endl;
+    cout << p2.ifPointLiesIn(point(-1, 1)) << endl;
     return 0;
 }

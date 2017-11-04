@@ -179,21 +179,17 @@ class direct // ax + by + c = 0
 
 public:
     // Constructor
-    direct (const coord_t &__a, const coord_t &__b, const coord_t &__c)
+    direct (const coord_t &__a = 1, const coord_t &__b = -1, const coord_t &__c = 0)
     {
         set(__a, __b, __c);
     }
     direct (const point &__point1, const point &__point2)
     {
-        if (__point1.x() == __point2.x()) {
-            set(1, 0, (-1) * __point1.x());
-        } else {
-            coord_t a, b, c;
-            a = (__point1.y() - __point2.y()) / (__point1.x() - __point2.x());
-            b = 1;
-            c = (-1) * (a * __point1.x() + b * __point1.y());
-            set(a , b, c);
-        }
+        coord_t a, b, c;
+        a = __point1.y() - __point2.y();
+        b = __point2.x() - __point1.x();
+        c = __point1.x() * __point2.y() - __point2.x() * __point1.y();
+        set(a, b, c);
     }
 
     // 5. operator= locked. Copying default. Default destructor
@@ -283,6 +279,7 @@ class polygon // Described by N of points
                     // position == 0 at first check
                     throw err_Polygon_is_not_convex();
                 }
+                position = newPosition; // Changes nothing or changing from 0 to +-1
             }
         }
     }
@@ -295,7 +292,7 @@ class polygon // Described by N of points
         }
         _points.resize(__size);
         for (size_t i = 0; i < __size; i++) {
-            _points[i] = *(&__point + i);
+            _points.at(i) = *(&__point + i);
         }
         _check();
     }
@@ -303,7 +300,7 @@ class polygon // Described by N of points
     {
         _points.resize(__points.size());
         for (size_t i = 0; i < _points.size(); i++) {
-            _points[i] = __points[i];
+            _points.at(i) = __points.at(i);
         }
     }
 
@@ -316,14 +313,14 @@ class polygon // Described by N of points
 
 public:
     // Constructor
-    polygon (const size_t &__size, const point &__point, ...)
+    polygon (const size_t &__size, const point __point, ...)
     {
         if (__size < 3) {
             throw err_Not_polygon();
         }
         _points.resize(__size);
         for (size_t i = 0; i < __size; i++) {
-            _points[i] = *(&__point + i);
+            _points.at(i) = *(&__point + i);
         }
         _check();
     }
@@ -345,11 +342,11 @@ public:
     }
     direct getDirect (const size_t &__i) const
     {
-        return direct(_points.at(__i), _points.at((__i + 1) % _points.size()));
+        return direct(_points.at(__i), _points.at((__i + 1) % n()));
     }
 
     // Other
-    bool ifLiesIn (const point &__point, const bool &__trueIfOnBorder = true) const // Return true if point is inside of figure or on border
+    bool ifPointLiesIn (const point &__point, const bool &__trueIfOnBorder = true) const // Return true if point is inside of figure or on border
     {
         for (size_t i = 0; i < n(); i++) {
             direct d = getDirect(i); // Side between i and i + 1
@@ -359,9 +356,9 @@ public:
                     return false;
                 }
                 point p1 = getPoint(i);
-                point p2 = getPoint(i + 1);
+                point p2 = getPoint((i + 1) % n());
                 if ((d.b() != 0 && (std::abs(p1.x() - __point.x()) + std::abs(p2.x() - __point.x()) == std::abs(p2.x() - p1.x()))) || // Checked projections of points on oX (if vertical checking oY)
-                    (std::abs(p1.y() - __point.y()) + std::abs(p2.y() - __point.y()) == std::abs(p2.y() - p1.y()))) { // Checked oY
+                    ((d.b() == 0) && (std::abs(p1.y() - __point.y()) + std::abs(p2.y() - __point.y()) == std::abs(p2.y() - p1.y())))) { // Checked oY
                     return true;
                 }
                 return false; // Not on side
