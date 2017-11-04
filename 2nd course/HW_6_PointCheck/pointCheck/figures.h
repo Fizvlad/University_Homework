@@ -7,10 +7,14 @@
 
 typedef float coord_t;
 
-// Definition
+// Classes
 class point;
 class direct;
 class polygon;
+
+// iostream
+std::ostream &operator<< (std::ostream &st, const point &__point);
+std::ostream &operator<< (std::ostream &st, const direct &__direct);
 
 // Comparison
 bool operator< (const point &__point, const direct &__direct);
@@ -20,6 +24,7 @@ bool operator<= (const point &__point, const direct &__direct);
 bool operator>= (const point &__point, const direct &__direct);
 bool operator!= (const point &__point, const direct &__direct);
 
+// Exceptions
 struct err_Wrong_direct : std::exception
 {
     const char* what()
@@ -55,6 +60,7 @@ struct err_Points_in_line : std::exception
         return "Polygon have several points on one side";
     }
 };
+
 
 class point // (x, y)
 {
@@ -167,11 +173,6 @@ class direct // ax + by + c = 0
         set(__direct.a(), __direct.b(), __direct.c());
         return *this;
     }
-    direct &operator= (direct &&__direct)
-    {
-        set(__direct.a(), __direct.b(), __direct.c());
-        return *this;
-    }
 
 public:
     // Constructor
@@ -181,26 +182,14 @@ public:
     }
     direct (const point &__point1, const point &__point2)
     {
-        if (__point1.x() == __point2.x()) {
-            set(1, 0, (-1) * __point1.x());
-        } else {
-            coord_t a, b, c;
-            a = (__point1.y() - __point2.y()) / (__point1.x() - __point2.x());
-            b = 1;
-            c = (-1) * (a * __point1.x() + b * __point1.y());
-            set(a , b, c);
-        }
+        coord_t a, b, c;
+        a = __point1.y() - __point2.y();
+        b = __point2.x() - __point1.x();
+        c = __point1.x() * __point2.y() - __point2.x() * __point1.y();
+        set(a , b, c);
     }
 
-    // 5. operator= locked. Copying allowed. Default destructor
-    direct (const direct &__direct)
-    {
-        set(__direct.a(), __direct.b(), __direct.c());
-    }
-    direct (direct &&__direct)
-    {
-        set(__direct.a(), __direct.b(), __direct.c());
-    }
+    // 5. operator= locked. Copying default. Default destructor
 
     // Getters
     coord_t a () const
@@ -270,19 +259,21 @@ public:
 class polygon // Described by N of points
 {
     std::vector <point> _points;
+
     // Safety
     void _check () const
     {
         for (size_t i = 0; i < n(); i++) {
             direct d = getDirect(i); // Direct connecting i and i+1
-            short position = 0;
+            short position = 0;// -1 if below, 1 if above, 0 initially
             for (size_t j = 0; j < n() - 2; j++) {
                 point p = getPoint((i + 2 + j) % n()); // Taking point right after points related to side
                 if (p == d) {
                     throw err_Points_in_line();
                 }
                 short newPosition = -1 + 2 * (p > d); // -1 if below, 1 if above
-                if (position != newPosition) {
+                if (position != 0 && position != newPosition) {
+                    // position == 0 at first check
                     throw err_Polygon_is_not_convex();
                 }
             }
@@ -301,22 +292,24 @@ class polygon // Described by N of points
         }
         _check();
     }
+    void set (const std::vector <point> &__points)
+    {
+        _points.resize(__points.size());
+        for (size_t i = 0; i < _points.size(); i++) {
+            _points[i] = __points[i];
+        }
+    }
 
     // Operator=
     polygon &operator= (const polygon &__polygon)
     {
-        // !!!
-        return *this;
-    }
-    polygon &operator= (polygon &&__polygon)
-    {
-        // !!!
+        set(__polygon._points);
         return *this;
     }
 
 public:
     // Constructor
-    polygon (size_t __size, point __point, ...)
+    polygon (const size_t &__size, const point &__point, ...)
     {
         if (__size < 3) {
             throw err_Not_polygon();
@@ -327,18 +320,53 @@ public:
         }
         _check();
     }
+
+    // 5. operator= locked. Copying not default cause of vectors. Default destructor
+    polygon (const polygon &__polygon)
+    {
+        set(__polygon._points);
+    }
+
     // Getters
     size_t n () const
     {
         return _points.size();
     }
-    point getPoint(size_t __i) const
+    point getPoint (const size_t &__i) const
     {
         return _points.at(__i);
     }
-    direct getDirect(size_t __i) const
+    direct getDirect (const size_t &__i) const
     {
         return direct(_points.at(__i), _points.at((__i + 1) % _points.size()));
+    }
+
+    // Other
+    bool ifLiesIn (const point &__point, const bool &__trueIfOnBorder = true) const // Return true if point is inside of figure or on border
+    {
+        for (size_t i = 0; i < n(); i++) {
+            direct d = getDirect(i); // Side between i and i + 1
+            if (__point == d) {
+                // Point lies on direct containing side. In this situation point can only be on side or out of borders
+                if (!__trueIfOnBorder) { // Don't even need to check
+                    return false;
+                }
+                point p1 = getPoint(i);
+                point p2 = getPoint(i + 1);
+                if ((d.b() != 0 && (std::abs(p1.x() - __point.x()) + std::abs(p2.x() - __point.x()) == std::abs(p2.x() - p1.x()))) || // Checked projections of points on oX (if vertical checking oY)
+                    (std::abs(p1.y() - __point.y()) + std::abs(p2.y() - __point.y()) == std::abs(p2.y() - p1.y()))) { // Checked oY
+                    return true;
+                }
+                return false; // Not on side
+            } else {
+                short pointPosition = -1 + 2 * (__point > d); // -1 if below, 1 if above
+                short rightPosition = -1 + 2 * (getPoint((i + 2) % n()) > d); // Checking where is not relevant to direct point on polygon
+                if (pointPosition != rightPosition) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 };
 

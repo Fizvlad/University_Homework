@@ -24,5 +24,7 @@ int main()
     polygon p1(4, point(-1, -1), point(1, -1), point(1, 1), point(-1 ,1));
     cout << p1.getDirect(0) << endl;
     cout << p1.getDirect(3) << endl;
+
+    polygon p2(4, point(-2, 0), point(0,0), point(-1, 2), point(-1, 0.5));
     return 0;
 }
