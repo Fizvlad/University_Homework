@@ -1,11 +1,14 @@
 #ifndef FIGURES_H_INCLUDED
 #define FIGURES_H_INCLUDED
 
-#include <cmath>
-#include <vector>
-#include <iostream>
+#include <cmath> // abs, sqrt pow
+#include <vector> // vector
+#include <iostream> // cout
+#include <iomanip> // setprecision
 
 typedef float coord_t;
+
+size_t FIGURES_COUT_PRECISION = 3;
 
 // Classes
 class point;
@@ -17,9 +20,9 @@ std::ostream &operator<< (std::ostream &st, const point &__point);
 std::ostream &operator<< (std::ostream &st, const direct &__direct);
 
 // Comparison
-bool operator< (const point &__point, const direct &__direct);
+bool operator<  (const point &__point, const direct &__direct);
 bool operator== (const point &__point, const direct &__direct);
-bool operator> (const point &__point, const direct &__direct);
+bool operator>  (const point &__point, const direct &__direct);
 bool operator<= (const point &__point, const direct &__direct);
 bool operator>= (const point &__point, const direct &__direct);
 bool operator!= (const point &__point, const direct &__direct);
@@ -182,11 +185,15 @@ public:
     }
     direct (const point &__point1, const point &__point2)
     {
-        coord_t a, b, c;
-        a = __point1.y() - __point2.y();
-        b = __point2.x() - __point1.x();
-        c = __point1.x() * __point2.y() - __point2.x() * __point1.y();
-        set(a , b, c);
+        if (__point1.x() == __point2.x()) {
+            set(1, 0, (-1) * __point1.x());
+        } else {
+            coord_t a, b, c;
+            a = (__point1.y() - __point2.y()) / (__point1.x() - __point2.x());
+            b = 1;
+            c = (-1) * (a * __point1.x() + b * __point1.y());
+            set(a , b, c);
+        }
     }
 
     // 5. operator= locked. Copying default. Default destructor
@@ -373,21 +380,21 @@ public:
 // iostream
 std::ostream &operator<< (std::ostream &st, const point &__point)
 {
-    return st << "(" << __point.x() << "; " << __point.y() << ")";
+    return st << "(" << std::setprecision(FIGURES_COUT_PRECISION) << __point.x() << "; " << std::setprecision(FIGURES_COUT_PRECISION) << __point.y() << ")";
 }
 std::ostream &operator<< (std::ostream &st, const direct &__direct)
 {
     if (__direct.a() != 0) {
-        st << __direct.a() << "*x";
+        st << std::setprecision(FIGURES_COUT_PRECISION) << __direct.a() << "*x";
     }
     if (__direct.b() != 0) {
         if (__direct.a() != 0) {
             st << " + ";
         }
-        st << __direct.b() << "*y";
+        st << std::setprecision(FIGURES_COUT_PRECISION) << __direct.b() << "*y";
     }
     if (__direct.c() != 0) {
-        st << " + " << __direct.c();
+        st << " + " << std::setprecision(FIGURES_COUT_PRECISION) << __direct.c();
     }
     return st << " = 0";
 }
