@@ -64,7 +64,7 @@ class direct // ax + by + c = 0
 
 public:
     // Constructor
-    direct (const coord_t &__a = 1, const coord_t &__b = -1, const coord_t &__c = 0) // Default: y=x
+    direct (const coord_t &__a = 1, const coord_t &__b = -1, const coord_t &__c = 0); // Default: y=x
     direct (const point &__point1, const point &__point2);
 
     // 5. operator= locked. Copying default. Default destructor
@@ -80,8 +80,8 @@ public:
 
     point cross (const direct &__direct) const; // Return point where directs cross (throws error if parallel)
 
-    coord_t y (const coord_t &__x) const; // Return Y of point on direct with given X
     coord_t x (const coord_t &__y) const; // Return X of point on direct with given Y
+    coord_t y (const coord_t &__x) const; // Return Y of point on direct with given X
 };
 
 class polygon // Described by N of points
@@ -106,7 +106,7 @@ public:
     polygon (const polygon &__polygon);
 
     // Getters
-    size_t n () const // Return amount of points
+    size_t n () const; // Return amount of points
     point getPoint (const size_t &__i) const; // Return points[i]
     direct getDirect (const size_t &__i) const; // Returnes direct through points[i] and points[i+1]
 
@@ -129,11 +129,29 @@ bool operator>= (const point &__point, const direct &__direct);
 bool operator!= (const point &__point, const direct &__direct);
 
 // Exceptions
-struct err_Wrong_direct : std::exception;
-struct err_Parallel_directions : std::exception;
-struct err_No_such_point_on_direct : std::exception;
-struct err_Polygon_is_not_convex : std::exception;
-struct err_Not_polygon : std::exception;
-struct err_Points_in_line : std::exception;
+struct err_Wrong_direct : std::exception
+{
+    const char * what();
+};
+struct err_Parallel_directions : std::exception
+{
+    const char * what();
+};
+struct err_No_such_point_on_direct : std::exception
+{
+    const char * what();
+};
+struct err_Polygon_is_not_convex : std::exception
+{
+    const char * what();
+};
+struct err_Not_polygon : std::exception
+{
+    const char * what();
+};
+struct err_Points_in_line : std::exception
+{
+    const char * what();
+};
 
 #endif // FIGURES_H_INCLUDED

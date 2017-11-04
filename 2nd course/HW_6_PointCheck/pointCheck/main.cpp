@@ -1,12 +1,10 @@
 #include <iostream>
-#include <cmath>
 #include "figures.h"
 
 using namespace std;
 
 int main()
 {
-    direct d0();
     direct d1(1, 1, 1);
     direct d2(2, 2, 2);
     direct d3(1, 1, 0);
