@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "figures.h"
+#include <chrono>
 
 using namespace std;
 
@@ -21,6 +22,8 @@ int main()
     // Points ready
     Polygon polygon(5, Point(50, -100), Point(100, 20), Point(10, 100), Point(-80, 100), Point(-100, 70));
     // Polygon ready
+
+    chrono::time_point<chrono::steady_clock> start = chrono::steady_clock::now();
     size_t in = 0;
     size_t out = 0;
     for (size_t i = 0; i < points.size(); i++) {
@@ -33,5 +36,6 @@ int main()
     }
     cout << "Points in: " << in << endl;
     cout << "Points out: " << out << endl;
+    cout << "Work time: " << chrono::duration_cast <chrono::milliseconds> (chrono::steady_clock::now() - start).count() << "ms" << endl;
     return 0;
 }

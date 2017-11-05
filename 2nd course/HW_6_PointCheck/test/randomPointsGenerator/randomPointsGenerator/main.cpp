@@ -7,8 +7,8 @@ using namespace std;
 
 int main()
 {
-    ofstream fout("output.txt");
-    long amount = 100000;
+    ofstream fout("../points.txt");
+    long amount = 1000000;
     long size = 100;
     srand(time(0));
     fout << amount << endl;
