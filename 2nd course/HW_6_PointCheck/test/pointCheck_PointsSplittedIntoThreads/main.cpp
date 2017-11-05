@@ -12,7 +12,7 @@ void threadFunc(Polygon *polygon, vector <Point> *points, unsigned from, unsigne
 {
     cout << "New thread launched\n";
     for (unsigned i = from; i < to; i++) {
-        if (polygon->ifPointLiesIn(points->at(i))) {
+        if (polygon->ifPointLiesIn(points->at(i), false)) {
             (*in)++;
         } else {
             (*out)++;

@@ -27,7 +27,7 @@ int main()
     size_t in = 0;
     size_t out = 0;
     for (size_t i = 0; i < points.size(); i++) {
-        if (polygon.ifPointLiesIn(points.at(i)))
+        if (polygon.ifPointLiesIn(points.at(i), false))
         {
             in++;
         } else {
