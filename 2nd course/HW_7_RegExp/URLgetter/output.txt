@@ -1,0 +1,17 @@
+example.org
+www.example.org
+sub.example.org
+http://www.example.org
+https://www.example.org
+http://yandex.ru
+a.b.c.d.site.com
+www.example.org/somepath
+www.example.org/somepath/
+www.example.org/somepath/1
+www.example.org/somepath/page.html
+www.example.org/somepath/coolsong.mp3
+www.example.org/somepath#someanchor
+www.example.org/somepath?param=pampam
+www.example.org/somepath?param=pampam&purum=pumpum
+www.example.org/somepath/?param=pampam&purum=pumpum
+www.example.org/somepath?param=pampam&purum=pumpum#lol

@@ -1,0 +1,31 @@
+This is an example of input.
+
+OK URLS:
+
+Just site name + domain: example.org
+www: www.example.org
+subdomain: sub.example.org
+protocol(1): http://www.example.org
+protocol(2): https://www.example.org
+protocol no www: http://yandex.ru
+Seems bad but still possible: a.b.c.d.site.com
+
+page with path (no/): www.example.org/somepath
+page with path: www.example.org/somepath/
+page with bigger path (no/): www.example.org/somepath/1
+page with bigger path: www.example.org/somepath/page.html
+some file: www.example.org/somepath/coolsong.mp3
+anchor: www.example.org/somepath#someanchor
+some requests: www.example.org/somepath?param=pampam
+some requests: www.example.org/somepath?param=pampam&purum=pumpum
+some requests: www.example.org/somepath/?param=pampam&purum=pumpum
+request + anchor: www.example.org/somepath?param=pampam&purum=pumpum#lol
+
+BAD URLS:
+www.example..bad
+http/site.not
+http:/http
+somesite.com//somepath
+somesite.com/somepath?param=1?aaa=1
+somesite.com/somepath?param&pam&
+dveri.com/zapilit##
