@@ -1,37 +1,37 @@
 #include <thread>
 #include <mutex>
 
-template <class _T> class customAtomic
+template <typename _T> class customAtomic
 {
 	_T _data;
-	std::mutex _mutex;
+	mutable std::recursive_mutex _mutex;
 
 public:
     // Load, store, exchange
-	_T load ()
+	_T load () const
 	{
 		_mutex.lock();
 		_T result = _data;
 		_mutex.unlock();
 		return result;
 	}
-	void store(_T data)
+	void store (const _T __data)
 	{
 		_mutex.lock();
-		_data = data;
+		_data = __data;
 		_mutex.unlock();
 	}
-	_T exchange(_T data)
+	_T exchange (const _T __data)
 	{
 		_mutex.lock();
 		_T result = _data;
-		_data = data;
+		_data = __data;
 		_mutex.unlock();
 		return result;
 	}
 
 	// Changing type
-	operator _T()
+	operator _T ()
 	{
 		_mutex.lock();
 		_T result = _data;
@@ -40,55 +40,50 @@ public:
 	}
 
 	// Increment
-	customAtomic<_T> &operator++()
+	customAtomic <_T> & operator++ ()
 	{
 	    _mutex.lock();
 		_data++;
 		_mutex.unlock();
 		return *this;
 	}
-	customAtomic<_T> &operator++(int)
+	customAtomic <_T> operator++ (int)
 	{
 	    _mutex.lock();
-	    customAtomic<_T> result(++_data);
+	    _T oldData = _data;
+	    _data++;
 		_mutex.unlock();
-		return *this;
+		return customAtomic <_T> (oldData);
 	}
 
 	// Constructor. No need to mute
-	customAtomic ()
+	customAtomic () = delete;
+	customAtomic (const _T __d) : _data(__d)
+	{}
+	customAtomic (const customAtomic <_T> &__other)
 	{
-		_data = _T();
+		_data = __other.load();
 	}
-	customAtomic (const _T &d)
+	customAtomic (customAtomic <_T> &&__other)
 	{
-		_data = d;
-	}
-	customAtomic (const customAtomic <_T> &other)
-	{
-		_data = other._data;
-	}
-	customAtomic (customAtomic <_T> &&other)
-	{
-		_data = other._data;
+		_data = __other.load();
 	}
 
 	// Destructor
-	~customAtomic ()
-	{}
+	~customAtomic () = default;
 
 	// operator=
-	customAtomic &operator= (const customAtomic <_T> &other)
+	customAtomic & operator= (const customAtomic <_T> &__other)
 	{
 		_mutex.lock();
-		_data = other._data;
+		_data = __other.load();
 		_mutex.unlock();
 		return *this;
 	}
-	customAtomic &operator= (customAtomic <_T> &&other)
+	customAtomic & operator= (customAtomic <_T> &&__other)
 	{
 		_mutex.lock();
-		_data = other._data;
+		_data = __other.load();
 		_mutex.unlock();
 		return *this;
 	}

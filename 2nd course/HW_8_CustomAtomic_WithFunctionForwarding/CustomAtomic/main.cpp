@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void increase(customAtomic<int>* ptr, unsigned s)
+void increase(customAtomic <int> * ptr, unsigned s)
 {
 	for (unsigned i = 0; i < s; i++) {
 		(*ptr)++;
@@ -21,7 +21,7 @@ int main()
 
 	thread* arr = new thread[threadsAmount];
 	for (unsigned i = 0; i < threadsAmount; i++) {
-		arr[i] = thread(increase, &a, 100000);
+		arr[i] = thread(increase, &a, 1000);
 		cout << i << " : " << a << endl;
 	}
 	for (unsigned i = 0; i < threadsAmount; i++) {
