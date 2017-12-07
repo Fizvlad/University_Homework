@@ -12,22 +12,23 @@ namespace condition_list
     class conditionList
     {
         // Types
-        typedef std::mutex                   mutexType;
-        typedef std::recursive_mutex         innerMutexType;
-        typedef std::condition_variable      cvType;
-        typedef std::list <dataType>         listType;
-        typedef std::unique_lock <innerMutexType> uniqueLockType;
+        typedef std::mutex                        outerMutexType;
+        typedef std::recursive_mutex              innerMutexType;
+        typedef std::condition_variable           cvType;
+        typedef std::list <dataType>              listType;
+        typedef std::unique_lock <outerMutexType> outerUniqueLockType;
+        typedef std::unique_lock <innerMutexType> innerUniqueLockType;
 
         // Members
                 listType       list_; // List with data
         mutable innerMutexType mutex_; // Mutex for inner use
+        mutable outerMutexType outerMutex_; // Mutex for threads synchronizing
     public:
         // Public members
-        mutable mutexType mutex; // Mutex for threads synchronizing
-        mutable cvType    condition_variable; // Condition variable for threads synchronizing
+        mutable cvType         condition_variable; // Condition variable for threads synchronizing
 
         // Default
-        conditionList  () : list_(), mutex_(), mutex(), condition_variable() {};
+        conditionList  () : list_(), mutex_(), outerMutex_(), condition_variable() {};
         ~conditionList () = default;
 
         // Deleted due to mutex
@@ -36,36 +37,42 @@ namespace condition_list
         conditionList            (conditionList&&)      = delete;
         conditionList &operator= (conditionList&&)      = delete;
 
+        // Threads synchronizing
+        outerUniqueLockType getLock() const
+        {
+            return std::move(outerUniqueLockType(outerMutex_));
+        }
+
         // List info getters
         bool empty () const
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             return list_.empty();
         }
 
         size_t size () const
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             return list_.size();
         }
 
         // Data getters
         dataType front () const
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             if (list_.size() == 0) throw std::out_of_range("conditionList.front(): Out of range.");
             return list_.front();
         }
         dataType back () const
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             if (list_.size() == 0) throw std::out_of_range("conditionList.back(): Out of range.");
             return list_.back();
         }
 
         dataType at (size_t index) const
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             if (index >= list_.size()) throw std::out_of_range("conditionList.at(): Index is out of range.");
             auto it = list_.cbegin();
             std::advance(it, index);
@@ -75,7 +82,7 @@ namespace condition_list
         // Special data getters
         dataType consume_front (bool ifDelete = false)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             dataType result = front();
             if (ifDelete) {
                 pop_front();
@@ -84,7 +91,7 @@ namespace condition_list
         }
         dataType consume_back (bool ifDelete = false)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             dataType result = back();
             if (ifDelete) {
                 pop_back();
@@ -94,7 +101,7 @@ namespace condition_list
 
         dataType consume (size_t index, bool ifDelete = false)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             dataType result = at(index);
             if (ifDelete) {
                 pop(index);
@@ -105,28 +112,28 @@ namespace condition_list
         // Data changers
         void push_front (const dataType &data)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             list_.push_front(data);
         }
         void push_back (const dataType &data)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             list_.push_back(data);
         }
 
         void pop_front ()
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             return list_.pop_front();
         }
         void pop_back ()
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             return list_.pop_back();
         }
         void pop(size_t index)
         {
-            uniqueLockType lg(mutex_);
+            innerUniqueLockType lg(mutex_);
             if (index >= list_.size()) throw std::out_of_range("conditionList.pop(): Index is out of range.");
             auto it = *(list_.begin());
             std::advance(it, index);
