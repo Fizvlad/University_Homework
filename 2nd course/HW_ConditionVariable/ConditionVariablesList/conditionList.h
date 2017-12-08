@@ -18,6 +18,7 @@ namespace condition_list
         typedef std::list <dataType>              listType;
         typedef std::unique_lock <outerMutexType> outerUniqueLockType;
         typedef std::unique_lock <innerMutexType> innerUniqueLockType;
+        typedef std::lock_guard <outerMutexType>  outerMutexLockGuardType;
 
         // Members
                 listType       list_; // List with data
@@ -40,39 +41,39 @@ namespace condition_list
         // Threads synchronizing
         outerUniqueLockType getLock() const
         {
-            return std::move(outerUniqueLockType(outerMutex_));
+            return std::move(outerUniqueLockType(outerMutex_/*, std::defer_lock_t()*/));
         }
 
         // List info getters
         bool empty () const
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             return list_.empty();
         }
 
         size_t size () const
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             return list_.size();
         }
 
         // Data getters
         dataType front () const
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             if (list_.size() == 0) throw std::out_of_range("conditionList.front(): Out of range.");
             return list_.front();
         }
         dataType back () const
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             if (list_.size() == 0) throw std::out_of_range("conditionList.back(): Out of range.");
             return list_.back();
         }
 
         dataType at (size_t index) const
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             if (index >= list_.size()) throw std::out_of_range("conditionList.at(): Index is out of range.");
             auto it = list_.cbegin();
             std::advance(it, index);
@@ -82,7 +83,7 @@ namespace condition_list
         // Special data getters
         dataType consume_front (bool ifDelete = false)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             dataType result = front();
             if (ifDelete) {
                 pop_front();
@@ -91,7 +92,7 @@ namespace condition_list
         }
         dataType consume_back (bool ifDelete = false)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             dataType result = back();
             if (ifDelete) {
                 pop_back();
@@ -101,7 +102,7 @@ namespace condition_list
 
         dataType consume (size_t index, bool ifDelete = false)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             dataType result = at(index);
             if (ifDelete) {
                 pop(index);
@@ -112,28 +113,28 @@ namespace condition_list
         // Data changers
         void push_front (const dataType &data)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             list_.push_front(data);
         }
         void push_back (const dataType &data)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             list_.push_back(data);
         }
 
         void pop_front ()
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             return list_.pop_front();
         }
         void pop_back ()
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             return list_.pop_back();
         }
         void pop(size_t index)
         {
-            innerUniqueLockType lg(mutex_);
+            innerUniqueLockType uniqueLock(mutex_);
             if (index >= list_.size()) throw std::out_of_range("conditionList.pop(): Index is out of range.");
             auto it = *(list_.begin());
             std::advance(it, index);

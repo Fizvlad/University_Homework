@@ -17,13 +17,13 @@ void listener (mutex *globalMutex, conditionList <int> *condList, size_t *reciev
         lock_guard <mutex> lockGuard(*globalMutex);
         cout << "! New listener created. Id: " << this_thread::get_id() << endl;
     }
-    auto uniqueLock = condList->getLock();
     while (*recievedNumbers < maxNumbersAmount) {
+        auto uniqueLock = condList->getLock();
         {
             lock_guard <mutex> lockGuard(*globalMutex);
             cout << "| Listener " << this_thread::get_id() << " is waiting" << endl;
         }
-        auto wakeUpReason = condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(100));
+        auto wakeUpReason = condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(1000));
         {
             lock_guard <mutex> lockGuard(*globalMutex);
             cout << "! Listener " << this_thread::get_id() << " woke up" << endl;
@@ -36,7 +36,9 @@ void listener (mutex *globalMutex, conditionList <int> *condList, size_t *reciev
                 cout << "- Listener " << this_thread::get_id() << " received data: " << data << endl;
                 (*recievedNumbers)++;
                 cout << "  Received numbers amount: " << *recievedNumbers << endl;
+                cout << "  Unique lock status: " << uniqueLock.owns_lock() << endl;
             }
+            if (uniqueLock.owns_lock()) uniqueLock.unlock(); // Unlock while doing expensive commands
             this_thread::sleep_for(chrono::milliseconds(5000)); // Timeout !!! ALL LISTENERS WAITING. WHY?
             {
                 lock_guard <mutex> lockGuard(*globalMutex);
@@ -87,11 +89,18 @@ int main()
     size_t WORKERS_AMOUNT = 3;
     size_t EACH_WORKER_LIMIT = 10;
 
+    cout << "All threads will be created in 2 seconds" << endl;
+
     thread t1(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    this_thread::sleep_for(chrono::milliseconds(300));
     thread t2(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    this_thread::sleep_for(chrono::milliseconds(300));
     thread t3(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    this_thread::sleep_for(chrono::milliseconds(300));
     thread t4(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    this_thread::sleep_for(chrono::milliseconds(300));
     thread t5(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    this_thread::sleep_for(chrono::milliseconds(300));
     thread t6(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
 
     thread w1(worker, &globalMutex, &condList, 1, EACH_WORKER_LIMIT);
