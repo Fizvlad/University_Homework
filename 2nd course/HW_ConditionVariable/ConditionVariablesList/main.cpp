@@ -1,10 +1,9 @@
-#include <iostream>
-#include <thread>
-#include <future>
-#include <mutex>
-#include <cstdlib>
-#include <chrono>
-#include <atomic>
+#include <iostream> // console
+#include <thread> // threads
+#include <mutex> // mutex
+#include <cstdlib> // rand
+#include <chrono> // sleep_for
+#include <ctime> // time
 
 #include "conditionList.h"
 
@@ -15,45 +14,49 @@ void listener (mutex *globalMutex, conditionList <int> *condList, size_t *reciev
 {
     {
         lock_guard <mutex> lockGuard(*globalMutex);
-        cout << "! New listener created. Id: " << this_thread::get_id() << endl;
+        cout << "L! New listener created. Id: " << this_thread::get_id() << endl;
     }
     while (*recievedNumbers < maxNumbersAmount) {
-        size_t finishedWorkers;
-        auto uniqueLock = condList->getLock();
+        size_t finishedWorkers = *finishedWorkers_; // Checking amount of finished workers
+        auto uniqueLock = condList->getLock(); // Getting locked mutex
+        condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(finishedWorkers == workersAmount ? 0 : 10000)); // Mutex unlocked. Not waiting if all workers have finished
+        // Woke up. Mutex locked
+        if (uniqueLock.owns_lock()) uniqueLock.unlock(); // Unlocking mutex
         {
             lock_guard <mutex> lockGuard(*globalMutex);
-            cout << "| Listener " << this_thread::get_id() << " is waiting" << endl;
-            finishedWorkers = *finishedWorkers_;
-        }
-        condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(finishedWorkers == workersAmount ? 0 : 10000));
-        {
-            lock_guard <mutex> lockGuard(*globalMutex);
-            cout << "! Listener " << this_thread::get_id() << " woke up" << endl;
+            cout << "L! Listener " << this_thread::get_id() << " woke up" << endl;
         }
         if (condList->size() == 0) continue; // Proceeding
         try {
-            int data = condList->consume_back(true);
+            int data = condList->consume_back(true); // Getting data and deleting it
             {
                 lock_guard <mutex> lockGuard(*globalMutex);
-                cout << "- Listener " << this_thread::get_id() << " received data: " << data << endl;
+                cout << "L- Listener " << this_thread::get_id() << " consumed data: " << data << endl;
                 (*recievedNumbers)++;
-                cout << "  Received numbers amount: " << *recievedNumbers << endl;
-                cout << "  Unique lock status: " << uniqueLock.owns_lock() << endl;
             }
-            if (uniqueLock.owns_lock()) uniqueLock.unlock(); // Unlock while doing expensive commands
-            this_thread::sleep_for(chrono::milliseconds(5000)); // Timeout !!! ALL LISTENERS WAITING. WHY?
+            srand(time(0));
+            this_thread::sleep_for(chrono::milliseconds(rand() % 15000 + 5000)); // Working for random time
             {
                 lock_guard <mutex> lockGuard(*globalMutex);
-                cout << "= Listener " << this_thread::get_id() << " finished work"<< endl;
+                cout << "L= Listener " << this_thread::get_id() << " finished work"<< endl;
             }
         } catch (out_of_range) {
+            // Have a low chance of this error
+            // It is possible because we have several atomic operations:
+            // 1. Checking size
+            // 2. Getting data
+            // Possible error scenario:
+            // 1. Thread1: Checking size (size = 1)
+            // 2. Thread2: Checking size (size = 1)
+            // 3. Thread1: Consuming data (size = 0)
+            // 4. Thread2: Trying to get data (size = 0) => Error!
             lock_guard <mutex> lockGuard(*globalMutex);
-            cout << "? Listener " << this_thread::get_id() << " got no data :(" << endl;
+            cout << "L? Listener " << this_thread::get_id() << " got no data :(" << endl;
         }
     }
     {
         lock_guard <mutex> lockGuard(*globalMutex);
-        cout << "x Listener " << this_thread::get_id() << " ended work" << endl;
+        cout << "Lx Listener " << this_thread::get_id() << " ended work" << endl;
     }
 }
 
@@ -61,22 +64,27 @@ void worker (mutex *globalMutex, conditionList <int> *condList, int workerNum, s
 {
     {
         lock_guard <mutex> lockGuard(*globalMutex);
-        cout << "! New worker created. Id: " << this_thread::get_id() << endl;
+        cout << " W! New worker created. Id: " << this_thread::get_id() << endl;
     }
     // Working
     for (size_t i = 0; i < toProduce; i++) {
-        this_thread::sleep_for(chrono::milliseconds(1000)); // Timeout
-        int number = workerNum * 1000 + i + 1;
-        condList->push_back(number);
-        condList->notify_one();
         {
             lock_guard <mutex> lockGuard(*globalMutex);
-            cout << "+ Worker " << this_thread::get_id() << " worked out number: " << number << endl;
+            cout << " W+ Worker " << this_thread::get_id() << " started working on number" << endl;
+        }
+        srand(time(0));
+        this_thread::sleep_for(chrono::milliseconds(rand() % 9500 + 500)); // Working for random time
+        int number = workerNum * 1000 + i + 1; // Number
+        condList->push_back(number);
+        condList->notify_all();
+        {
+            lock_guard <mutex> lockGuard(*globalMutex);
+            cout << " W+ Worker " << this_thread::get_id() << " worked out number: " << number << endl;
         }
     }
     {
         lock_guard <mutex> lockGuard(*globalMutex);
-        cout << "x Worker " << this_thread::get_id() << " ended work" << endl;
+        cout << " Wx Worker " << this_thread::get_id() << " ended work" << endl;
         (*finishedWorkers)++;
     }
 }

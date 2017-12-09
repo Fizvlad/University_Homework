@@ -23,7 +23,7 @@ namespace condition_list
         // Members
                 listType       list_; // List with data
         mutable innerMutexType mutex_; // Mutex for inner use
-        mutable outerMutexType outerMutex_; // Mutex for threads synchronizing
+        mutable outerMutexType outerMutex_; // Mutex for threads synchronizing. It's not really private because access can be gained through uniqueLock
     public:
         // Public members
         mutable cvType         condition_variable; // Condition variable for threads synchronizing
