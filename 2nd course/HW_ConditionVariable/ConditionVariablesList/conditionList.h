@@ -41,7 +41,7 @@ namespace condition_list
         // Threads synchronizing
         outerUniqueLockType getLock() const
         {
-            return std::move(outerUniqueLockType(outerMutex_/*, std::defer_lock_t()*/));
+            return std::move(outerUniqueLockType(outerMutex_));
         }
 
         // List info getters

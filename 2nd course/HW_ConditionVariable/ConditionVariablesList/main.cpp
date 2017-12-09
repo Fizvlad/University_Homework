@@ -11,24 +11,26 @@
 using namespace std;
 using condition_list::conditionList;
 
-void listener (mutex *globalMutex, conditionList <int> *condList, size_t *recievedNumbers, size_t maxNumbersAmount)
+void listener (mutex *globalMutex, conditionList <int> *condList, size_t *recievedNumbers, size_t maxNumbersAmount, size_t workersAmount, size_t *finishedWorkers_)
 {
     {
         lock_guard <mutex> lockGuard(*globalMutex);
         cout << "! New listener created. Id: " << this_thread::get_id() << endl;
     }
     while (*recievedNumbers < maxNumbersAmount) {
+        size_t finishedWorkers;
         auto uniqueLock = condList->getLock();
         {
             lock_guard <mutex> lockGuard(*globalMutex);
             cout << "| Listener " << this_thread::get_id() << " is waiting" << endl;
+            finishedWorkers = *finishedWorkers_;
         }
-        auto wakeUpReason = condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(1000));
+        condList->condition_variable.wait_for(uniqueLock, chrono::milliseconds(finishedWorkers == workersAmount ? 0 : 10000));
         {
             lock_guard <mutex> lockGuard(*globalMutex);
             cout << "! Listener " << this_thread::get_id() << " woke up" << endl;
         }
-        if (wakeUpReason == cv_status::timeout && condList->size() == 0) continue; // Proceeding
+        if (condList->size() == 0) continue; // Proceeding
         try {
             int data = condList->consume_back(true);
             {
@@ -55,7 +57,7 @@ void listener (mutex *globalMutex, conditionList <int> *condList, size_t *reciev
     }
 }
 
-void worker (mutex *globalMutex, conditionList <int> *condList, int workerNum, size_t toProduce)
+void worker (mutex *globalMutex, conditionList <int> *condList, int workerNum, size_t toProduce, size_t *finishedWorkers)
 {
     {
         lock_guard <mutex> lockGuard(*globalMutex);
@@ -75,6 +77,7 @@ void worker (mutex *globalMutex, conditionList <int> *condList, int workerNum, s
     {
         lock_guard <mutex> lockGuard(*globalMutex);
         cout << "x Worker " << this_thread::get_id() << " ended work" << endl;
+        (*finishedWorkers)++;
     }
 }
 
@@ -85,29 +88,30 @@ int main()
     mutex globalMutex;
     conditionList <int> condList;
     size_t recievedNumbers = 0; // Shared
+    size_t finishedWorkers = 0; // Shared
 
     size_t WORKERS_AMOUNT = 3;
     size_t EACH_WORKER_LIMIT = 10;
 
     cout << "All threads will be created in 2 seconds" << endl;
 
-    thread t1(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t1(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread t2(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t2(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread t3(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t3(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread t4(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t4(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread t5(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t5(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread t6(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
+    thread t6(listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT, WORKERS_AMOUNT, &finishedWorkers);
 
-    thread w1(worker, &globalMutex, &condList, 1, EACH_WORKER_LIMIT);
+    thread w1(worker, &globalMutex, &condList, 1, EACH_WORKER_LIMIT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread w2(worker, &globalMutex, &condList, 2, EACH_WORKER_LIMIT);
+    thread w2(worker, &globalMutex, &condList, 2, EACH_WORKER_LIMIT, &finishedWorkers);
     this_thread::sleep_for(chrono::milliseconds(300));
-    thread w3(worker, &globalMutex, &condList, 3, EACH_WORKER_LIMIT);
+    thread w3(worker, &globalMutex, &condList, 3, EACH_WORKER_LIMIT, &finishedWorkers);
 
     t1.join();
     t2.join();
@@ -119,32 +123,6 @@ int main()
     w1.join();
     w2.join();
     w3.join();
-
-    /*
-    auto t1 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-    auto t2 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-    auto t3 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-    auto t4 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-    auto t5 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-    auto t6 = async(launch::async, listener, &globalMutex, &condList, &recievedNumbers, EACH_WORKER_LIMIT * WORKERS_AMOUNT);
-
-    auto w1 = async(launch::async, worker, &globalMutex, &condList, 3, EACH_WORKER_LIMIT);
-    this_thread::sleep_for(chrono::milliseconds(300));
-    auto w2 = async(launch::async, worker, &globalMutex, &condList, 3, EACH_WORKER_LIMIT);
-    this_thread::sleep_for(chrono::milliseconds(300));
-    auto w3 = async(launch::async, worker, &globalMutex, &condList, 3, EACH_WORKER_LIMIT);
-
-    t1.get();
-    t2.get();
-    t3.get();
-    t4.get();
-    t5.get();
-    t6.get();
-
-    w1.get();
-    w2.get();
-    w3.get();
-    */
 
     cout << "List size: " << condList.size() << endl;
     cout << "Received numbers amount: " << recievedNumbers << endl;
