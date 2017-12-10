@@ -1,6 +1,8 @@
 # API сообщений сообщества
 Для работы с API потребуется создать ключ доступа в разделе "Управление сообществом".
 
-Для работы можно использовать:
+**Для получения сообщений можно использовать:**
 * [Long Poll запросы](https://vk.com/dev/using_longpoll) (Ответ на запрос при событие или по истечении таймаута)
-* Запросы. Например, [messages.getDialogs](https://vk.com/dev/messages.getDialogs)
+* Обычные запросы. Например, [messages.getDialogs](https://vk.com/dev/messages.getDialogs)
+
+**Для отправки сообщений** надо будет отправлять запросы, например [messages.send](https://vk.com/dev/messages.send)
