@@ -243,11 +243,11 @@
 
 *[CURLOPT_MAXREDIRS](https://curl.haxx.se/libcurl/c/CURLOPT_MAXREDIRS.html)* - Maximum number of redirects to follow
 
-*[[CURLOPT_POST](https://curl.haxx.se/libcurl/c/CURLOPT_POST.html)REDIR](https://curl.haxx.se/libcurl/c/CURLOPT_POSTREDIR.html)* - How to act on redirects after POST
+*[CURLOPT_POSTREDIR](https://curl.haxx.se/libcurl/c/CURLOPT_POSTREDIR.html)* - How to act on redirects after POST
 
 *[CURLOPT_PUT](https://curl.haxx.se/libcurl/c/CURLOPT_PUT.html)* - Issue a HTTP PUT request
 
-*CURLOPT_POST* - Issue a HTTP POST request
+*[CURLOPT_POST](https://curl.haxx.se/libcurl/c/CURLOPT_POST.html)* - Issue a HTTP POST request
 
 *[CURLOPT_POSTFIELDS](https://curl.haxx.se/libcurl/c/CURLOPT_POSTFIELDS.html)* - Send a POST with this data
 
