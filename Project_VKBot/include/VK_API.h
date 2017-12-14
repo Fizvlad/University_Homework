@@ -24,7 +24,7 @@ namespace vk_api
         const char* what_;
     };
 
-    std:: string apiRequest (std::string methodName, std::string parameters, std::string accessToken = "", std::string version = "5.69");
+    std:: string apiRequest (std::string methodName, std::string parameters = "", std::string accessToken = "", std::string version = "5.69");
 }
 
 #endif // VK_API_H_INCLUDED

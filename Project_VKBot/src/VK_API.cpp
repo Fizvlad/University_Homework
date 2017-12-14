@@ -19,12 +19,16 @@ std:: string vk_api::apiRequest (std::string methodName, std::string parameters,
     std::string url = "https://api.vk.com/method/";
     url += methodName;
     url += "?";
-    url += parameters;
-    if (accessToken != "") {
-        url += "&access_token=";
-        url += accessToken;
+    if (parameters != "") {
+        url += parameters;
+        url += "&";
     }
-    url += "&v=";
+    if (accessToken != "") {
+        url += "access_token=";
+        url += accessToken;
+        url += "&";
+    }
+    url += "v=";
     url += version;
     // Got URL for request
 
@@ -39,7 +43,7 @@ std:: string vk_api::apiRequest (std::string methodName, std::string parameters,
 
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &errorBuffer);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_HEADER, 1); // Don't show header
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0); // Don't show header
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1); // Do redirect
     curl_easy_setopt(curl, CURLOPT_NOBODY, 0); // Don't hide body
     curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL); // Use SSL
