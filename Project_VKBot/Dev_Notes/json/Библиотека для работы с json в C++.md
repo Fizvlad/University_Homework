@@ -46,7 +46,7 @@
     json array_not_object = json::array({ {"yes", true}, {"no", 0} });
 ```
 
-### json <-> string
+### json ⇄ string
 Для создание json из строки можно использовать [строковые литералы](https://msdn.microsoft.com/ru-ru/library/69ze775t.aspx):
 ``` C++
     json j = "{ \"happy\": true, \"pi\": 3.141 }"_json;
