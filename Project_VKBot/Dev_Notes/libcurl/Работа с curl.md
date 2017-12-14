@@ -5,7 +5,7 @@
 `#include <curl/curl.h>`
 
 **Инициализация**  
-```
+``` C++
     CURL *curl; // Объект curl  
     curl = curl_easy_init(); // Инициализация
 ```  
