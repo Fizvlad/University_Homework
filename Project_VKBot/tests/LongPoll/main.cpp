@@ -1,6 +1,6 @@
+#include <string>
 #include <iostream>
 #include <fstream>
-#include <string>
 
 #include "nlohmann/json.hpp" // gcc 4.2+ required
 
@@ -17,5 +17,8 @@ int main()
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl;
 
+    longpoll::session s;
+    s.initialize(token);
+    s.listen([](json upd){ cout << upd << endl; });
     return 0;
 }

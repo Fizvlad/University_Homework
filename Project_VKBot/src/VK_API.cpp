@@ -67,7 +67,11 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
     url += "v=";
     url += version;
 
-    return nlohmann::json::parse(safeRequest_(url));
+    nlohmann::json response = nlohmann::json::parse(safeRequest_(url));
+    if (response.find("failed") != response.end())
+        throw vk_api::apiRequestExpetion("API request error");
+
+    return response["response"];
 }
 
 /*
@@ -75,3 +79,33 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
     ---- LongPoll
     -------------------
 */
+vk_api::longpoll::session::session (uint8_t mode, unsigned short timeout) : server_(""), key_(""), ts_(0), mode_((unsigned short)mode), timeout_(timeout)
+{}
+vk_api::longpoll::session::~session ()
+{}
+void vk_api::longpoll::session::initialize (std::string accessToken)
+{
+    nlohmann::json response = apiRequest("messages.getLongPollServer", mode_ & vk_api::longpoll::MODE::GET_PTS ? "need_pts=1" : "need_pts=0", accessToken);
+    server_ = response["server"];
+    key_    = response["key"];
+    ts_     = response["ts"];
+}
+nlohmann::json vk_api::longpoll::session::request_ ()
+{
+    if (server_ == "")
+        vk_api::apiRequestExpetion("Uninitialized session");
+    std::string url = "https://";
+    url += server_;
+    url += "?version=2&act=a_check&key=";
+    url += key_;
+    url += "&ts=";
+    url += std::to_string(ts_);
+    url += "&wait=";
+    url += std::to_string(timeout_);
+    url += "&mode=";
+    url += std::to_string((int)mode_);
+
+    nlohmann::json response = nlohmann::json::parse(safeRequest_(url));
+    ts_ = response["ts"];
+    return response["updates"];
+}
