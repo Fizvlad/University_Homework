@@ -52,6 +52,54 @@ namespace vk_api
             const uint8_t GET_RANDOM_ID   = 0x80; // 7 128
         }
 
+        namespace EVENTS
+        {
+            namespace MESSAGE
+            {
+                namespace FLAGS
+                {
+                    const unsigned short CHANGE = 1;
+                    const unsigned short SET    = 2;
+                    const unsigned short RESET  = 3;
+                }
+                const unsigned short NEW    = 4;
+                const unsigned short EDITED = 5;
+
+                const unsigned short INPUT_READ    = 6; // Flag of incoming  letter changed to 'read'
+                const unsigned short OUTPUT_READ   = 7; // User read our message
+
+                const unsigned short DELETED   = 13;
+                const unsigned short RECOVERED = 14;
+            }
+
+            namespace USER
+            {
+                const unsigned short ONLINE  = 8;
+                const unsigned short OFFLINE = 9;
+
+                const unsigned short TYPING = 61;
+                const unsigned short TYPING_IN_CHAT = 62;
+                const unsigned short CALLED = 70;
+            }
+
+            namespace DIALOGUE
+            {
+                namespace FLAGS // Only for group messages
+                {
+                    const unsigned short RESET  = 10;
+                    const unsigned short CHANGE = 11;
+                    const unsigned short SET    = 12;
+                }
+                const unsigned short PARAMETERS_CHANGED = 51;
+            }
+
+            namespace OTHER
+            {
+                const unsigned short COUNTER_CHANGED = 80;
+                const unsigned short NOTIFICATIONS_PARAMETERS_CHANGED = 114;
+            }
+        }
+
         class session
         {
         public:
