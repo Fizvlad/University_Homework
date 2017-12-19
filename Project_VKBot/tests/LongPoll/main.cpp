@@ -19,6 +19,11 @@ int main()
 
     longpoll::session s;
     s.initialize(token);
-    s.listen([](json upd){ cout << upd << endl; });
+    s.listen([](json upd){
+                cout << "Received new events." << endl;
+                for (auto i : upd) {
+                    cout << "  " << i << endl;
+                }
+             });
     return 0;
 }

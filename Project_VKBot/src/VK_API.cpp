@@ -68,9 +68,8 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
     url += version;
 
     nlohmann::json response = nlohmann::json::parse(safeRequest_(url));
-    if (response.find("failed") != response.end())
+    if (response.find("response") == response.end())
         throw vk_api::apiRequestExpetion("API request error");
-
     return response["response"];
 }
 
@@ -106,6 +105,8 @@ nlohmann::json vk_api::longpoll::session::request_ ()
     url += std::to_string((int)mode_);
 
     nlohmann::json response = nlohmann::json::parse(safeRequest_(url));
+    if (response.find("failed") != response.end())
+        throw vk_api::apiRequestExpetion("API request error");
     ts_ = response["ts"];
     return response["updates"];
 }
