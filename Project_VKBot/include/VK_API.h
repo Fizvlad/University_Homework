@@ -113,28 +113,31 @@ namespace vk_api
             void initialize (std::string accessToken);
 
             template <typename Func>
-            void listen_once (Func f)
+            bool listen_once (Func f)
             {
                 nlohmann::json updates = request_();
-                f(updates);
+                return f(updates);
             }
             template <typename Func>
-            void listen_n (Func f, unsigned n)
+            bool listen_n (Func f, unsigned n)
             {
                 for (unsigned i = 0; i < n; i++)
-                    listen_once(f);
+                    if (!listen_once(f))
+                        return false;
             }
             template <typename Func, typename Predicate>
-            void listen_while (Func f, Predicate p)
+            bool listen_while (Func f, Predicate p)
             {
                 while (p())
-                    listen_once(f);
+                    if (!listen_once(f))
+                        return false;
             }
             template <typename Func>
-            void listen (Func f)
+            bool listen (Func f)
             {
                 while (true)
-                    listen_once(f);
+                    if (!listen_once(f))
+                        return false;
             }
         private:
             std::string    server_;
