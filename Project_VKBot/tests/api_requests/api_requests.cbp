@@ -14,14 +14,14 @@
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-g" />
-					<Add directory="P:/Programms/curl/include" />
+					<Add option="-lcurl" />
+					<Add directory="/usr/local/include" />
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
-					<Add library="P:/Programms/curl/lib/.libs/libcurl.a" />
-					<Add library="P:/Programms/curl/lib/.libs/libcurl.dll.a" />
+					<Add library="/usr/local/lib/libcurl.so" />
 					<Add directory="../../src" />
-					<Add directory="P:/Programms/curl/lib/.libs" />
+					<Add directory="/usr/local/lib" />
 				</Linker>
 			</Target>
 		</Build>
