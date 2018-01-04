@@ -29,9 +29,17 @@ int main()
                     cout << "No new events." << endl;
                 for (auto i : upd) {
                     cout << "  " << i << endl;
-                    if (i[0] == longpoll::EVENTS::MESSAGE::NEW)
+                    if ((unsigned short)i[0] == longpoll::EVENTS::MESSAGE::NEW)
                         fout << "User with id" << i[3] << " at " << i[4] << ": " << i[5] << endl;
-                    if (i[5] == "!stop")
+
+                    if (i[5] == "!read") {
+                        string param = "peer_id=";
+                        param += to_string((int)i[3]);
+                        param += "&start_message_id=";
+                        param += to_string((int)i[1]);
+                        apiRequest("messages.markAsRead", param, token);
+                    }
+                    else if (i[5] == "!stop")
                         return false;
                 }
                 return true;
