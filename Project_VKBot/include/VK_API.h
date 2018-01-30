@@ -3,6 +3,9 @@
 
 #include <string>
 #include <exception>
+#include <ctime>
+#include <vector>
+#include <sstream>
 
 #include "curl/curl.h"
 #include "nlohmann/json.hpp"
@@ -11,9 +14,18 @@ namespace vk_api
 {
     /*
         -------------------
+        ---- Custom types
+        -------------------
+    */
+    /// Id user or message
+    typedef unsigned long vkid_t;
+
+    /*
+        -------------------
         ---- Exceptions
         -------------------
     */
+    /// VK_API exception class
     class apiRequestExpetion : std::exception
     {
     public:
@@ -29,20 +41,33 @@ namespace vk_api
         const char* what_;
     };
 
+
     /*
         -------------------
         ---- API
         -------------------
     */
+    ///
+    /// \brief Send HTTPS request for given method
+    ///
+    /// \param methodName Name of the method
+    /// \param parameters Query string
+    /// \param accessToken VK access token (might be not necessary)
+    /// \param version API version
+    /// \return Request response in JSON
+    ///
     nlohmann::json apiRequest (std::string methodName, std::string parameters = "", std::string accessToken = "", std::string version = "5.69");
+
 
     /*
         -------------------
         ---- LongPoll
         -------------------
     */
+    /// Working with longpoll requests
     namespace longpoll
     {
+        /// Longpoll request mode
         namespace MODE
         {
             const uint8_t GET_ATTACHMENTS = 0x02; // 1   2
@@ -52,6 +77,7 @@ namespace vk_api
             const uint8_t GET_RANDOM_ID   = 0x80; // 7 128
         }
 
+        /// Id of events which can be received with longpoll
         namespace EVENTS
         {
             namespace MESSAGE
@@ -100,6 +126,7 @@ namespace vk_api
             }
         }
 
+        /// Interface for work with longpoll
         class session
         {
         public:
@@ -110,14 +137,16 @@ namespace vk_api
             session (session&&) = delete;
             ~session ();
 
-            void initialize (std::string accessToken);
+            void initialize (std::string accessToken); ///< Setting up access token. Necessary for requests
 
+            /// Single longpoll request
             template <typename Func>
             bool listen_once (Func f)
             {
                 nlohmann::json updates = request_();
                 return f(updates);
             }
+            /// N of logpoll requests. Stop listening if handler return FALSE
             template <typename Func>
             bool listen_n (Func f, unsigned n)
             {
@@ -125,6 +154,7 @@ namespace vk_api
                     if (!listen_once(f))
                         return false;
             }
+            /// Listening while predicate returns TRUE. Stop listening if handler return FALSE
             template <typename Func, typename Predicate>
             bool listen_while (Func f, Predicate p)
             {
@@ -132,6 +162,7 @@ namespace vk_api
                     if (!listen_once(f))
                         return false;
             }
+            /// Listen while handler return TRUE
             template <typename Func>
             bool listen (Func f)
             {
@@ -142,12 +173,52 @@ namespace vk_api
         private:
             std::string    server_;
             std::string    key_;
-            unsigned long  ts_;
+            time_t         ts_;
             unsigned short mode_;
             unsigned short timeout_;
 
             nlohmann::json request_ ();
         };
+    }
+
+
+    /*
+        -------------------
+        ---- Working with chat
+        -------------------
+    */
+    namespace chat
+    {
+        /// Message type. Can be created by
+        class message
+        {
+        public:
+            message () = delete;
+            message &operator=(const message&) = default;
+            message (const message&) = default;
+            message &operator=(message&&) = default;
+            message (message&&) = default;
+            ~message () = default;
+
+            time_t getTimestamp ();
+            vkid_t getId ();
+            vkid_t getUserId ();
+            std::string getText();
+
+            void markAsRead (std::string accessToken);
+        private:
+            time_t ts_;
+            vkid_t id_;
+            vkid_t user_;
+            std::string text_;
+
+            message (nlohmann::json input);
+
+            friend std::vector<message> recieveNewMessages (std::string accessToken, unsigned amount);
+        };
+
+        /// Get vector with new messages
+        std::vector<message> recieveNewMessages (std::string accessToken, unsigned amount = 200);
     }
 }
 
