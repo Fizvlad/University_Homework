@@ -20,7 +20,7 @@ int main()
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl;
 
-    longpoll::session s;
+    longpoll::Session s;
     s.initialize(token);
     s.listen([&](json upd){
                 if (upd.size() != 0)
