@@ -1,7 +1,7 @@
 #ifndef VK_API_H_INCLUDED
 #define VK_API_H_INCLUDED
 
-#include <string>
+#include <string> // std::string
 #include <exception>
 #include <ctime>
 #include <vector>
@@ -26,12 +26,12 @@ namespace vk_api
         -------------------
     */
     /// VK_API exception class
-    class apiRequestExpetion : std::exception
+    class ApiRequestExpetion : std::exception
     {
     public:
-        explicit apiRequestExpetion (const char* message) : what_(message) {}
-        apiRequestExpetion (const apiRequestExpetion &other) : what_(other.what_) {}
-        apiRequestExpetion &operator= (const apiRequestExpetion &other)
+        explicit ApiRequestExpetion (const char* message) : what_(message) {}
+        ApiRequestExpetion (const ApiRequestExpetion &other) : what_(other.what_) {}
+        ApiRequestExpetion &operator= (const ApiRequestExpetion &other)
         {
             what_ = other.what_;
             return *this;
@@ -127,15 +127,15 @@ namespace vk_api
         }
 
         /// Interface for work with longpoll
-        class session
+        class Session
         {
         public:
-            session (uint8_t mode = 0, unsigned short timeout = 25);
-            session &operator=(const session&) = delete;
-            session (const session&) = delete;
-            session &operator=(session&&) = delete;
-            session (session&&) = delete;
-            ~session ();
+            Session (uint8_t mode = 0, unsigned short timeout = 25);
+            Session &operator=(const Session&) = delete;
+            Session (const Session&) = delete;
+            Session &operator=(Session&&) = delete;
+            Session (Session&&) = delete;
+            ~Session ();
 
             void initialize (std::string accessToken); ///< Setting up access token. Necessary for requests
 
@@ -146,6 +146,7 @@ namespace vk_api
                 nlohmann::json updates = request_();
                 return f(updates);
             }
+
             /// N of logpoll requests. Stop listening if handler return FALSE
             template <typename Func>
             bool listen_n (Func f, unsigned n)
@@ -154,6 +155,7 @@ namespace vk_api
                     if (!listen_once(f))
                         return false;
             }
+
             /// Listening while predicate returns TRUE. Stop listening if handler return FALSE
             template <typename Func, typename Predicate>
             bool listen_while (Func f, Predicate p)
@@ -162,6 +164,7 @@ namespace vk_api
                     if (!listen_once(f))
                         return false;
             }
+
             /// Listen while handler return TRUE
             template <typename Func>
             bool listen (Func f)
@@ -184,41 +187,55 @@ namespace vk_api
 
     /*
         -------------------
-        ---- Working with chat
+        ---- Working with messages
         -------------------
     */
-    namespace chat
+    /// Working with chats and messages
+    namespace messages
     {
-        /// Message type. Can be created by
-        class message
-        {
+        /// Real message class
+        class Message {
         public:
-            message () = delete;
-            message &operator=(const message&) = default;
-            message (const message&) = default;
-            message &operator=(message&&) = default;
-            message (message&&) = default;
-            ~message () = default;
+            Message () = delete; ///< Constructor will only be accessible from some functions
+            Message &operator=(const Message&) = default;
+            Message (const Message&) = default;
+            Message &operator=(Message&&) = default;
+            Message (Message&&) = default;
+            ~Message () = default;
 
             time_t getTimestamp ();
             vkid_t getId ();
-            vkid_t getUserId ();
+            vkid_t getSenderId ();
             std::string getText();
-
-            void markAsRead (std::string accessToken);
+            bool getReadStatus();
         private:
-            time_t ts_;
-            vkid_t id_;
-            vkid_t user_;
-            std::string text_;
+            const time_t ts_;
+            const vkid_t id_; ///< Message id
+            const vkid_t sender_; ///< Sender id
+            const vkid_t receiver_; ///< Receiver id
+            const std::string text_;
+            const bool ifRead_; ///< Read state
 
-            message (nlohmann::json input);
-
-            friend std::vector<message> recieveNewMessages (std::string accessToken, unsigned amount);
+            Message (nlohmann::json input); ///< Parsing message from json
         };
 
-        /// Get vector with new messages
-        std::vector<message> recieveNewMessages (std::string accessToken, unsigned amount = 200);
+        std::vector<Message> getUnreadMessages(size_t amount);
+
+        /// Dialogue class
+        class Dialogue {
+        public:
+            Dialogue () = delete; ///< Constructor will only be accessible from some functions
+            Dialogue &operator=(const Dialogue&) = default;
+            Dialogue (const Dialogue&) = default;
+            Dialogue &operator=(Dialogue&&) = default;
+            Dialogue (Dialogue&&) = default;
+            ~Dialogue () = default;
+
+            vkid_t getId ();
+            bool getReadStatus();
+        private:
+            vkid_t id_; ///< Id of user
+        };
     }
 }
 
