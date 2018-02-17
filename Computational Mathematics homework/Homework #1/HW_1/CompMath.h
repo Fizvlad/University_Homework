@@ -1,22 +1,27 @@
 #ifndef COMPMATH_H_INCLUDED
 #define COMPMATH_H_INCLUDED
 
-#include <string>
-#include <exception>
-#include <iostream>
-#include <cmath>
+#include <string> // std::string
+#include <cmath> // Math
 
-typedef double (*doubleToDoubleFunc_t)(double);
+#include "CompMath_utility.h"
 
-class CompMath_Exception : std::exception {
-    std::string what_;
-public:
-    CompMath_Exception(std::string s);
-    const char* what();
-};
+typedef double (*Consumer_Function_t)(double);
+typedef double (*Biconsumer_Function_t)(double, double);
 
-double findDrawdown (doubleToDoubleFunc_t f, double a, double b, size_t depth = 10);
+/*
+    CompMath
+*/
+/// Finds some interval [x_0; x_1]: f(x_0) * f(x_1) <= 0, [x_0; x_1] in [a; b]
+/// Function returns [b;b] if can not find such point
+/// \param f Function double -> double
+/// \param interval Search area
+/// \param depth Level of splitting
+Interval findDrawdown (Function<Consumer_Function_t> f, Interval interval, size_t depth = 10);
 
-double findSolution (doubleToDoubleFunc_t f, double a, double b);
+/// Finds some solution in [a; b]
+/// \param f Function double -> double
+/// \param interval Search area
+Point findSolution (Function<Consumer_Function_t> f, Interval interval);
 
 #endif // COMPMATH_H_INCLUDED

@@ -1,38 +1,30 @@
 #include "CompMath.h"
 
-
-CompMath_Exception::CompMath_Exception(std::string s) : what_(s) {}
-const char* CompMath_Exception::what() {return what_.c_str();}
-
-/// Finds point x_0: x_0 != b, f(x_0) * f(b) <= 0.
-/// Function returns b if can not find such point
-// TODO Reowrk function so it returns pair of doubles
-double findDrawdown (doubleToDoubleFunc_t f, double a, double b, size_t depth) {
-    std::cout << "Reqested interval : " << "[" << a << ";" << b << "]" << ". Function values on edges: " << f(a) << "; " << f(b) << std::endl;
-    double result;
-    if (f(a) * f(b) <= 0) {
-        result = a; // a is RESULT
+// CompMath
+Interval findDrawdown (Function<Consumer_Function_t> f, Interval interval, size_t depth) {
+    double v_a = f.valueAt(interval.begin);
+    double v_b = f.valueAt(interval.end);
+    //std::cout << "Reqested interval : " << interval << ". Function values on edges: " << v_a << "; " << v_b << std::endl;
+    if (f.valueAt(interval.begin) * f.valueAt(interval.end) <= 0) {
+        return interval;
     } else if (depth > 0) {
-        // Splitting [a; b] to [a; a+b / 2] and [a+b / 2; b]
-        double c = (a + b) / 2;
-        double left = findDrawdown(f, a, c, depth - 1); // Looking for answer on left part
-        if (left == c) {
-            // No such point on left
-            double right = findDrawdown(f, c, b, depth - 1); // Looking for answer on right part
-            if (right == b) {
-                // No such point on right
-                result = b; // b is RESULT
+        Point middle((interval.begin.value + interval.end.value) / 2);
+        Interval left = findDrawdown(f, Interval(interval.begin, middle), depth - 1);
+        if (left.size() == 0) {
+            Interval right = findDrawdown(f, Interval(middle, interval.end), depth - 1);
+            if (right.size() == 0) {
+                return Interval(interval.end, interval.end);
             } else {
-                result = right; // right is RESULT
+                return right;
             }
         } else {
-            result = left; // left is RESULT
+            return left;
         }
     } else {
-        result = b; // b is RESULT
+        return Interval(interval.end, interval.end);
     }
 }
 
-double findSolution (doubleToDoubleFunc_t f, double a, double b) {
-    return 0;
+Point findSolution (Function<Consumer_Function_t> f, Interval interval) {
+    return Point();
 }
