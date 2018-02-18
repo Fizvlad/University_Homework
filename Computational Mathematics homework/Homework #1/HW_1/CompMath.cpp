@@ -5,9 +5,6 @@ Interval findDrawdown_iteratively (Function<Consumer_Function_t> f, Interval int
     if (interval.begin.value > interval.end.value) {
         throw CompMath_Exception("Wrong interval");
     }
-    double v_a = f.valueAt(interval.begin);
-    double v_b = f.valueAt(interval.end);
-    //std::cout << "Reqested interval : " << interval << ". Function values on edges: " << v_a << "; " << v_b << std::endl;
 
     if (f.valueAt(interval.begin) * f.valueAt(interval.end) <= 0) {
         return interval;
@@ -29,47 +26,25 @@ Interval findDrawdown_iteratively (Function<Consumer_Function_t> f, Interval int
     }
 }
 
-// TODO function which goes through interval with given step and looking for interval by some predicate
-
 Interval findDrawdown (Function<Consumer_Function_t> f, Interval interval, double step) {
-    if (interval.begin.value > interval.end.value) {
-        throw CompMath_Exception("Wrong interval");
-    }
-    //std::cout << "Reqested interval : " << interval << std::endl;
-
-    Point x_0(interval.begin);
-    Point x_1(interval.begin + step);
-    while (x_1.value < interval.end.value) {
-        if (f.valueAt(x_0) * f.valueAt(x_1) <= 0) {
-            return Interval(x_0, x_1);
-        }
-        x_0.value = x_1.value;
-        x_1.value = x_1.value + step;
-    }
-    return Interval(interval.end, interval.end);
+    return findMatchingSubinterval(interval, [f](Interval i){return f.valueAt(i.begin) * f.valueAt(i.end) <= 0;}, step);
 }
 
-Point findSolution (Function<Consumer_Function_t> f, Interval interval, double accuracy) {
-    if (interval.begin.value > interval.end.value) {
-        throw CompMath_Exception("Wrong interval");
-    }
-    interval = findDrawdown(f, interval);
+Point findSolution_SimpleIterations (Function<Consumer_Function_t> f, Interval interval, double accuracy) {
+    double step = 1e-1; // Maximum of interval size
+    interval = findDrawdown(f, interval, step);
     if (interval.size() == 0) {
-        throw CompMath_Exception("Wrong interval");
+        throw CompMath_Exception("Wrong interval. No drawdowns");
     }
-    Point x_0;
-    if (std::abs(f.valueAt(interval.begin)) < std::abs(f.valueAt(interval.end))) {
-        x_0.value = interval.begin;
-    } else {
-        x_0.value = interval.end;
-    }
+
+    double maximumDerivative = f.derivativeAt(findPointWithHighestValue(interval, [f](Point p){return f.derivativeAt(p);}, step / 128));
+    Point x_0 = interval.begin;
     Point x_1;
     double currentAccuracy;
     do {
-        x_1.value = f.valueAt(x_0) + x_0;
+        x_1.value = x_0 - f.valueAt(x_0) / maximumDerivative;
         currentAccuracy = std::abs(x_1.value - x_0.value);
         x_0.value = x_1.value;
-        std::cout << x_0 << std::endl;
-    } while (currentAccuracy > accuracy);
+    } while (currentAccuracy * 10 >= accuracy); // Multiplying by 10 to get accurate last digit
     return x_1;
 }

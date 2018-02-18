@@ -24,6 +24,14 @@
 		<Unit filename="CompMath.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="CompMath_search.cpp" />
+		<Unit filename="CompMath_search.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="CompMath_utility.cpp" />
+		<Unit filename="CompMath_utility.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
