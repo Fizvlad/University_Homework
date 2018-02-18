@@ -39,9 +39,11 @@ public:
 
 std::ostream &operator<< (std::ostream &s, Interval i);
 
+
 /*
     Exceptions
 */
+
 class CompMath_Exception : std::exception {
 public:
     CompMath_Exception(std::string s);
@@ -49,5 +51,14 @@ public:
 private:
     std::string what_;
 };
+
+
+/*
+    Other
+*/
+
+template <typename T> int sgn (T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 #endif // COMPMATH_UTILITY_H_INCLUDED
