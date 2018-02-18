@@ -3,6 +3,7 @@
 
 #include <string> // std::string
 #include <cmath> // Math
+#include <utility> // std::pair
 
 #include "CompMath_utility.h"
 #include "CompMath_search.h"
@@ -30,6 +31,23 @@ Interval findDrawdown (Function<Consumer_Function_t> f, Interval interval, doubl
 /// Finds some solution in [a; b]
 /// \param f Function double -> double
 /// \param interval Search area
+/// \param accuracy Amount of correct digits after decimal point
 Point findSolution_SimpleIterations (Function<Consumer_Function_t> f, Interval interval, double accuracy);
+
+/// Finds some solution in [a; b]
+/// \param f Function double -> double
+/// \param interval Search area
+/// \param accuracy Amount of correct digits after decimal point
+Point findSolution_Newton (Function<Consumer_Function_t> f, Interval interval, double accuracy);
+
+
+/*
+    CompMath. System of two equasions
+*/
+/// Finds some solution
+/// \param f Two functions: double, double -> double
+/// \param accuracy Amount of correct digits after decimal point
+std::pair<Point, Point> findSolution_Newton (BiFunctions<Biconsumer_Function_t> f, double x, double y, double accuracy);
+
 
 #endif // COMPMATH_H_INCLUDED
