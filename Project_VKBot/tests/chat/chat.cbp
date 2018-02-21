@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add directory="../../include" />
 				</Compiler>
@@ -25,9 +26,23 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="../../include/VK_API.h" />
+		<Unit filename="../../include/VK_API.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_longpoll.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_messages.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_utility.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="../../include/nlohmann/json.hpp" />
 		<Unit filename="../../src/VK_API.cpp" />
+		<Unit filename="../../src/VK_API_longpoll.cpp" />
+		<Unit filename="../../src/VK_API_messages.cpp" />
+		<Unit filename="../../src/VK_API_utility.cpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
