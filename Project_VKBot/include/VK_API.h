@@ -3,6 +3,6 @@
 
 #include "VK_API_utility.h"
 #include "VK_API_longpoll.h"
-#include "VK_API_messages.h"
+#include "VK_API_chat.h"
 
 #endif // VK_API_H_INCLUDED
