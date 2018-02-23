@@ -29,10 +29,10 @@
 		<Unit filename="../../include/VK_API.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="../../include/VK_API_longpoll.h">
+		<Unit filename="../../include/VK_API_chat.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="../../include/VK_API_messages.h">
+		<Unit filename="../../include/VK_API_longpoll.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="../../include/VK_API_utility.h">
@@ -40,8 +40,8 @@
 		</Unit>
 		<Unit filename="../../include/nlohmann/json.hpp" />
 		<Unit filename="../../src/VK_API.cpp" />
+		<Unit filename="../../src/VK_API_chat.cpp" />
 		<Unit filename="../../src/VK_API_longpoll.cpp" />
-		<Unit filename="../../src/VK_API_messages.cpp" />
 		<Unit filename="../../src/VK_API_utility.cpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>

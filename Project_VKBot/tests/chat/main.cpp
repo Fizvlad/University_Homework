@@ -14,15 +14,15 @@ int main()
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl;
     ChatBot bot(token);
-    bot.start([&] (Message m) {
-        cout << m.senderId << " send message to " << m.receiverId << " with id " << m.id << " at " << m.timestamp << ". Content: " << endl << m.text << endl;
+    bot.start([&] (Message m, bool isOld) {
+        cout << (isOld ? "(Old message) " : "") << m.senderId << " send message to " << m.receiverId << " with id " << m.id << " at " << m.timestamp << ". Content: " << endl << m.text << endl;
         if (m.text == "!read") {
-            bot.markAsRead(m.senderId);
-        }
-        if (m.text == "!answer") {
+            bot.markAsRead(m);
+        } else if (m.text == "!answer") {
+            bot.markAsRead(m);
             bot.sendMessage(m.senderId, "Честно говоря, мне надоел весь этот чёртов фарс");
-        }
-        if (m.text == "!stop") {
+        } else if (m.text == "!stop") {
+            bot.markAsRead(m);
             return false;
         }
         return true;

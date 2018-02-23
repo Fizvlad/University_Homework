@@ -3,6 +3,7 @@
 
 
 #include <string> // std::string
+#include <sstream> // std::stringstream
 #include <ctime> // time_t
 #include <vector> // std::vector
 
@@ -41,14 +42,16 @@ namespace vk_api {
         template <typename MessageHandlerFunc> void start (MessageHandlerFunc handler) {
             std::vector<Message> unread = getUnreadMessages_();
             for (auto message : unread) {
-                handler(message);
+                if (!handler(message, true)) {
+                    return;
+                }
             }
 
             longpoll_.listen([&] (nlohmann::json upd) {
                 for (auto i : upd) {
                     if ((unsigned short)i[0] == longpoll::EVENTS::MESSAGE::NEW) {
-                        Message m(i[4], i[1], i[3], 0, i[5]);
-                        if (!handler(m)) {
+                        Message message(i[4], i[1], i[3], 0, i[5]);
+                        if (!handler(message, false)) {
                             return false;
                         }
                     }
@@ -57,10 +60,11 @@ namespace vk_api {
              });
         }
 
-        void markAsRead (vkid_t userId);
+        void markAsRead (Message message);
         void sendMessage (vkid_t receiver, std::string text);
     private:
         longpoll::Session longpoll_;
+        std::string accessToken_;
 
         std::vector<Message> getUnreadMessages_();
     };
