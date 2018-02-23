@@ -15,13 +15,11 @@
 					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add option="-lcurl" />
-					<Add directory="/usr/local/include" />
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
 					<Add library="/usr/local/lib/libcurl.so" />
 					<Add directory="../../src" />
-					<Add directory="/usr/local/lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -29,8 +27,25 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="../../include/VK_API.h" />
+		<Unit filename="../../include/VK_API.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_longpoll.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_messages.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/VK_API_utility.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../include/nlohmann/json.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="../../src/VK_API.cpp" />
+		<Unit filename="../../src/VK_API_longpoll.cpp" />
+		<Unit filename="../../src/VK_API_messages.cpp" />
+		<Unit filename="../../src/VK_API_utility.cpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
