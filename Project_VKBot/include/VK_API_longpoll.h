@@ -80,6 +80,8 @@ namespace vk_api {
             void initialize (std::string accessToken); ///< Setting up access token. Necessary for requests
 
             /// Single longpoll request
+            /// \param f Events handler
+            /// \return Result of  f(updates)
             template <typename Func>
             bool listen_once (Func f) {
                 nlohmann::json updates = request_();
@@ -87,27 +89,42 @@ namespace vk_api {
             }
 
             /// N of logpoll requests. Stop listening if handler return FALSE
+            /// \param f Events handler
+            /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func>
             bool listen_n (Func f, unsigned n) {
-                for (unsigned i = 0; i < n; i++)
-                    if (!listen_once(f))
+                for (unsigned i = 0; i < n; i++) {
+                    if (!listen_once(f)) {
                         return false;
+                    }
+                }
+                return true;
             }
 
             /// Listening while predicate returns TRUE. Stop listening if handler return FALSE
+            /// \param f Events handler
+            /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func, typename Predicate>
             bool listen_while (Func f, Predicate p) {
-                while (p())
-                    if (!listen_once(f))
+                while (p()) {
+                    if (!listen_once(f)) {
                         return false;
+                    }
+                }
+                return true;
             }
 
             /// Listen while handler return TRUE
+            /// \param f Events handler
+            /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func>
             bool listen (Func f) {
-                while (true)
-                    if (!listen_once(f))
+                while (true) {
+                    if (!listen_once(f)) {
                         return false;
+                    }
+                }
+                return true;
             }
         private:
             std::string    server_;
