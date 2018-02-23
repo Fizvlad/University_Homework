@@ -40,7 +40,7 @@ namespace {
 }
 
 
-nlohmann::json vk_api::apiRequest (std::string url) {
+nlohmann::json vk_api::jsonRequest (std::string url) {
     std::string responseString = safeRequest_(url);
     nlohmann::json response;
     try {
@@ -49,10 +49,7 @@ nlohmann::json vk_api::apiRequest (std::string url) {
         response = {};
         // TODO Correct handle of parse error
     }
-    if (response.find("response") == response.end()) {
-        throw vk_api::ApiRequestExpetion("API request error");
-    }
-    return response["response"];
+    return response;
 }
 
 nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameters, std::string accessToken, std::string version) {
@@ -66,5 +63,11 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
     }
     url << "v=" << version;
 
-    return apiRequest(url.str());
+    nlohmann::json response = jsonRequest(url.str());
+
+    if (response.find("response") == response.end()) {
+        throw vk_api::ApiRequestExpetion("API request error. Bad response");
+    }
+
+    return response["response"];
 }

@@ -19,9 +19,9 @@ nlohmann::json vk_api::longpoll::Session::request_ () {
     std::stringstream url;
     url << "https://" << server_ << "?version=2&act=a_check&key=" << key_ << "&ts=" << std::to_string(ts_) << "&wait=" << std::to_string(timeout_) << "&mode=" << std::to_string((int)mode_);
 
-    nlohmann::json response = vk_api::apiRequest(url.str());
+    nlohmann::json response = vk_api::jsonRequest(url.str());
     if (response.find("failed") != response.end()) {
-        throw vk_api::ApiRequestExpetion("API request error");
+        throw vk_api::ApiRequestExpetion("API request error. Response failed");
     }
     ts_ = response["ts"];
     return response["updates"];
