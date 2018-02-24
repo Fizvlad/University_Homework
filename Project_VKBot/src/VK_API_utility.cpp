@@ -35,6 +35,7 @@ namespace {
         if (result != CURLE_OK) {
             throw vk_api::ApiRequestExpetion(errorBuffer.c_str());
         }
+        curl_easy_cleanup(curl);
         return outputBuffer;
     }
 }
