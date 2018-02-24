@@ -7,6 +7,8 @@
 #include <ctime> // time_t
 #include <vector> // std::vector
 
+#include "curl/curl.h" // url encode/decode
+
 #include "VK_API_longpoll.h"
 
 namespace vk_api {
@@ -39,6 +41,8 @@ namespace vk_api {
         ChatBot (ChatBot&&) = delete;
         ~ChatBot ();
 
+        /// Handle last unread message in every dialogue and starts longpoll
+        /// \param handler bool (function*) (Message message, bool isOld) to handle messages
         template <typename MessageHandlerFunc> void start (MessageHandlerFunc handler) {
             std::vector<Message> unread = getUnreadMessages_();
             for (auto message : unread) {

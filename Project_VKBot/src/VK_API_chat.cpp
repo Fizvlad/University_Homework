@@ -1,5 +1,44 @@
 #include "VK_API_chat.h"
 
+namespace {
+    std::string url_encode (std::string str) {
+        std::string result;
+        CURL *curl = curl_easy_init();
+        if(curl) {
+            char *output = curl_easy_escape(curl, str.c_str(), str.size());
+            if(output) {
+                result.append(output);
+                curl_free(output);
+            } else {
+                throw vk_api::ApiRequestExpetion("Unable to encode string. escape returned NULL.");
+            }
+        } else {
+            throw vk_api::ApiRequestExpetion("Unable to encode string. Unable to init CURL.");
+        }
+        curl_easy_cleanup(curl);
+        return result;
+    }
+    std::string url_decode (std::string str) {
+        std::string result;
+        CURL *curl = curl_easy_init();
+        if(curl) {
+            int l;
+            char *output = curl_easy_unescape(curl, str.c_str(), str.size(), &l);
+            if(output) {
+                result.append(output, l);
+                curl_free(output);
+            } else {
+                throw vk_api::ApiRequestExpetion("Unable to decode string. unescape returned NULL.");
+            }
+        } else {
+            throw vk_api::ApiRequestExpetion("Unable to decode string. Unable to init CURL.");
+        }
+        curl_easy_cleanup(curl);
+        return result;
+    }
+}
+
+
 vk_api::Message::Message (nlohmann::json input) :
 timestamp(input["date"]), id(input["id"]), senderId(input["out"] == 1 ? 0 : (vkid_t) input["user_id"]),
 receiverId(input["out"] == 0 ? 0 : (vkid_t) input["user_id"]), text(input["body"].get<std::string>()), ifRead(input["read_state"] == 1) {}
@@ -21,7 +60,9 @@ void vk_api::ChatBot::markAsRead (vk_api::Message message) {
 }
 
 void vk_api::ChatBot::sendMessage (vkid_t receiver, std::string text) {
-    // TODO Send message
+    std::stringstream param;
+    param << "user_id=" << receiver << "&message=" << url_encode(text);
+    vk_api::apiRequest("messages.send", param.str(), accessToken_);
 }
 
 std::vector<vk_api::Message> vk_api::ChatBot::getUnreadMessages_ () {

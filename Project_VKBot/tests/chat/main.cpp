@@ -16,7 +16,10 @@ int main()
     ChatBot bot(token);
     bot.start([&] (Message m, bool isOld) {
         cout << (isOld ? "(Old message) " : "") << m.senderId << " send message to " << m.receiverId << " with id " << m.id << " at " << m.timestamp << ". Content: " << endl << m.text << endl;
-        if (m.text == "!read") {
+        if (m.text == "!help") {
+            bot.markAsRead(m);
+            bot.sendMessage(m.senderId, "Список доступных комманд:\n !read - прочесть сообщения \n !answer - ответить в беседу \n !stop - остановить работу бота");
+        } else if (m.text == "!read") {
             bot.markAsRead(m);
         } else if (m.text == "!answer") {
             bot.markAsRead(m);
