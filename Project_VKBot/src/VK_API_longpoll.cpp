@@ -1,6 +1,6 @@
 #include "VK_API_longpoll.h"
 
-vk_api::longpoll::Session::Session (uint8_t mode, unsigned short timeout) : server_(""), key_(""), ts_(0), mode_((unsigned short)mode), timeout_(timeout) {}
+vk_api::longpoll::Session::Session (unsigned mode, unsigned short timeout) : server_(""), key_(""), ts_(0), mode_((unsigned short)mode), timeout_(timeout) {}
 
 vk_api::longpoll::Session::~Session () {}
 

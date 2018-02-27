@@ -15,11 +15,11 @@ namespace vk_api {
     namespace longpoll {
         /// Longpoll request mode
         namespace MODE {
-            const uint8_t GET_ATTACHMENTS = 0x02; // 1   2
-            const uint8_t EXTENDED_EVENTS = 0x08; // 3   8
-            const uint8_t GET_PTS         = 0x20; // 5  32
-            const uint8_t GET_EXTRA       = 0x40; // 6  64
-            const uint8_t GET_RANDOM_ID   = 0x80; // 7 128
+            const unsigned GET_ATTACHMENTS = 2; // 1   2
+            const unsigned EXTENDED_EVENTS = 8; // 3   8
+            const unsigned GET_PTS         = 32; // 5  32
+            const unsigned GET_EXTRA       = 64; // 6  64
+            const unsigned GET_RANDOM_ID   = 128; // 7 128
         }
 
 
@@ -67,10 +67,26 @@ namespace vk_api {
         }
 
 
+        /// Message flags
+        namespace MESSAGE_FLAGS {
+            const unsigned UNREAD = 1;
+            const unsigned OUTBOX = 2;
+            const unsigned REPLIED = 4;
+            const unsigned IMPORTANT = 8;
+            const unsigned CHAT = 16; // DEPRICATED
+            const unsigned FRIENDS = 32;
+            const unsigned SPAM = 64;
+            const unsigned DELETED = 128;
+            const unsigned FIXED = 256; // DEPRICATED
+            const unsigned MEDIA = 512; // DEPRICATED
+            const unsigned HIDDEN = 65536;
+            const unsigned DELETED_FOR_ALL = 131072;
+        }
+
         /// Interface for work with longpoll
         class Session {
         public:
-            Session (uint8_t mode = 0, unsigned short timeout = 25);
+            Session (unsigned mode = 0, unsigned short timeout = 25);
             Session &operator=(const Session&) = delete;
             Session (const Session&) = delete;
             Session &operator=(Session&&) = delete;
