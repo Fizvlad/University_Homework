@@ -53,7 +53,7 @@ namespace vk_api {
 
             longpoll_.listen([&] (nlohmann::json upd) {
                 for (auto i : upd) {
-                    if ((unsigned short)i[0] == longpoll::EVENTS::MESSAGE::NEW) {
+                    if ((unsigned)i[0] == longpoll::EVENTS::MESSAGE::NEW && !((unsigned)i[2] & longpoll::MESSAGE_FLAGS::OUTBOX)) {
                         Message message(i[4], i[1], i[3], 0, i[5]);
                         if (!handler(message, false)) {
                             return false;
