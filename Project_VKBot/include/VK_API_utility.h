@@ -19,7 +19,7 @@ namespace vk_api {
             what_ = other.what_;
             return *this;
         }
-        const char* what () {
+        const char* what () const noexcept {
             return what_;
         }
     private:
