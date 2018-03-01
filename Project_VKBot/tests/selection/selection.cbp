@@ -17,6 +17,7 @@
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
+					<Add library="/usr/local/lib/libcurl.so" />
 					<Add directory="../../src" />
 				</Linker>
 			</Target>
@@ -25,7 +26,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="../../include/selection/VK_selection.h" />
+		<Unit filename="../../include/VK_API_utility.h" />
+		<Unit filename="../../include/selection/VK_selection.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../../src/VK_API_utility.cpp" />
 		<Unit filename="../../src/selection/VK_selection.cpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
