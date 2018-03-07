@@ -5,16 +5,45 @@
 #include <string> // std::string
 #include <iostream> // std::ostream
 #include <sstream> // std::stringstream
+#include <cstdio> // std::open, std::read, ...
 
 #include "VK_API_utility.h" // vk_api::apiRequest
 
 namespace vk_selection {
+    /// Class to work with selection of Units
+    /// Each Selection have its own file in "name_.vks" which contains ids
+    class Selection {
+    public:
+        Selection (std::string name);
+        Selection () = delete;
+        Selection &operator=(const Selection&) = delete;
+        Selection (const Selection&) = delete;
+        Selection &operator=(Selection&&) = default;
+        Selection (Selection&&) = default;
+        ~Selection ();
+
+        Selection &operator&& (const Selection &other) const;
+        Selection &operator|| (const Selection &other) const;
+        Selection &operator! ();
+
+        /// \return Return TRUE if selection contains everything except of stated units
+        bool isInverted () const;
+        /// \return Return amount of units in selection
+        unsigned long size () const;
+    private:
+        bool isInverted_; ///< TRUE if this selection includes every single unit except of contained (Functionality is reduced in this case)
+        unsigned long size_;
+        std::string name_; ///< Name of file with stored info
+    };
+
+
     /// Id of user or group
     typedef unsigned long vkid_t;
 
     enum unitType {Undefined, User, Public, Group, Event};
 
     /// Class to work with single User, Group, Public or Event
+    /// Weights up to 40b
     class Unit {
     public:
         Unit () = delete;
@@ -33,7 +62,12 @@ namespace vk_selection {
         /// \return Unit custom id (screen name)
         std::string customId() const;
 
-        // TODO methods
+        /// \return Selection (10000 max) with friends of user or empty selection
+        Selection friends ();
+        /// \return Selection with subscribers of user or public or empty selection
+        Selection subscribers ();
+        /// \return Selection with members of group or empty selection
+        Selection members ();
     private:
         unitType type_;
         vkid_t id_;
@@ -45,23 +79,6 @@ namespace vk_selection {
 
     /// Print type, id and custom id
     std::ostream &operator<< (std::ostream &os, const Unit &unit);
-
-    /// Class to work with selection of Units
-    class Selection {
-    public:
-        Selection (std::string str = "");
-        Selection &operator=(const Selection&);
-        Selection (const Selection&);
-        Selection &operator=(Selection&&);
-        Selection (Selection&&);
-        ~Selection ();
-
-        // TODO methods
-    private:
-        bool isEverything_; ///< TRUE if this selection includes every single unit (Functionality is reduced in this case)
-
-        // TODO How to store all the data? (Largest VK public got 5 millions subscribers)
-    };
 }
 
 #endif // VK_SELECTION_H_INCLUDED

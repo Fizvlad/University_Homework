@@ -10,7 +10,9 @@ int main()
     Unit habr = Unit("habr");
     Unit gag = Unit("ru9gag");
     Unit stepik = Unit("rustepik");
-    Unit durov = Unit(1, true);
-    cout << habr << endl << gag << endl << stepik << endl << durov << endl;
+    Unit pasha = Unit(1, true);
+    Unit buerak = Unit("buerak_spring");
+    cout << habr << endl << gag << endl << stepik << endl << pasha << endl << buerak << endl;
+    Selection a("test");
     return 0;
 }

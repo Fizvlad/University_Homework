@@ -1,5 +1,6 @@
 #include "selection/VK_selection.h"
 
+const char SELECTION_EXTENSION[4] = "vks";
 
 vk_selection::unitType vk_selection::Unit::type() const {
     return type_;
@@ -71,4 +72,46 @@ bool vk_selection::Unit::initOther_(std::string id) {
 
 std::ostream &vk_selection::operator<< (std::ostream &os, const vk_selection::Unit &unit) {
     return os << unit.type() << " " << unit.id() << " " << unit.customId();
+}
+
+vk_selection::Selection vk_selection::Unit::friends() {
+    // TODO implementation
+}
+vk_selection::Selection vk_selection::Unit::subscribers() {
+    // TODO implementation
+}
+vk_selection::Selection vk_selection::Unit::members() {
+    // TODO implementation
+}
+
+
+vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_(0), name_("") {
+    std::stringstream fileName;
+    fileName << name << "." << SELECTION_EXTENSION;
+    std::FILE *file = std::fopen(fileName.str().c_str(), "w+");
+    std::fprintf(file, "%c%c%u%c", isInverted() ? '1' : '0', '\n', size(), '\n');
+    std::fclose(file);
+}
+
+vk_selection::Selection::~Selection()
+{
+    // TODO implementation
+}
+
+
+vk_selection::Selection& vk_selection::Selection::operator&&(const Selection& other) const {
+    // TODO implementation
+}
+vk_selection::Selection &vk_selection::Selection::operator||(const Selection& other) const {
+    // TODO implementation
+}
+vk_selection::Selection &vk_selection::Selection::operator!() {
+    // TODO implementation
+}
+
+bool vk_selection::Selection::isInverted() const {
+    return isInverted_;
+}
+unsigned long vk_selection::Selection::size() const {
+    return size_;
 }
