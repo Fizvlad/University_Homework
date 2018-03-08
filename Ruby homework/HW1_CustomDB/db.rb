@@ -105,7 +105,7 @@ class Table
 
         File.open(@name, "r") { |file|
             for line in file
-                if line == strForSearch
+                if line.strip == strForSearch
                     return true
                 end
             end
@@ -200,16 +200,18 @@ class Table
 
         result = []
         for i in (0...tableResults[0].length)
-            fullLine = util_recursive_findInConnections(tables, tableResults, connections, 0, i)
-            isFull = true
-            for i in (0...tables.length)
-                if fullLine[i] == nil
-                    isFull = false
-                    break
+            fullLines = util_recursive_findInConnections(tables, tableResults, connections, 0, i) # Array with matches to given line
+            for fullLine in fullLines
+                isFull = true
+                for i in (0...tables.length)
+                    if fullLine[i] == nil
+                        isFull = false
+                        break
+                    end
                 end
-            end
-            if isFull
-                result.push(fullLine)
+                if isFull
+                    result.push(fullLine)
+                end
             end
         end
         return result
@@ -220,46 +222,57 @@ class Table
     end
 
     private
-    def self.util_recursive_findInConnections(initialTables, tables, connections, tableIndex, lineIndex, visitedTables = [])
-        result = []
-        result[tableIndex] = tables[tableIndex][lineIndex] # Adding this line to result
+    def self.util_recursive_findInConnections(initialTables, filteredTables, connections, here_tableIndex, here_lineIndex, visitedTables = [])
+        results = []
         for connection in connections
-            p = connection.index(tableIndex.to_s) # Finding if connection related to current table
-            if p != nil
-                there_tableIndex = connection[p - 2].to_i # Index of connected table
-                if visitedTables.index(there_tableIndex) != nil
-                    next
-                end
-                here_valueName = connection[p + 1] # Name of value in current table
-                there_valueName = connection[p - 1] # Name of value in connected table
-                visitedTables.push(p) # Remembering connection to prevent loops
+            ci = connection.index(here_tableIndex.to_s)
+            if ci == nil
+                # This connection is not related to current table
+                next
+            end
+            here_valueName = connection[ci + 1]
+            here_valueIndex = initialTables[here_tableIndex].util_value_index(here_valueName)
+            here_value = filteredTables[here_tableIndex][here_lineIndex][here_valueIndex]
 
-                here_valueIndex = initialTables[tableIndex].util_value_index(here_valueName) # Index of value in current table
-                here_value = tables[tableIndex][lineIndex][here_valueIndex] # Value in current table
+            there_tableIndex = connection[ci - 2].to_i
+            if visitedTables.index(there_tableIndex) != nil
+                # Already visited this table
+                next
+            end
+            there_valueName = connection[ci - 1]
+            there_valueIndex = initialTables[there_tableIndex].util_value_index(there_valueName)
 
-                there_valueIndex = initialTables[there_tableIndex].util_value_index(there_valueName) # Index of value in connected table
-                for there_lineIndex in (0...tables[there_tableIndex].length)
-                    if tables[there_tableIndex][there_lineIndex][there_valueIndex] == here_value
-                        # Found matching line there
-                        recursive_result = util_recursive_findInConnections(initialTables, tables, connections, there_tableIndex, there_lineIndex, visitedTables)
-                        # Now recursive_result contains part of result or just [nil, nil, ...]
-                        for i in (0...recursive_result.length)
-                            if recursive_result[i] != nil
-                                result[i] = recursive_result[i]
-                            end
+            visitedTables.push(here_tableIndex).uniq! # Adding this table to visited
+            for there_lineIndex in (0...filteredTables[there_tableIndex].length)
+                # Going through lines in another table
+                there_value = filteredTables[there_tableIndex][there_lineIndex][there_valueIndex]
+                if here_value == there_value
+                    # Found matching one
+                    recursive_results = util_recursive_findInConnections(initialTables, filteredTables, connections, there_tableIndex, there_lineIndex, visitedTables)
+                    if recursive_results.length == 0
+                        # All connections were visited. Just adding matching line and this line to current results
+                        result = []
+                        result[here_tableIndex] = filteredTables[here_tableIndex][here_lineIndex]
+                        result[there_tableIndex] = filteredTables[there_tableIndex][there_lineIndex]
+                        results.push(result)
+                    else
+                        # Recursively got results. Adding this line data
+                        results = recursive_results
+                        for result in results
+                            result[here_tableIndex] = filteredTables[here_tableIndex][here_lineIndex]
                         end
                     end
                 end
             end
         end
-        return result
+        return results
     end
 end
 
 
 # Creating DB
-usersAmount = 100
-groupsAmount = 30
+usersAmount = 1000
+groupsAmount = 300
 membershipsAmount = Integer(usersAmount * (rand + 1))
 puts "users : #{usersAmount}, groups: #{groupsAmount}, memberships: #{membershipsAmount}"
 
