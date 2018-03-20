@@ -4,14 +4,39 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <exception>
 
 namespace interpolation {
-    struct Point {
-        double x;
-        double y;
+    struct Interval {
+        double begin;
+        double end;
 
-        Point (double X = 0, double Y = 0) : x(X), y(Y) {}
+        Interval(double b, double e) : begin(b), end(e) {}
     };
+
+
+    template <typename DoubleToDouble_f_t> double findPreimage (double y, Interval interval, DoubleToDouble_f_t f, double precision = 1e-8) {
+        if (!(f(interval.begin) < y && f(interval.end) > y) && !(f(interval.end) < y && f(interval.begin) > y)) {
+            std::cerr << f(interval.begin) << " " << y << " " << f(interval.end) << std::endl;
+            throw std::invalid_argument("y must lie between f(begin) and f(end)");
+        }
+        if (std::abs(y - f(interval.begin)) < precision) {
+            return interval.begin;
+        }
+        if (std::abs(f(interval.end) - y) < precision) {
+            return interval.end;
+        }
+
+        double m = (interval.begin + interval.end) / 2;
+        double result;
+        if ((f(interval.begin) < y && f(m) > y) || (f(m) < y && f(interval.begin) > y)) {
+            result = findPreimage(y, Interval(interval.begin, m), f, precision);
+        } else {
+            result = findPreimage(y, Interval(m, interval.end), f, precision);
+        }
+        return result;
+
+    }
 
 
     struct InterpolationPoint {
@@ -117,6 +142,7 @@ namespace interpolation {
 
     namespace {
         // Utility namespace for interpolate
+
         int factorial(int n)
         {
           return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
@@ -165,6 +191,7 @@ namespace interpolation {
             return result;
         }
     }
+
     Polynomial interpolate (std::vector<InterpolationPoint> input) {
         std::vector<InterpolationPoint> input_;
         for (InterpolationPoint p : input) {

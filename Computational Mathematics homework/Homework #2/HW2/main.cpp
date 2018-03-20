@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Interpolation.h"
+#include "CompMath_interpolation.h"
 
 using namespace std;
 using namespace interpolation;
@@ -29,8 +29,17 @@ int main()
     cout << endl;
     cout << "y(0.28) = " << polynomial1(0.28) << endl;
     cout << "y(0.475) = " << polynomial1(0.475) << endl;
+    double y = 4.5;
+    double x = findPreimage(4.5, {0.2, 0.25}, polynomial1); // ! Have to set interval 'with hands'
+    cout << "x(" << y << ") = " << x << endl;
+    cout << "f(" << x << ") = " << polynomial1(x) << "; Correct value: " << y << endl;
 
     cout << endl << endl;
+
+
+
+
+
     // Task 2
     vector<InterpolationPoint> points2 = {
         InterpolationPoint(0, {1, 2, 10, 36, 192}),
