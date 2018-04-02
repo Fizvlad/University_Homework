@@ -103,7 +103,9 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
 
 vk_selection::Selection::~Selection()
 {
-    // TODO implementation
+    if (std::remove(name_.c_str()) != 0) {
+        std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
+    }
 }
 
 
