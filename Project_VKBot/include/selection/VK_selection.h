@@ -11,7 +11,7 @@
 
 namespace vk_selection {
     /// Class to work with selection of Units
-    /// Each Selection have its own file in "name_.vks" which contains ids
+    /// Each Selection have its own file in "${name_}.vks" which contains ids
     class Selection {
     public:
         Selection (std::string name);
@@ -40,7 +40,7 @@ namespace vk_selection {
     /// Id of user or group
     typedef unsigned long vkid_t;
 
-    enum unitType {Undefined, User, Public, Group, Event};
+    enum unitType : char {Undefined, User, Public, Group, Event};
 
     /// Class to work with single User, Group, Public or Event
     /// Weights up to 40b

@@ -88,8 +88,16 @@ vk_selection::Selection vk_selection::Unit::members() {
 vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_(0), name_("") {
     std::stringstream fileName;
     fileName << name << "." << SELECTION_EXTENSION;
-    std::FILE *file = std::fopen(fileName.str().c_str(), "w+");
-    std::fprintf(file, "%c%c%u%c", isInverted() ? '1' : '0', '\n', size(), '\n');
+    name_ = fileName.str();
+    std::FILE *file = std::fopen(name_.c_str(), "wb+");
+    if (isInverted_) {
+        char oneChar = '1';
+        std::fwrite(&oneChar, sizeof(oneChar), 1, file);
+    } else {
+        char zeroChar = '0';
+        std::fwrite(&zeroChar, sizeof(zeroChar), 1, file);
+    }
+    std::fwrite(&size_, sizeof(unsigned long), 1, file);
     std::fclose(file);
 }
 
