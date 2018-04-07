@@ -29,6 +29,9 @@ namespace vk_selection {
         bool isInverted () const;
         /// \return Return amount of units in selection
         unsigned long size () const;
+
+        /// Save to file "${name}.txt"
+        void saveAs (std::string name);
     private:
         bool isInverted_; ///< TRUE if this selection includes every single unit except of contained (Functionality is reduced in this case)
         unsigned long size_;
@@ -42,6 +45,8 @@ namespace vk_selection {
             func(file);
             std::fclose(file);
         }
+
+        void updateInfo_ ();
     };
 
 
@@ -76,8 +81,6 @@ namespace vk_selection {
         Selection subscribers ();
         /// \return Selection with members of group or empty selection
         Selection members ();
-
-        void saveAs (std::string name);
     private:
         unitType type_;
         vkid_t id_;

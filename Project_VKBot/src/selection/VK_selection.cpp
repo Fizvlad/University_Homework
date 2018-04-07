@@ -94,6 +94,9 @@ vk_selection::Selection vk_selection::Unit::friends() {
             fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
         }
     });
+
+    result.size_ += response.size();
+    result.updateInfo_();
     return result;
 }
 vk_selection::Selection vk_selection::Unit::subscribers() {
@@ -122,9 +125,9 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
 
 vk_selection::Selection::~Selection()
 {
-    if (std::remove(name_.c_str()) != 0) {
+    /*if (std::remove(name_.c_str()) != 0) {
         std::cerr << "Error: Unable to remove " << name_ << " with size of ~" << (size_ * 5 / 1000) << "MB" << std::endl;
-    }
+    }*/
 }
 
 
@@ -136,6 +139,20 @@ vk_selection::Selection &vk_selection::Selection::operator||(const Selection& ot
 }
 vk_selection::Selection &vk_selection::Selection::operator!() {
     // TODO implementation
+}
+
+void vk_selection::Selection::updateInfo_ () {
+    std::FILE *file = std::fopen(name_.c_str(), "ab");
+    std::fseek(file, 0, SEEK_SET);
+    if (isInverted_) {
+        char oneChar = '1';
+        std::fwrite(&oneChar, sizeof(oneChar), 1, file);
+    } else {
+        char zeroChar = '0';
+        std::fwrite(&zeroChar, sizeof(zeroChar), 1, file);
+    }
+    std::fwrite(&size_, sizeof(unsigned long), 1, file);
+    std::fclose(file);
 }
 
 void vk_selection::Selection::saveAs (std::string name) {
