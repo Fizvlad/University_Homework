@@ -14,7 +14,6 @@ namespace vk_selection {
     /// Each Selection have its own file in "${name_}.vks" which contains ids
     class Selection {
     public:
-        Selection (std::string name);
         Selection () = delete;
         Selection &operator=(const Selection&) = delete;
         Selection (const Selection&) = delete;
@@ -34,6 +33,15 @@ namespace vk_selection {
         bool isInverted_; ///< TRUE if this selection includes every single unit except of contained (Functionality is reduced in this case)
         unsigned long size_;
         std::string name_; ///< Name of file with stored info
+
+        Selection (std::string name);
+        friend class Unit;
+
+        template <typename F> void inFile (const char* mode, F func) {
+            std::FILE *file = std::fopen(name_.c_str(), mode);
+            func(file);
+            std::fclose(file);
+        }
     };
 
 
@@ -68,13 +76,15 @@ namespace vk_selection {
         Selection subscribers ();
         /// \return Selection with members of group or empty selection
         Selection members ();
+
+        void saveAs (std::string name);
     private:
         unitType type_;
         vkid_t id_;
         std::string customId_; ///< Can be empty
 
-        bool initUser_(std::string id); ///< Return FALSE if unable to initialize
-        bool initOther_(std::string id); ///< Return FALSE if unable to initialize
+        bool initUser_ (std::string id); ///< Return FALSE if unable to initialize
+        bool initOther_ (std::string id); ///< Return FALSE if unable to initialize
     };
 
     /// Print type, id and custom id

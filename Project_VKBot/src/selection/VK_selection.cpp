@@ -76,6 +76,25 @@ std::ostream &vk_selection::operator<< (std::ostream &os, const vk_selection::Un
 
 vk_selection::Selection vk_selection::Unit::friends() {
     // TODO implementation
+    if (type_ != vk_selection::User) {
+        throw vk_api::ApiRequestExpetion("Can not request friends for this Unit (not user).");
+    }
+    std::stringstream param;
+    param << "user_id=" << id_ << "&count=10000";
+    nlohmann::json response = vk_api::apiRequest("friends.get", param.str())["items"];
+
+    std::stringstream name;
+    name << "user_" << id_ << "_friends";
+    Selection result(name.str());
+
+    result.inFile("ab", [response](FILE *file){
+        char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
+        for (vk_selection::vkid_t id : response) {
+            fwrite(&pre, sizeof(pre), 1, file);
+            fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+        }
+    });
+    return result;
 }
 vk_selection::Selection vk_selection::Unit::subscribers() {
     // TODO implementation
@@ -116,6 +135,10 @@ vk_selection::Selection &vk_selection::Selection::operator||(const Selection& ot
     // TODO implementation
 }
 vk_selection::Selection &vk_selection::Selection::operator!() {
+    // TODO implementation
+}
+
+void vk_selection::Selection::saveAs (std::string name) {
     // TODO implementation
 }
 
