@@ -1,5 +1,7 @@
 # Tickets from station
 
+SET @u_from_station_id := 1;
+
 SELECT DISTINCT
     t.TICKET_ID,
     p.PASSENGER_ID,
@@ -19,6 +21,5 @@ WHERE
         AND tv.VOYAGE_ID = v.VOYAGE_ID
         AND v.ROUTE_ID = r.ROUTE_ID
         AND r.TRAIL_ID = tr.TRAIL_ID
-        
-        AND tr.FROM_ID = 1
+        AND tr.FROM_ID = @from_station_id
 ORDER BY t.TICKET_ID;

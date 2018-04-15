@@ -1,10 +1,12 @@
 # All passengers of train on day
 
+SET @u_train_id := 1;
+SET @u_date := '2018-04-12';
+
 SELECT DISTINCT
     p.PASSENGER_ID,
     t.TICKET_ID,
     vi.VOYAGE_ID,
-    tr.TRAIN_ID,
     vi.DATE,
     vi.TIME
 FROM
@@ -18,7 +20,6 @@ WHERE
         AND t.TICKET_ID = tv.TICKET_ID
         AND tv.VOYAGE_ID = vi.VOYAGE_ID
         AND vi.TRAIN_ID = tr.TRAIN_ID
-        
-        AND tr.TRAIN_ID = 1
-        AND vi.DATE = '2018-04-12'
+        AND tr.TRAIN_ID = @u_train_id
+        AND vi.DATE = @u_date
 ORDER BY p.PASSENGER_ID;
