@@ -9,7 +9,7 @@ using json = nlohmann::json;
 int main()
 {
     setlocale(LC_CTYPE, "rus");
-    fstream fin("../../private/key.txt");
+    fstream fin("private/key.txt");
     string token;
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl;

@@ -14,7 +14,7 @@ using namespace std;
 int main()
 {
     setlocale(LC_CTYPE, "rus");
-    fstream fin("../../private/key.txt");
+    fstream fin("private/key.txt");
     fstream fout("messages.txt", fstream::app);
     string token;
     fin >> token;
