@@ -2,8 +2,7 @@
 #define VK_API_MESSAGES_H_INCLUDED
 
 
-#include <string> // std::string
-#include <sstream> // std::stringstream
+#include <string> // std::string, std::stringstream
 #include <ctime> // time_t
 #include <vector> // std::vector
 

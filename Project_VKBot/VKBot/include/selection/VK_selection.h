@@ -2,9 +2,8 @@
 #define VK_SELECTION_H_INCLUDED
 
 
-#include <string> // std::string
+#include <string> // std::string, std::stringstream
 #include <iostream> // std::ostream
-#include <sstream> // std::stringstream
 #include <cstdio> // std::open, std::read, ...
 
 #include "VK_API_utility.h" // vk_api::apiRequest

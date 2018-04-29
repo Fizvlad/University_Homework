@@ -1,9 +1,8 @@
 #ifndef VK_API_UTILITY_H_INCLUDED
 #define VK_API_UTILITY_H_INCLUDED
 
-#include <string> // std::string
+#include <string> // std::string, std::stringstream
 #include <exception> // std::exception
-#include <sstream> // std::stringstream
 
 #include "curl/curl.h" // curl
 #include "nlohmann/json.hpp" // json

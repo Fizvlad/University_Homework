@@ -1,9 +1,8 @@
 #ifndef VK_API_LONGPOLL_H_INCLUDED
 #define VK_API_LONGPOLL_H_INCLUDED
 
-#include <string> // std::string
+#include <string> // std::string, std::stringstream
 #include <ctime> // time_t
-#include <sstream> // std::stringstream
 
 #include "nlohmann/json.hpp" // json
 
