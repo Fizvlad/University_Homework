@@ -52,7 +52,8 @@ namespace vk_selection {
     /// Id of user or group
     typedef unsigned long vkid_t;
 
-    enum unitType : char {Undefined, User, Public, Group, Event};
+    enum unitType : char {Undefined = '0', User, Public, Group, Event};
+    const std::string unitTypeNames[] = {"Undefined", "User", "Public", "Group", "Event"};
 
     /// Class to work with single User, Group, Public or Event
     /// Weights up to 40b

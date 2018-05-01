@@ -16,10 +16,11 @@ int main()
     Unit habr = Unit("habr");
     Unit gag = Unit("ru9gag");
     Unit stepik = Unit("rustepik");
-    Unit Filyus_Bots = Unit(283177744, true);
+    Unit Filyus_Bot = Unit(283177744, true);
     Unit buerak = Unit("buerak_spring");
-    cout << habr << endl << gag << endl << stepik << endl << Filyus_Bots << endl << buerak << endl;
-    Selection test = Filyus_Bots.friends();
-    test.saveAs("result1");
+    cout << habr << endl << gag << endl << stepik << endl << Filyus_Bot << endl << buerak << endl;
+
+    Selection test = Filyus_Bot.friends();
+    test.saveAs("bot_friends");
     return 0;
 }
