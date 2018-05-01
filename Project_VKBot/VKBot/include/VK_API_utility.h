@@ -34,7 +34,7 @@ namespace vk_api {
     nlohmann::json jsonRequest (std::string url);
 
     ///
-    /// \brief Send HTTPS request for given method
+    /// \brief Send HTTPS request for given method and return response["response"]
     ///
     /// \param methodName Name of the method
     /// \param parameters Query string
@@ -43,6 +43,17 @@ namespace vk_api {
     /// \return "response" value of recieved json
     ///
     nlohmann::json apiRequest (std::string methodName, std::string parameters, std::string accessToken = "", std::string version = "5.69");
+
+    ///
+    /// \brief Send HTTPS request for given method and return full response
+    ///
+    /// \param methodName Name of the method
+    /// \param parameters Query string
+    /// \param accessToken VK access token (might be not necessary)
+    /// \param version API version
+    /// \return "response" value of recieved json
+    ///
+    nlohmann::json apiRequest_raw (std::string methodName, std::string parameters, std::string accessToken = "", std::string version = "5.69");
 
     ///
     /// \brief Executes given JS code on VK server

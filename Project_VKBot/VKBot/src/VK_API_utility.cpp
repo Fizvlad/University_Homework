@@ -55,7 +55,7 @@ nlohmann::json vk_api::jsonRequest (std::string url) {
     return response;
 }
 
-nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameters, std::string accessToken, std::string version) {
+nlohmann::json vk_api::apiRequest_raw (std::string methodName, std::string parameters, std::string accessToken, std::string version) {
     std::stringstream url;
     url << "https://api.vk.com/method/" << methodName << "?";
     if (parameters != "") {
@@ -65,17 +65,17 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
         url << "access_token=" << accessToken << "&";
     }
     url << "v=" << version;
-
-    nlohmann::json response = jsonRequest(url.str());
-
+    return jsonRequest(url.str());
+}
+nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameters, std::string accessToken, std::string version) {
+    nlohmann::json response = apiRequest_raw(methodName, parameters, accessToken, version);
     if (response.find("response") == response.end()) {
         throw vk_api::ApiRequestExpetion("API request error. Bad response");
     }
-
     return response["response"];
 }
 nlohmann::json vk_api::execute (std::string code, std::string accessToken, std::string version) {
     std::stringstream param;
     param << "code=" << str_encode(code);
-    return vk_api::apiRequest("execute", param.str(), accessToken, version);
+    return vk_api::apiRequest_raw("execute", param.str(), accessToken, version);
 }

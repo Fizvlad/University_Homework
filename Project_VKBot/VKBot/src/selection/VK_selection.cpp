@@ -1,6 +1,8 @@
 #include "selection/VK_selection.h"
 
-const char SELECTION_EXTENSION[4] = "vks";
+namespace {
+    const char SELECTION_EXTENSION[4] = "vks";
+}
 
 vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_(0), name_("") {
     std::stringstream fileName;

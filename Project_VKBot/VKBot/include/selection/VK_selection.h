@@ -78,7 +78,8 @@ namespace vk_selection {
         /// \return Selection (10000 max) with friends of user or empty selection
         Selection friends ();
         /// \return Selection with subscribers of user or public or empty selection
-        Selection subscribers ();
+        /// Requires user accessToken
+        Selection subscribers (std::string accessToken);
         /// \return Selection with members of group or empty selection
         Selection members ();
     private:

@@ -108,6 +108,9 @@
 		<Unit filename="src/selection/VK_selection_unit.cpp">
 			<Option target="Debug" />
 		</Unit>
+		<Unit filename="src/utility/encode_decode.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="tests/LongPoll/main.cpp">
 			<Option target="test_longpoll" />
 		</Unit>

@@ -1,5 +1,13 @@
 #include "selection/VK_selection.h"
 
+namespace {
+    std::string js_userSubscribers(vk_selection::vkid_t id) {
+        std::stringstream code;
+        code << "var id=" << id << ";var count=1000;var result=[];var first=API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":0});result.push(first.items);var total=first.count;var i=1;while (i*count<total&&i<25){result.push(API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":i*count}).items);i=i+1;}return result;";
+        return code.str();
+    }
+}
+
 vk_selection::unitType vk_selection::Unit::type() const {
     return type_;
 }
@@ -39,7 +47,14 @@ bool vk_selection::Unit::initUser_(std::string id) {
     }
     type_ = User;
     id_ = userInfo["id"];
-    customId_ = userInfo["screen_name"];
+    if (userInfo["screen_name"] == nullptr) {
+        // Private profile?
+        std::stringstream sn;
+        sn << "id" << id_;
+        customId_ = sn.str();
+    } else {
+        customId_ = userInfo["screen_name"];
+    }
     return true;
 }
 bool vk_selection::Unit::initOther_(std::string id) {
@@ -69,7 +84,6 @@ bool vk_selection::Unit::initOther_(std::string id) {
 }
 
 vk_selection::Selection vk_selection::Unit::friends() {
-    // TODO implementation
     if (type_ != vk_selection::User) {
         throw vk_api::ApiRequestExpetion("Can not request friends for this Unit (not user).");
     }
@@ -93,8 +107,27 @@ vk_selection::Selection vk_selection::Unit::friends() {
     result.updateInfo_();
     return result;
 }
-vk_selection::Selection vk_selection::Unit::subscribers() {
-    // TODO implementation
+vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken) {
+    // TODO Finish function (only first 25k loaded). ATTENTION: this method does not work with group token
+    if (type_ != vk_selection::User) {
+        throw vk_api::ApiRequestExpetion("Can not request friends for this Unit (not user).");
+    }
+    nlohmann::json response = vk_api::execute(js_userSubscribers(id_), accessToken);
+
+    std::stringstream name;
+    name << "user_" << id_ << "_subscribers";
+    Selection result(name.str());
+
+    result.inFile("ab", [response](FILE *file){
+        char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
+        for (vk_selection::vkid_t id : response) {
+            fwrite(&pre, sizeof(pre), 1, file);
+            fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+        }
+    });
+    result.size_ += response.size();
+    result.updateInfo_();
+    return result;
 }
 vk_selection::Selection vk_selection::Unit::members() {
     // TODO implementation
