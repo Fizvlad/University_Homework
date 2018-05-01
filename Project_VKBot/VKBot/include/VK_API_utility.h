@@ -43,6 +43,18 @@ namespace vk_api {
     /// \return "response" value of recieved json
     ///
     nlohmann::json apiRequest (std::string methodName, std::string parameters, std::string accessToken = "", std::string version = "5.69");
+
+    ///
+    /// \brief Executes given JS code on VK server
+    ///
+    /// Please take a look at https://vk.com/dev/execute before use.
+    ///
+    /// \param code string of code
+    /// \param accessToken VK access token (might be not necessary)
+    /// \param version API version
+    /// \return "response" value of recieved json
+    ///
+    nlohmann::json execute (std::string code, std::string accessToken, std::string version = "5.69");
 }
 
 #endif // VK_API_UTILITY_H_INCLUDED

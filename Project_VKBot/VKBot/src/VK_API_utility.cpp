@@ -38,6 +38,8 @@ namespace {
         curl_easy_cleanup(curl);
         return outputBuffer;
     }
+
+    #include "utility/encode_decode.cpp"
 }
 
 
@@ -71,4 +73,9 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
     }
 
     return response["response"];
+}
+nlohmann::json vk_api::execute (std::string code, std::string accessToken, std::string version) {
+    std::stringstream param;
+    param << "code=" << str_encode(code);
+    return vk_api::apiRequest("execute", param.str(), accessToken, version);
 }

@@ -1,41 +1,7 @@
 #include "VK_API_chat.h"
 
 namespace {
-    std::string url_encode (std::string str) {
-        std::string result;
-        CURL *curl = curl_easy_init();
-        if(curl) {
-            char *output = curl_easy_escape(curl, str.c_str(), str.size());
-            if(output) {
-                result.append(output);
-                curl_free(output);
-            } else {
-                throw vk_api::ApiRequestExpetion("Unable to encode string. escape returned NULL.");
-            }
-        } else {
-            throw vk_api::ApiRequestExpetion("Unable to encode string. Unable to init CURL.");
-        }
-        curl_easy_cleanup(curl);
-        return result;
-    }
-    std::string url_decode (std::string str) {
-        std::string result;
-        CURL *curl = curl_easy_init();
-        if(curl) {
-            int l;
-            char *output = curl_easy_unescape(curl, str.c_str(), str.size(), &l);
-            if(output) {
-                result.append(output, l);
-                curl_free(output);
-            } else {
-                throw vk_api::ApiRequestExpetion("Unable to decode string. unescape returned NULL.");
-            }
-        } else {
-            throw vk_api::ApiRequestExpetion("Unable to decode string. Unable to init CURL.");
-        }
-        curl_easy_cleanup(curl);
-        return result;
-    }
+    #include "utility/encode_decode.cpp"
 }
 
 
@@ -61,7 +27,7 @@ void vk_api::ChatBot::markAsRead (vk_api::Message message) {
 
 void vk_api::ChatBot::sendMessage (vkid_t receiver, std::string text) {
     std::stringstream param;
-    param << "user_id=" << receiver << "&message=" << url_encode(text);
+    param << "user_id=" << receiver << "&message=" << str_encode(text);
     vk_api::apiRequest("messages.send", param.str(), accessToken_);
 }
 
