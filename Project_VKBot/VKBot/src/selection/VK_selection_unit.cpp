@@ -1,15 +1,15 @@
 #include "selection/VK_selection.h"
 
 namespace {
-    std::string js_userSubscribers (vk_selection::vkid_t id) {
+    std::string js_userSubscribers (vk_selection::vkid_t id, size_t offset = 0) {
         std::stringstream code;
-        code << "var id=" << id << ";var count=1000;var result=[];var first=API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":0});result.push(first.items);var total=first.count;var i=1;while (i*count<total&&i<25){result.push(API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":i*count}).items);i=i+1;}return result;";
+        code << "var id=" << id << ";var count=1000;var offset=" << offset << ";var requestsLimit=25;var result=[];var first=API.users.getFollowers({\"group_id\":id,\"count\":count,\"offset\":offset});result.push(first.items);var total=first.count;var current=first.items.length;var i=1;while (i*count<total&&i<requestsLimit){var r=API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":offset+i*count});result.push(r.items);current=current+r.items.length;i=i+1;}return {\"total\":total,\"current\":current,\"items\":result};";
         return code.str();
     }
 
-    std::string js_groupMembers (vk_selection::vkid_t id) {
+    std::string js_groupMembers (vk_selection::vkid_t id, size_t offset = 0) {
         std::stringstream code;
-        code << "var id=" << id << ";var count=1000;var result=[];var first=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":0});result.push(first.items);var total=first.count;var i=1;while (i*count<total&&i<25){result.push(API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":i*count}).items);i=i+1;}return result;";
+        code << "var id=" << id << ";var count=1000;var offset=" << offset << ";var requestsLimit=25;var result=[];var first=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":offset});result.push(first.items);var total=first.count;var current=first.items.length;var i=1;while (i*count<total&&i<requestsLimit){var r=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":offset+i*count});result.push(r.items);current=current+r.items.length;i=i+1;}return {\"total\":total,\"current\":current,\"items\":result};";
         return code.str();
     }
 }
@@ -118,53 +118,68 @@ vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken)
     if (type_ != vk_selection::User) {
         throw vk_api::ApiRequestExpetion("Can not request friends for this Unit (not user).");
     }
-    // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
-    nlohmann::json response = vk_api::execute(js_userSubscribers(id_), accessToken);
-    size_t realSize = 0;
-    for (auto sub : response) {
-        realSize += sub.size();
-    }
 
+    size_t total = 1;
+    size_t current = 0;
+    nlohmann::json responses = {};
+    while (current < total) {
+        // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
+        nlohmann::json response = vk_api::execute(js_userSubscribers(id_, current), accessToken);
+        total = (size_t) response["total"];
+        current += (size_t) response["current"];
+        responses.push_back(response["items"]);
+    }
     std::stringstream name;
     name << "user_" << id_ << "_subscribers";
     Selection result(name.str());
 
-    result.inFile("ab", [response](FILE *file){
+    result.inFile("ab", [responses](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
-        for (auto sub : response) {
-            for (vk_selection::vkid_t id : sub) {
-                fwrite(&pre, sizeof(pre), 1, file);
-                fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+        for (auto re : responses) {
+            for (auto sub : re) {
+                for (vk_selection::vkid_t id : sub) {
+                    fwrite(&pre, sizeof(pre), 1, file);
+                    fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+                }
             }
         }
     });
+    result.size_ = total;
+    result.updateInfo_();
+    return result;
 }
 vk_selection::Selection vk_selection::Unit::members(std::string accessToken) {
     // TODO implementation
     if (type_ == vk_selection::User) {
         throw vk_api::ApiRequestExpetion("Can not request members for this Unit (User).");
     }
-    // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
-    nlohmann::json response = vk_api::execute(js_groupMembers(id_), accessToken);
-    size_t realSize = 0;
-    for (auto sub : response) {
-        realSize += sub.size();
-    }
 
+    size_t total = 1;
+    size_t current = 0;
+    nlohmann::json responses = {};
+    while (current < total) {
+        // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
+        nlohmann::json response = vk_api::execute(js_groupMembers(id_, current), accessToken);
+        total = (size_t) response["total"];
+        current += (size_t) response["current"];
+        responses.push_back(response["items"]);
+    }
     std::stringstream name;
     name << "group_" << id_ << "_members";
     Selection result(name.str());
 
-    result.inFile("ab", [response](FILE *file){
+    result.inFile("ab", [responses](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
-        for (auto sub : response) {
-            for (vk_selection::vkid_t id : sub) {
-                fwrite(&pre, sizeof(pre), 1, file);
-                fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+        for (auto re : responses) {
+            for (auto sub : re) {
+                for (vk_selection::vkid_t id : sub) {
+                    fwrite(&pre, sizeof(pre), 1, file);
+                    fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+                }
             }
         }
     });
-    result.size_ += realSize;
+    result.size_ = total;
     result.updateInfo_();
     return result;
 }

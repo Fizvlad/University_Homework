@@ -20,21 +20,25 @@ int main()
 
     Unit habr = Unit("habr");
     Unit gag = Unit("ru9gag");
+    Unit kinopoisk = Unit("kinopoisk");
     Unit stepik = Unit("rustepik");
     Unit Filyus_Bot = Unit(283177744, true);
     Unit Fizvlad = Unit("id157230821");
     Unit buerak = Unit("buerak_spring");
-    cout << habr << endl << gag << endl << stepik << endl << Filyus_Bot << endl << Fizvlad << endl << buerak << endl;
+    cout << habr << endl << gag << endl << kinopoisk << endl << stepik << endl << Filyus_Bot << endl << Fizvlad << endl << buerak << endl;
 
-    //Selection test = Filyus_Bot.friends();
-    //test.saveAs("test");
+    // Works fine
+    Selection test = Filyus_Bot.friends();
+    test.saveAs("Filyus_friends");
 
     /*
+    // Requires personal accessToken
     Selection test2 = Fizvlad.subscribers(service_token);
     test2.saveAs("test2");
     */
 
-    Selection test3 = gag.members(token);
-    test3.saveAs("test3");
+    // Works fine. Requires much time
+    Selection test3 = kinopoisk.members(token);
+    test3.saveAs("Kinopoisk_subscribers");
     return 0;
 }

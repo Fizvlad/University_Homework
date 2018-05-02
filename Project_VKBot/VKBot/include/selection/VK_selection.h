@@ -39,7 +39,7 @@ namespace vk_selection {
         /// \brief Size of selection
         ///
         /// \return Return amount of units in selection
-        unsigned long size () const;
+        size_t size () const;
 
 
         ///
@@ -50,7 +50,7 @@ namespace vk_selection {
 
     private:
         bool isInverted_;
-        unsigned long size_;
+        size_t size_;
         std::string name_;
 
         Selection (std::string name);

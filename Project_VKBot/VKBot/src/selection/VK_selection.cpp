@@ -16,7 +16,7 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
         char zeroChar = '0';
         std::fwrite(&zeroChar, sizeof(char), 1, file);
     }
-    std::fwrite(&size_, sizeof(unsigned long), 1, file);
+    std::fwrite(&size_, sizeof(size_t), 1, file);
     std::fclose(file);
 }
 
@@ -48,7 +48,7 @@ void vk_selection::Selection::updateInfo_ () {
         char zeroChar = '0';
         std::fwrite(&zeroChar, sizeof(char), 1, file);
     }
-    std::fwrite(&size_, sizeof(unsigned long), 1, file);
+    std::fwrite(&size_, sizeof(size_t), 1, file);
     std::fclose(file);
 }
 
@@ -59,8 +59,8 @@ void vk_selection::Selection::saveAs (std::string name) {
     std::fprintf(file, "%s", isInverted_ ? "Inverted\n" : "Not inverted\n");
     std::fprintf(file, "%s%lu%s", "Size of selection: ", size_, "\n");
     inFile("rb", [this, unitTypeNames, file](FILE *b_file){
-        std::fseek(b_file, sizeof(char) + sizeof(unsigned long), SEEK_SET); // Moving to the beginning of data
-        for (unsigned long i = 0; i < size_; i++) {
+        std::fseek(b_file, sizeof(char) + sizeof(size_t), SEEK_SET); // Moving to the beginning of data
+        for (size_t i = 0; i < size_; i++) {
             char u; // unit type
             std::fread(&u, sizeof(char), 1, b_file);
             std::fprintf(file, "%s", vk_selection::unitTypeNames[((int) u) - ((int) '0')].c_str()); // Using '0' as first element in enum
@@ -77,7 +77,7 @@ void vk_selection::Selection::saveAs (std::string name) {
 bool vk_selection::Selection::isInverted() const {
     return isInverted_;
 }
-unsigned long vk_selection::Selection::size() const {
+size_t vk_selection::Selection::size() const {
     return size_;
 }
 
