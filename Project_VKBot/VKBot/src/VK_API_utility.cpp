@@ -77,5 +77,5 @@ nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameter
 nlohmann::json vk_api::execute (std::string code, std::string accessToken, std::string version) {
     std::stringstream param;
     param << "code=" << str_encode(code);
-    return vk_api::apiRequest_raw("execute", param.str(), accessToken, version);
+    return vk_api::apiRequest("execute", param.str(), accessToken, version);
 }

@@ -67,7 +67,7 @@ void vk_selection::Selection::saveAs (std::string name) {
 
             vkid_t id; // unit id
             std::fread(&id, sizeof(vkid_t), 1, b_file);
-            std::fprintf(file, "%c%lu%s", ' ', id, "\n"); // Using '0' as first element in enum
+            std::fprintf(file, "%c%lu%s", ' ', id, "\n");
         }
     });
 

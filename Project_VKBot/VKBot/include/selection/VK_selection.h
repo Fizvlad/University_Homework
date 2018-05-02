@@ -139,7 +139,7 @@ namespace vk_selection {
         /// \brief Selection of group/public/event members
         ///
         /// \return Selection with members or empty selection
-        Selection members ();
+        Selection members (std::string accessToken);
 
 
     private:

@@ -1,9 +1,15 @@
 #include "selection/VK_selection.h"
 
 namespace {
-    std::string js_userSubscribers(vk_selection::vkid_t id) {
+    std::string js_userSubscribers (vk_selection::vkid_t id) {
         std::stringstream code;
         code << "var id=" << id << ";var count=1000;var result=[];var first=API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":0});result.push(first.items);var total=first.count;var i=1;while (i*count<total&&i<25){result.push(API.users.getFollowers({\"user_id\":id,\"count\":count,\"offset\":i*count}).items);i=i+1;}return result;";
+        return code.str();
+    }
+
+    std::string js_groupMembers (vk_selection::vkid_t id) {
+        std::stringstream code;
+        code << "var id=" << id << ";var count=1000;var result=[];var first=API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":0});result.push(first.items);var total=first.count;var i=1;while (i*count<total&&i<25){result.push(API.groups.getMembers({\"group_id\":id,\"count\":count,\"offset\":i*count}).items);i=i+1;}return result;";
         return code.str();
     }
 }
@@ -112,7 +118,12 @@ vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken)
     if (type_ != vk_selection::User) {
         throw vk_api::ApiRequestExpetion("Can not request friends for this Unit (not user).");
     }
+    // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
     nlohmann::json response = vk_api::execute(js_userSubscribers(id_), accessToken);
+    size_t realSize = 0;
+    for (auto sub : response) {
+        realSize += sub.size();
+    }
 
     std::stringstream name;
     name << "user_" << id_ << "_subscribers";
@@ -120,15 +131,40 @@ vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken)
 
     result.inFile("ab", [response](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
-        for (vk_selection::vkid_t id : response) {
-            fwrite(&pre, sizeof(pre), 1, file);
-            fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+        for (auto sub : response) {
+            for (vk_selection::vkid_t id : sub) {
+                fwrite(&pre, sizeof(pre), 1, file);
+                fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+            }
         }
     });
-    result.size_ += response.size();
+}
+vk_selection::Selection vk_selection::Unit::members(std::string accessToken) {
+    // TODO implementation
+    if (type_ == vk_selection::User) {
+        throw vk_api::ApiRequestExpetion("Can not request members for this Unit (User).");
+    }
+    // NOTICE Result of following command is array of arrays (due to API.execute restrictions)
+    nlohmann::json response = vk_api::execute(js_groupMembers(id_), accessToken);
+    size_t realSize = 0;
+    for (auto sub : response) {
+        realSize += sub.size();
+    }
+
+    std::stringstream name;
+    name << "group_" << id_ << "_members";
+    Selection result(name.str());
+
+    result.inFile("ab", [response](FILE *file){
+        char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
+        for (auto sub : response) {
+            for (vk_selection::vkid_t id : sub) {
+                fwrite(&pre, sizeof(pre), 1, file);
+                fwrite(&id, sizeof(vk_selection::vkid_t), 1, file);
+            }
+        }
+    });
+    result.size_ += realSize;
     result.updateInfo_();
     return result;
-}
-vk_selection::Selection vk_selection::Unit::members() {
-    // TODO implementation
 }

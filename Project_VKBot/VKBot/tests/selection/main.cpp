@@ -26,12 +26,15 @@ int main()
     Unit buerak = Unit("buerak_spring");
     cout << habr << endl << gag << endl << stepik << endl << Filyus_Bot << endl << Fizvlad << endl << buerak << endl;
 
-    Selection test = Filyus_Bot.friends();
-    test.saveAs("test");
+    //Selection test = Filyus_Bot.friends();
+    //test.saveAs("test");
 
     /*
     Selection test2 = Fizvlad.subscribers(service_token);
     test2.saveAs("test2");
     */
+
+    Selection test3 = gag.members(token);
+    test3.saveAs("test3");
     return 0;
 }
