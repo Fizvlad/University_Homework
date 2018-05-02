@@ -11,12 +11,17 @@
 #include "VK_API_longpoll.h"
 
 namespace vk_api {
-    /// Id of user or message
+
+    ///
+    /// \brief Id of user or message
+    ///
     typedef unsigned long vkid_t;
 
-    /// Structure with message data
-    class Message {
-    public:
+
+    ///
+    /// \brief Structure with message data
+    ///
+    struct Message {
         time_t timestamp;
         vkid_t id;
         vkid_t senderId;
@@ -25,13 +30,24 @@ namespace vk_api {
         bool ifRead;
 
         Message (time_t Timestamp = 0, vkid_t Id = 0, vkid_t SenderId = 0, vkid_t ReceiverId = 0, std::string Text = "", bool IfRead = true);
-        Message (nlohmann::json input); ///< Parsing message from json
+
+        ///
+        /// \brief Parsing message from json
+        ///
+        Message (nlohmann::json input);
     };
 
-    /// Working with chats and messages
+
+    ///
+    /// \brief Working with chats and messages
+    ///
     class ChatBot {
     public:
+        ///
+        /// \brief Saving accessToken and setting up longpoll session
+        ///
         ChatBot (std::string accessToken);
+
 
         ChatBot () = delete;
         ChatBot &operator=(const ChatBot&) = delete;
@@ -40,7 +56,10 @@ namespace vk_api {
         ChatBot (ChatBot&&) = delete;
         ~ChatBot ();
 
-        /// Handle last unread message in every dialogue and starts longpoll
+
+        ///
+        /// \brief Handle last unread message in every dialogue and starts longpoll
+        ///
         /// \param handler bool (function*) (Message message, bool isOld) to handle messages
         template <typename MessageHandlerFunc> void start (MessageHandlerFunc handler) {
             std::vector<Message> unread = getUnreadMessages_();
@@ -63,14 +82,27 @@ namespace vk_api {
              });
         }
 
+        ///
+        /// \brief Mark message as read
+        ///
+        /// \param message Message structure
         void markAsRead (Message message);
+
+        ///
+        /// \brief Send message to user
+        ///
+        /// \param receiver Id of user
+        /// \param text Text of message
         void sendMessage (vkid_t receiver, std::string text);
+
+
     private:
         longpoll::Session longpoll_;
         std::string accessToken_;
 
         std::vector<Message> getUnreadMessages_();
     };
+
 }
 
 #endif // VK_API_MESSAGES_H_INCLUDED

@@ -9,7 +9,10 @@
 
 
 namespace vk_api {
-    /// VK_API exception class
+
+    ///
+    /// \brief VK_API exception class
+    ///
     class ApiRequestExpetion : std::exception {
     public:
         explicit ApiRequestExpetion (const char* message) : what_(message) {}
@@ -24,6 +27,7 @@ namespace vk_api {
     private:
         const char* what_;
     };
+
 
     ///
     /// \brief Send HTTPS request for given url
@@ -66,6 +70,7 @@ namespace vk_api {
     /// \return "response" value of recieved json
     ///
     nlohmann::json execute (std::string code, std::string accessToken, std::string version = "5.69");
+
 }
 
 #endif // VK_API_UTILITY_H_INCLUDED
