@@ -30,7 +30,7 @@ for (let i = 2; i < process.argv.length; i++) {
     let filePath = path.join(path.resolve(), process.argv[i]);
     fs.readFile(filePath, {"encoding": "utf-8"}, function (err, data) {
         if (!err) {
-            let name = process.argv[i].replace(/\..+$/, (s) => (s + ".txt"));
+            let name = process.argv[i].replace(/\.[^\.]+$/, (s) => (s + ".txt"));
             fs.writeFile(name, stringify(data), (err) => (err ? console.log(err) : null));
         } else {
             console.log(err);
