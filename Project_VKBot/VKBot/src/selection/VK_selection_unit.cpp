@@ -101,7 +101,7 @@ vk_selection::Selection vk_selection::Unit::friends() {
     name << "user_" << id_ << "_friends";
     Selection result(name.str());
 
-    result.inFile("ab", [response](FILE *file){
+    result.inFile_("ab", [response](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
         for (vk_selection::vkid_t id : response) {
             fwrite(&pre, sizeof(pre), 1, file);
@@ -133,7 +133,7 @@ vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken)
     name << "user_" << id_ << "_subscribers";
     Selection result(name.str());
 
-    result.inFile("ab", [responses](FILE *file){
+    result.inFile_("ab", [responses](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
         for (auto re : responses) {
             for (auto sub : re) {
@@ -149,7 +149,6 @@ vk_selection::Selection vk_selection::Unit::subscribers(std::string accessToken)
     return result;
 }
 vk_selection::Selection vk_selection::Unit::members(std::string accessToken) {
-    // TODO implementation
     if (type_ == vk_selection::User) {
         throw vk_api::ApiRequestExpetion("Can not request members for this Unit (User).");
     }
@@ -168,7 +167,7 @@ vk_selection::Selection vk_selection::Unit::members(std::string accessToken) {
     name << "group_" << id_ << "_members";
     Selection result(name.str());
 
-    result.inFile("ab", [responses](FILE *file){
+    result.inFile_("ab", [responses](FILE *file){
         char pre = (char) vk_selection::User; // Forced to first create char pre because there is no way to save enum element into file
         for (auto re : responses) {
             for (auto sub : re) {

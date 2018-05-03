@@ -8,7 +8,7 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
     std::stringstream fileName;
     fileName << name << "." << SELECTION_EXTENSION;
     name_ = fileName.str();
-    std::FILE *file = std::fopen(name_.c_str(), "wb+");
+    std::FILE *file = std::fopen(name_.c_str(), "wb");
     if (isInverted_) {
         char oneChar = '1';
         std::fwrite(&oneChar, sizeof(char), 1, file);
@@ -20,6 +20,21 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
     std::fclose(file);
 }
 
+vk_selection::Selection::Selection(const vk_selection::Selection &other, std::string name) : isInverted_(other.isInverted_), size_(other.size_), name_("") {
+    std::stringstream fileName;
+    fileName << name << "." << SELECTION_EXTENSION;
+    name_ = fileName.str();
+    vk_selection::Selection::inTwoFiles_(other, "rb", *this, "wb", [](std::FILE *source, std::FILE *target){
+        size_t B_SIZE = 256;
+        char buffer[B_SIZE];
+        size_t s = std::fread(buffer, sizeof(char), B_SIZE, source);
+        while (s) {
+            std::fwrite(buffer, sizeof(char), s, target);
+            s = std::fread(buffer, sizeof(char), B_SIZE, source);
+        }
+    });
+}
+
 vk_selection::Selection::~Selection()
 {
     if (std::remove(name_.c_str()) != 0) {
@@ -28,13 +43,13 @@ vk_selection::Selection::~Selection()
 }
 
 
-vk_selection::Selection& vk_selection::Selection::operator&&(const Selection& other) const {
+vk_selection::Selection vk_selection::Selection::operator&&(const Selection& other) const {
     // TODO implementation
 }
-vk_selection::Selection &vk_selection::Selection::operator||(const Selection& other) const {
+vk_selection::Selection vk_selection::Selection::operator||(const Selection& other) const {
     // TODO implementation
 }
-vk_selection::Selection &vk_selection::Selection::operator!() {
+vk_selection::Selection vk_selection::Selection::operator!() {
     // TODO implementation
 }
 
@@ -58,7 +73,7 @@ void vk_selection::Selection::saveAs (std::string name) {
     std::FILE *file = std::fopen(fileName.str().c_str(), "w");
     std::fprintf(file, "%s", isInverted_ ? "Inverted\n" : "Not inverted\n");
     std::fprintf(file, "%s%lu%s", "Size of selection: ", size_, "\n");
-    inFile("rb", [this, unitTypeNames, file](FILE *b_file){
+    inFile_("rb", [this, unitTypeNames, file](std::FILE *b_file){
         std::fseek(b_file, sizeof(char) + sizeof(size_t), SEEK_SET); // Moving to the beginning of data
         for (size_t i = 0; i < size_; i++) {
             char u; // unit type

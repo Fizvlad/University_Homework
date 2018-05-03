@@ -24,9 +24,9 @@ namespace vk_selection {
         ~Selection ();
 
 
-        Selection &operator&& (const Selection &other) const;
-        Selection &operator|| (const Selection &other) const;
-        Selection &operator! ();
+        Selection operator&& (const Selection &other) const;
+        Selection operator|| (const Selection &other) const;
+        Selection operator! ();
 
 
         ///
@@ -52,24 +52,37 @@ namespace vk_selection {
         bool isInverted_;
         size_t size_;
         std::string name_;
-
+        Selection (const Selection& other, std::string name);
         Selection (std::string name);
+
         friend class Unit;
 
-        template <typename F> void inFile (const char* mode, F func) {
+        template <typename F> void inFile_ (const char* mode, F func) {
             std::FILE *file = std::fopen(name_.c_str(), mode);
             func(file);
             std::fclose(file);
+        }
+
+        template <typename F> static void inTwoFiles_ (const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
+            std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
+            std::FILE *file2 = std::fopen(selection2.name_.c_str(), mode2);
+            func(file1, file2);
+            std::fclose(file1);
+            std::fclose(file2);
         }
 
         void updateInfo_ ();
     };
 
 
+
+
     ///
     /// \brief Id of user or group
     ///
     typedef unsigned long vkid_t;
+
+
 
 
     ///
