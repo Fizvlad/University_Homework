@@ -11,14 +11,10 @@
 
 namespace vk_api {
 
-    ///
-    /// \brief Working with longpoll requests
-    ///
+    /// Working with longpoll requests.
     namespace longpoll {
 
-        ///
-        /// \brief Longpoll request mode
-        ///
+        /// Longpoll request mode.
         namespace MODE {
             const unsigned GET_ATTACHMENTS = 2; // 1   2
             const unsigned EXTENDED_EVENTS = 8; // 3   8
@@ -28,9 +24,7 @@ namespace vk_api {
         }
 
 
-        ///
-        /// \brief Id of events which can be received with longpoll
-        ///
+        /// Id of events which can be received with longpoll.
         namespace EVENTS {
             namespace MESSAGE {
                 namespace FLAGS {
@@ -74,9 +68,7 @@ namespace vk_api {
         }
 
 
-        ///
-        /// \brief Message flags
-        ///
+        /// Message flags.
         namespace MESSAGE_FLAGS {
             const unsigned UNREAD = 1;
             const unsigned OUTBOX = 2;
@@ -93,43 +85,41 @@ namespace vk_api {
         }
 
 
-        ///
-        /// \brief Interface for work with longpoll
-        ///
+        /// Interface for work with longpoll.
         class Session {
         public:
-            Session (unsigned mode = 0, unsigned short timeout = 25);
+
+            Session(unsigned mode = 0, unsigned short timeout = 25);
+
             Session &operator=(const Session&) = delete;
-            Session (const Session&) = delete;
+            Session(const Session&) = delete;
             Session &operator=(Session&&) = delete;
-            Session (Session&&) = delete;
-            ~Session ();
+            Session(Session&&) = delete;
+
+            ~Session();
 
 
-            ///
-            /// \brief Setting up access token. Necessary for requests
-            ///
-            void initialize (std::string accessToken);
+            /// Setting up access token. Necessary for requests.
+            void initialize(std::string accessToken);
 
 
+            /// Single longpoll request.
             ///
-            /// \brief Single longpoll request
-            ///
-            /// \param f Events handler
-            /// \return Result of  f(updates)
+            /// \param f Events handler.
+            /// \return Result of  f(updates).
             template <typename Func>
-            bool listen_once (Func f) {
+            bool listen_once(Func f) {
                 nlohmann::json updates = request_();
                 return f(updates);
             }
 
-            ///
-            /// \brief N of logpoll requests. Stop listening if handler return FALSE
+
+            /// N of logpoll requests. Stop listening if handler return FALSE
             ///
             /// \param f Events handler
             /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func>
-            bool listen_n (Func f, unsigned n) {
+            bool listen_n(Func f, unsigned n) {
                 for (unsigned i = 0; i < n; i++) {
                     if (!listen_once(f)) {
                         return false;
@@ -138,13 +128,13 @@ namespace vk_api {
                 return true;
             }
 
-            ///
-            /// \brief Listening while predicate returns TRUE. Stop listening if handler return FALSE
+
+            /// Listening while predicate returns TRUE. Stop listening if handler return FALSE
             ///
             /// \param f Events handler
             /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func, typename Predicate>
-            bool listen_while (Func f, Predicate p) {
+            bool listen_while(Func f, Predicate p) {
                 while (p()) {
                     if (!listen_once(f)) {
                         return false;
@@ -153,13 +143,13 @@ namespace vk_api {
                 return true;
             }
 
-            ///
-            /// \brief Listen while handler return TRUE
+
+            /// Listen while handler return TRUE
             ///
             /// \param f Events handler
             /// \return FALSE if listening was stopped because handler returned FALSE, TRUE otherwise
             template <typename Func>
-            bool listen (Func f) {
+            bool listen(Func f) {
                 while (true) {
                     if (!listen_once(f)) {
                         return false;
@@ -170,13 +160,14 @@ namespace vk_api {
 
 
         private:
+
             std::string    server_;
             std::string    key_;
             time_t         ts_;
             unsigned short mode_;
             unsigned short timeout_;
 
-            nlohmann::json request_ ();
+            nlohmann::json request_();
         };
 
     }

@@ -10,60 +10,64 @@
 
 namespace vk_selection {
 
-    ///
-    /// \brief Class to work with selection of Units
-    ///
-    /// Each Selection have its own file in "${name_}.vks" which contains ids
+    /// Class to work with selection of Units.
+    /// Each Selection have its own file in "${name_}.vks" which contains ids.
     class Selection {
     public:
-        Selection () = delete;
-        Selection &operator=(const Selection&) = delete;
-        Selection (const Selection&) = delete;
-        Selection &operator=(Selection&&) = default;
-        Selection (Selection&&) = default;
-        ~Selection ();
+
+        Selection() = delete;
+        Selection&operator=(const Selection&) = delete;
+        Selection(const Selection&) = delete;
+        Selection&operator=(Selection&&) = default;
+        Selection(Selection&&) = default;
+
+        ~Selection();
 
 
-        Selection operator&& (const Selection &other) const;
-        Selection operator|| (const Selection &other) const;
-        Selection operator! ();
+        Selection operator&&(const Selection &other) const;
+        Selection operator||(const Selection &other) const;
+        Selection operator!();
 
 
+        /// TRUE if selection is inverted.
         ///
-        /// \brief TRUE if selection is inverted
-        ///
-        /// \return Return TRUE if selection contains everything except of stated units
-        bool isInverted () const;
-
-        ///
-        /// \brief Size of selection
-        ///
-        /// \return Return amount of units in selection
-        size_t size () const;
+        /// \return Return TRUE if selection contains everything except of stated units.
+        bool isInverted() const;
 
 
+        /// Size of selection.
         ///
-        /// \brief Save to file "${name}.txt"
-        ///
-        void saveAs (std::string name);
+        /// \return Return amount of units in selection.
+        size_t size() const;
+
+
+        /// Save to file "${name}.txt".
+        void saveAs(std::string name);
 
 
     private:
+
         bool isInverted_;
         size_t size_;
         std::string name_;
-        Selection (const Selection& other, std::string name);
-        Selection (std::string name);
+
+
+        Selection(const Selection& other, std::string name);
+        Selection(std::string name);
+
 
         friend class Unit;
 
-        template <typename F> void inFile_ (const char* mode, F func) {
+
+        template <typename F>
+        void inFile_(const char* mode, F func) {
             std::FILE *file = std::fopen(name_.c_str(), mode);
             func(file);
             std::fclose(file);
         }
 
-        template <typename F> static void inTwoFiles_ (const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
+        template <typename F>
+        static void inTwoFiles_(const vk_selection::Selection &selection1, const char* mode1, const vk_selection::Selection &selection2, const char* mode2, F func) {
             std::FILE *file1 = std::fopen(selection1.name_.c_str(), mode1);
             std::FILE *file2 = std::fopen(selection2.name_.c_str(), mode2);
             func(file1, file2);
@@ -71,44 +75,35 @@ namespace vk_selection {
             std::fclose(file2);
         }
 
-        void updateInfo_ ();
+        void updateInfo_();
     };
 
 
-
-
-    ///
-    /// \brief Id of user or group
-    ///
+    /// Id of user or group.
     typedef unsigned long vkid_t;
 
 
-
-
-    ///
-    /// \brief Type of Unit
-    ///
+    /// Type of Unit.
     enum unitType : char {Undefined = '0', User, Public, Group, Event};
+
+    /// Unit types.
     const std::string unitTypeNames[] = {"Undefined", "User", "Public", "Group", "Event"};
 
-    ///
-    /// \brief Class to work with single User, Group, Public or Event
-    ///
+
+    /// Class to work with single User, Group, Public or Event.
     class Unit {
     public:
-        ///
-        /// \brief Create using id
-        ///
+
+        /// Create using id.
         Unit (vkid_t id, bool isUser);
 
-        ///
-        /// \brief Crete using custom id
-        ///
-        /// Automatically identifies Unit type
+        /// Create using custom id.
+        /// Automatically identifies Unit type.
         Unit (std::string id);
 
 
         Unit () = delete;
+
         Unit &operator=(const Unit&) = default;
         Unit (const Unit&) = default;
         Unit &operator=(Unit&&) = default;
@@ -116,57 +111,58 @@ namespace vk_selection {
         ~Unit () = default;
 
 
+        /// Unit type.
         ///
-        /// \brief Unit type
-        ///
-        /// \return Unit type
+        /// \return Unit type.
         unitType type() const;
 
+
+        /// Unit id.
         ///
-        /// \brief Unit id
-        ///
-        /// \return Unit id
+        /// \return Unit id.
         vkid_t id() const;
 
+
+        /// Unit custom id.
         ///
-        /// \brief Unit custom id
-        ///
-        /// \return Unit custom id (screen name)
+        /// \return Unit custom id (screen name).
         std::string customId() const;
 
 
+        /// Selection of user friends.
         ///
-        /// \brief Selection of user friends
-        ///
-        /// \return Selection (10000 max) with friends of user or empty selection
+        /// \return Selection (10000 max) with friends of user or empty selection.
         Selection friends ();
 
+
+        /// Selection of user subscribers.
+        /// Notice: Requires user accessToken.
         ///
-        /// \brief Selection of user subscribers
-        ///
-        /// Requires user accessToken
-        /// \return Selection with subscribers of user or empty selection
+        /// \return Selection with subscribers of user or empty selection.
         Selection subscribers (std::string accessToken);
 
+
+        /// Selection of group/public/event members.
         ///
-        /// \brief Selection of group/public/event members
-        ///
-        /// \return Selection with members or empty selection
+        /// \return Selection with members or empty selection.
         Selection members (std::string accessToken);
 
 
     private:
+
         unitType type_;
         vkid_t id_;
         std::string customId_;
 
-        bool initUser_ (std::string id); ///< Return FALSE if unable to initialize
-        bool initOther_ (std::string id); ///< Return FALSE if unable to initialize
+        /// Return FALSE if unable to initialize.
+        bool initUser_ (std::string id);
+
+        ///Return FALSE if unable to initialize.
+        bool initOther_ (std::string id);
     };
 
-    ///
-    /// \brief Print type, id and custom id
-    ///
+
+    /// Print type, id and custom id.
     std::ostream &operator<< (std::ostream &os, const Unit &unit);
 
 }
