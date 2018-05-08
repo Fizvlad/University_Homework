@@ -13,7 +13,8 @@ int main()
     string token;
     fin >> token;
     cout << "Token: " << token[0] << token[1] << token[2] << token[3] << "..." << endl;
-    ChatBot bot(token);
+    ChatBot bot(token, 157926798);
+    bot.setOnlineStatus(true);
     bot.start([&] (Message m, bool isOld) {
         cout << (isOld ? "(Old message) " : "") << m.senderId << " send message to " << m.receiverId << " with id " << m.id << " at " << m.timestamp << ". Content: " << endl << m.text << endl;
         if (m.text == "!help") {
@@ -26,6 +27,7 @@ int main()
             bot.sendMessage(m.senderId, "Честно говоря, мне надоел весь этот чёртов фарс");
         } else if (m.text == "!stop") {
             bot.markAsRead(m);
+            bot.setOnlineStatus(false);
             return false;
         }
         return true;

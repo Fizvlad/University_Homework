@@ -12,56 +12,54 @@
 
 namespace vk_api {
 
-    ///
-    /// \brief Id of user or message
-    ///
+    /// Id of user or message
     typedef unsigned long vkid_t;
 
 
-    ///
-    /// \brief Structure with message data
-    ///
+    /// Structure with message data.
     struct Message {
+        /// Message timestamp.
         time_t timestamp;
+        /// Id of message.
         vkid_t id;
+        /// Id of sender.
         vkid_t senderId;
+        /// Id of receiver.
         vkid_t receiverId;
+        /// Text of message.
         std::string text;
-        bool ifRead;
 
-        Message (time_t Timestamp = 0, vkid_t Id = 0, vkid_t SenderId = 0, vkid_t ReceiverId = 0, std::string Text = "", bool IfRead = true);
 
-        ///
-        /// \brief Parsing message from json
-        ///
-        Message (nlohmann::json input);
+        /// Creating message manually.
+        Message(time_t Timestamp = 0, vkid_t Id = 0, vkid_t SenderId = 0, vkid_t ReceiverId = 0, std::string Text = "");
+
+        /// Parsing message from vk response in json.
+        Message(nlohmann::json input);
     };
 
 
-    ///
-    /// \brief Working with chats and messages
-    ///
+    /// Working with chats and messages.
     class ChatBot {
     public:
-        ///
-        /// \brief Saving accessToken and setting up longpoll session
-        ///
-        ChatBot (std::string accessToken);
+
+        /// Saving accessToken and setting up longpoll session.
+        ChatBot(std::string accessToken, vkid_t groupId);
 
 
-        ChatBot () = delete;
-        ChatBot &operator=(const ChatBot&) = delete;
-        ChatBot (const ChatBot&) = delete;
-        ChatBot &operator=(ChatBot&&) = delete;
-        ChatBot (ChatBot&&) = delete;
-        ~ChatBot ();
+        ChatBot() = delete;
+        ChatBot&operator=(const ChatBot&) = delete;
+        ChatBot(const ChatBot&) = delete;
+        ChatBot&operator=(ChatBot&&) = delete;
+        ChatBot(ChatBot&&) = delete;
+
+        ~ChatBot();
 
 
+        /// Handle last unread message in every dialogue and starts longpoll.
         ///
-        /// \brief Handle last unread message in every dialogue and starts longpoll
-        ///
-        /// \param handler bool (function*) (Message message, bool isOld) to handle messages
-        template <typename MessageHandlerFunc> void start (MessageHandlerFunc handler) {
+        /// \param handler bool (function*) (Message message, bool isOld) to handle messages.
+        template <typename MessageHandlerFunc>
+        void start (MessageHandlerFunc handler) {
             std::vector<Message> unread = getUnreadMessages_();
             for (auto message : unread) {
                 if (!handler(message, true)) {
@@ -82,23 +80,29 @@ namespace vk_api {
              });
         }
 
-        ///
-        /// \brief Mark message as read
-        ///
-        /// \param message Message structure
-        void markAsRead (Message message);
 
+        /// Mark message as read.
         ///
-        /// \brief Send message to user
+        /// \param message Message structure.
+        void markAsRead(Message message);
+
+
+        /// Sets online status on web-site.
+        void setOnlineStatus(bool isOnline);
+
+
+        /// Send message to user.
         ///
-        /// \param receiver Id of user
-        /// \param text Text of message
-        void sendMessage (vkid_t receiver, std::string text);
+        /// \param receiver Id of user.
+        /// \param text Text of message.
+        void sendMessage(vkid_t receiver, std::string text);
 
 
     private:
+
         longpoll::Session longpoll_;
         std::string accessToken_;
+        vkid_t groupId_;
 
         std::vector<Message> getUnreadMessages_();
     };
