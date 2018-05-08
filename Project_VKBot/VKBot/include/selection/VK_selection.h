@@ -165,6 +165,9 @@ namespace vk_selection {
     /// Print type, id and custom id.
     std::ostream &operator<< (std::ostream &os, const Unit &unit);
 
+
+    bool operator<(const Unit &l, const Unit &r);
+
 }
 
 #endif // VK_SELECTION_H_INCLUDED

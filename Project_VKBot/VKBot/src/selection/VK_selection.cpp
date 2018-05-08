@@ -4,6 +4,7 @@ namespace {
     const char SELECTION_EXTENSION[4] = "vks";
 }
 
+
 vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_(0), name_("") {
     std::stringstream fileName;
     fileName << name << "." << SELECTION_EXTENSION;
@@ -20,6 +21,7 @@ vk_selection::Selection::Selection(std::string name) : isInverted_(false), size_
     std::fclose(file);
 }
 
+
 vk_selection::Selection::Selection(const vk_selection::Selection &other, std::string name) : isInverted_(other.isInverted_), size_(other.size_), name_("") {
     std::stringstream fileName;
     fileName << name << "." << SELECTION_EXTENSION;
@@ -35,6 +37,7 @@ vk_selection::Selection::Selection(const vk_selection::Selection &other, std::st
     });
 }
 
+
 vk_selection::Selection::~Selection()
 {
     if (std::remove(name_.c_str()) != 0) {
@@ -44,14 +47,21 @@ vk_selection::Selection::~Selection()
 
 
 vk_selection::Selection vk_selection::Selection::operator&&(const Selection& other) const {
-    // TODO implementation
+
 }
+
 vk_selection::Selection vk_selection::Selection::operator||(const Selection& other) const {
-    // TODO implementation
+    vk_selection::Selection result(this->name_ + "_AND_" + other.name_);
+    result.inFile_("ab", [](std::FILE *target){
+    });
 }
+
 vk_selection::Selection vk_selection::Selection::operator!() {
-    // TODO implementation
+    vk_selection::Selection result(*this, this->name_ + "_NOT");
+    result.isInverted_ = !isInverted_;
+    result.updateInfo_();
 }
+
 
 void vk_selection::Selection::updateInfo_ () {
     std::FILE *file = std::fopen(name_.c_str(), "ab");
@@ -66,6 +76,7 @@ void vk_selection::Selection::updateInfo_ () {
     std::fwrite(&size_, sizeof(size_t), 1, file);
     std::fclose(file);
 }
+
 
 void vk_selection::Selection::saveAs (std::string name) {
     std::stringstream fileName;
@@ -89,13 +100,21 @@ void vk_selection::Selection::saveAs (std::string name) {
     std::fclose(file);
 }
 
+
 bool vk_selection::Selection::isInverted() const {
     return isInverted_;
 }
+
 size_t vk_selection::Selection::size() const {
     return size_;
 }
 
+
 std::ostream &vk_selection::operator<< (std::ostream &os, const vk_selection::Unit &unit) {
     return os << vk_selection::unitTypeNames[(int) unit.type() - (int) '0'] << " " << unit.id() << " " << unit.customId();
+}
+
+
+bool vk_selection::operator<(const Unit &l, const Unit &r) {
+    return l.type() == r.type() ? l.id() < r.id() : l.type() < r.type();
 }

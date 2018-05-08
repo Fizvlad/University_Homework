@@ -70,7 +70,7 @@ nlohmann::json vk_api::apiRequest_raw (std::string methodName, std::string param
 nlohmann::json vk_api::apiRequest (std::string methodName, std::string parameters, std::string accessToken, std::string version) {
     nlohmann::json response = apiRequest_raw(methodName, parameters, accessToken, version);
     if (response.find("response") == response.end()) {
-        throw vk_api::ApiRequestExpetion("API request error. Bad response");
+        throw vk_api::ApiRequestExpetion(("API request error. No response:\n" + response.dump()).c_str());
     }
     return response["response"];
 }

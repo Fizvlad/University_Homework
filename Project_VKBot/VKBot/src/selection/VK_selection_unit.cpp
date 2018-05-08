@@ -49,6 +49,7 @@ bool vk_selection::Unit::initUser_(std::string id) {
     try {
         userInfo = vk_api::apiRequest("users.get", param.str())[0];
     } catch (vk_api::ApiRequestExpetion e) {
+        std::cout << e.what() << std::endl;
         return false;
     }
     type_ = User;

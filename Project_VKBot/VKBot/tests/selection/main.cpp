@@ -31,6 +31,8 @@ int main()
     Selection test = Filyus_Bot.friends();
     test.saveAs("Filyus_friends");
 
+    //(!test).saveAs("Not_Filyus_friends");
+
     /*
     // Requires personal accessToken
     Selection test2 = Fizvlad.subscribers(service_token);
@@ -38,7 +40,7 @@ int main()
     */
 
     // Works fine. Requires much time
-    Selection test3 = kinopoisk.members(token);
-    test3.saveAs("Kinopoisk_subscribers");
+    //Selection test3 = kinopoisk.members(token);
+    //test3.saveAs("Kinopoisk_subscribers");
     return 0;
 }
