@@ -1,30 +1,15 @@
-#!/usr/bin/ruby -w
+require_relative "../require/network/front.rb"
 
-# Front-end part of application
+client = Client_QA.new("network_config.cfg", true)
 
-require "socket"
-require "./require/utility.rb"
+handler = Proc.new do |a, i|
+    puts a["response"]
+    puts a["do_close"]
+    puts a["do_stop"]
+    puts i
 
-#===============================================================================
-# Setting up constants
-#===============================================================================
-
-CONFIG = load_configuration
-
-
-#===============================================================================
-# Main
-#===============================================================================
-
-server = TCPSocket.open(CONFIG["hostname"], CONFIG["port"])
-
-server.puts(CONFIG["auth"])
-authResult = server.gets.strip
-if authResult == "auth_success"
-    server.puts "exit"
-else
-    reason = server.gets.strip
-    puts "Failed authentification. Reason: #{reason}"
+    str = gets.chomp
+    return {:response => str}
 end
 
-server.close
+client.connect("hello", handler)

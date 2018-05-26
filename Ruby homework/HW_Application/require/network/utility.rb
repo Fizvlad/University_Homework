@@ -1,14 +1,15 @@
 #!/usr/bin/ruby -w
 
-# Utility functions for application
+# Utility functions for network front/end
 
 #===============================================================================
 # Functions
 #===============================================================================
 
-def load_configuration(configPath = "config.cfg")
+# Loads configuration file and returnes map of key-value
+def load_configuration(configPath)
     config = Hash.new
-    File.open("config.cfg", "r") { |file|
+    File.open(configPath, "r") { |file|
         for line in file
             value = line.strip.split
             next if value.count == 0

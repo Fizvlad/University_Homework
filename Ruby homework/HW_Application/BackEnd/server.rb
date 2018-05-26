@@ -1,54 +1,13 @@
-#!/usr/bin/ruby -w
+require_relative "../require/network/back.rb"
 
-# Back-end part of application
+server = Server_QA.new("network_config.cfg", true)
 
-require "socket"
-require "./require/utility.rb"
+handler = Proc.new do |q, i|
+    puts q["response"]
+    puts i
 
-#===============================================================================
-# Setting up constants
-#===============================================================================
+    str = gets.chomp
+    return {:response => str, :do_stop => false, :do_close => str == "exit"}
+end
 
-CONFIG = load_configuration
-
-puts "Loaded config:"
-CONFIG.each_pair { |key, value|
-    puts "  #{key}: #{value}"
-}
-
-
-#===============================================================================
-# Main
-#===============================================================================
-
-exitFlag = false
-
-server = TCPServer.open(CONFIG["port"])
-loop {
-    break if exitFlag
-
-    newClient = server.accept
-    Thread.start(newClient) { |client|
-        auth = client.gets.strip
-        if auth == CONFIG["auth"]
-            client.puts "auth_success"
-
-            command = client.gets.strip
-            puts "Requested command: #{command}"
-            case command
-            when "exit", "quit"
-                exitFlag = true
-                # Need to initiate self connection to stop server.accept from listening
-                TCPSocket.open(CONFIG["hostname"], CONFIG["port"]).close
-            else
-                client.puts "unknown_command"
-            end
-
-        else
-            client.puts "auth_fail wrong_key"
-            puts "Unsuccessful authorization atempt. Used keyword: #{auth}"
-        end
-        client.close
-    }
-}
-server.close
+server.listen(handler)
