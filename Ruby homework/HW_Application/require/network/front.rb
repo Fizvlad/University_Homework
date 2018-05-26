@@ -37,9 +37,8 @@ class Client_QA
         puts "Q: #{q}" if @do_log
         server.puts q.to_json
 
-        exit_flag = false
         i = 1
-        while !exit_flag do
+        loop do
             a = JSON.parse server.gets
             # a = {"response": str, "do_stop": bool, "do_close": bool}
             puts "A: #{a}" if @do_log
@@ -49,8 +48,9 @@ class Client_QA
             q = handler.call(a, i)
             # q = {"response": str}
             puts "Q: #{q}" if @do_log
-            server.puts q.to_json
+            server.puts JSON.generate(q)
             i += 1
         end
+        server.close
     end
 end

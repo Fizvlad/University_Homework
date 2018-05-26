@@ -3,11 +3,9 @@ require_relative "../require/network/back.rb"
 server = Server_QA.new("network_config.cfg", true)
 
 handler = Proc.new do |q, i|
-    puts q["response"]
-    puts i
-
+    print "> A: "
     str = gets.chomp
-    return {:response => str, :do_stop => false, :do_close => str == "exit"}
+    {:response => str, :do_stop => str == "stop", :do_close => str == "close"}
 end
 
 server.listen(handler)

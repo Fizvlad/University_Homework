@@ -29,15 +29,15 @@ class Server_QA
 
 
     def listen(handler)
-        exit_flag = false
+        stop_flag = false
         server = TCPServer.open(@config["port"])
         puts "Server is running" if @do_log
-        while !exit_flag do
+        while !stop_flag do
             newClient = server.accept
-
             Thread.start(newClient) do |client|
+                close_flag = false
                 i = 0
-                loop do
+                while !close_flag do
                     q = JSON.parse client.gets
                     # q = {"response": str}
                     puts "Q: #{q}" if @do_log
@@ -46,21 +46,20 @@ class Server_QA
                     puts "A: #{a}" if @do_log
                     i += 1
 
-                    if a["do_stop"]
-                        exit_flag = true
-                        client.puts a.to_json
-                        break
-                    elsif a["do_close"]
-                        client.puts a.to_json
-                        break
-                    else
-                        client.puts a["response"].to_json
+                    if a[:do_stop]
+                        stop_flag = true
+                    elsif a[:do_close]
+                        close_flag = true
+                    end
+                    client.puts JSON.generate(a)
+
+                    # Need to initiate self connection to stop server.accept from listening
+                    if stop_flag
+                        puts "Server is stopping"
+                        TCPSocket.open(@config["hostname"], @config["port"]).close
                     end
                 end
             end
-
-            # Need to initiate self connection to stop server.accept from listening
-            TCPSocket.open(@config["hostname"], @config["port"]).close if exit_flag
         end
         server.close
     end
