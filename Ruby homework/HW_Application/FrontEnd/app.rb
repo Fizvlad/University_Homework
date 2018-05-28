@@ -8,4 +8,4 @@ handler = Proc.new do |a, i|
     {:response => str}
 end
 
-client.connect("hello", handler)
+client.connect(handler)

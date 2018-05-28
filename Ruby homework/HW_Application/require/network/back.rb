@@ -2,9 +2,7 @@
 
 # Back-end part of application
 
-require "socket"
-require "json"
-require_relative "utility.rb"
+require_relative "back_front__shared.rb"
 
 
 #===============================================================================
@@ -15,18 +13,7 @@ class Server_QA
     attr_reader :config
     attr_accessor :do_log
 
-
-    def initialize(configPath, do_log = false)
-        @config = load_configuration(configPath)
-        @do_log = do_log
-        if @do_log
-            puts "Loaded configuration:"
-            @config.each_pair do |key, value|
-                puts "  #{key}: #{value}"
-            end
-        end
-    end
-
+    include Back_Front__shared
 
     def listen(handler)
         stop_flag = false
@@ -35,10 +22,18 @@ class Server_QA
         while !stop_flag do
             newClient = server.accept
             Thread.start(newClient) do |client|
+                puts "New client connected" if @do_log
                 close_flag = false
                 i = 0
-                while !close_flag do
-                    q = JSON.parse client.gets
+                rsa_this = OpenSSL::PKey::RSA.new(2048)
+                rsa_other = OpenSSL::PKey::RSA.new(receive(client)["response"])
+                send(client, {:response => rsa_this.public_key})
+
+
+                loop do
+                    break if close_flag || stop_flag
+
+                    q = receive(client, rsa_this)
                     # q = {"response": str}
                     puts "Q: #{q}" if @do_log
                     a = handler.call(q, i)
@@ -51,13 +46,12 @@ class Server_QA
                     elsif a[:do_close]
                         close_flag = true
                     end
-                    client.puts JSON.generate(a)
-
-                    # Need to initiate self connection to stop server.accept from listening
-                    if stop_flag
-                        puts "Server is stopping"
-                        TCPSocket.open(@config["hostname"], @config["port"]).close
-                    end
+                    send(client, a, rsa_other)
+                end
+                # Need to initiate self connection to stop server.accept from listening
+                if stop_flag
+                    puts "Server is stopping"
+                    TCPSocket.open(@config["hostname"], @config["port"]).close
                 end
             end
         end

@@ -2,9 +2,7 @@
 
 # Front-end part of application
 
-require "socket"
-require "json"
-require_relative "utility.rb"
+require_relative "back_front__shared.rb"
 
 
 #===============================================================================
@@ -15,41 +13,29 @@ class Client_QA
     attr_reader :config
     attr_accessor :do_log
 
+    include Back_Front__shared
 
-    def initialize(configPath, do_log = false)
-        @config = load_configuration(configPath)
-        @do_log = do_log
-        if @do_log
-            puts "Loaded configuration:"
-            @config.each_pair do |key, value|
-                puts "  #{key}: #{value}"
-            end
-        end
-    end
-
-
-    def connect(initial_message, handler)
+    def connect(handler)
         server = TCPSocket.open(@config["hostname"], @config["port"])
         puts "Connection established" if @do_log
+        i = 0
+        rsa_this = OpenSSL::PKey::RSA.new(2048)
+        send(server, {:response => rsa_this.public_key})
+        rsa_other = OpenSSL::PKey::RSA.new(receive(server)["response"])
 
-        q = {:response => initial_message}
-        # q = {"response": str}
-        puts "Q: #{q}" if @do_log
-        server.puts q.to_json
 
-        i = 1
         loop do
-            a = JSON.parse server.gets
+            q = handler.call({:response => "", :do_stop => false, :do_close => false}, i)
+            # q = {"response": str}
+            puts "Q: #{q}" if @do_log
+            send(server, q, rsa_other)
+            i += 1
+
+            a = receive(server, rsa_this)
             # a = {"response": str, "do_stop": bool, "do_close": bool}
             puts "A: #{a}" if @do_log
 
             break if a["do_stop"] || a["do_close"]
-
-            q = handler.call(a, i)
-            # q = {"response": str}
-            puts "Q: #{q}" if @do_log
-            server.puts JSON.generate(q)
-            i += 1
         end
         server.close
     end
