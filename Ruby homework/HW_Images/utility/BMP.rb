@@ -1,17 +1,30 @@
 class BMP
     # TODO Current version only support V3 header and 24 bit count
 
-    attr_reader :width, :height, :file_size
+    attr_reader :info_version, :bitcount, :file_size
 
     def initialize(*args)
+        @pixels = nil
+        @if_first_line_at_top = nil
+        @info_version = nil
+        @bitcount = nil
+        @bitmap_offset = nil
+        @file_size = nil
+
+        @header_size = 14
+        @possible_info_sizes = [40, 108, 124]
+
         case args.length
         when 1
-            path = File.absolute_path(args[0])
-            initialize_from_file(path)
+            if args[0].is_a?(BMP)
+                initialize_copy(args[0])
+            else
+                initialize_from_file(File.absolute_path(args[0]))
+            end
         when 2, 3
-            raise(ArgumentError, "Wrong argument") unless args[0].is_a?(Numeric) && args[0] > 0 &&
-                                                          args[1].is_a?(Numeric) && args[1] > 0 &&
-                                                          (args.length == 2 || args[2].to_s.match?(/[0-1A-F]{6}/))
+            raise(ArgumentError, "Wrong argument") unless util_check_unsigned_integer(args[0]) &&
+                                                          util_check_unsigned_integer(args[1]) &&
+                                                          (args.length == 2 || util_check_color_str(args[2]))
             initialize_new(args[0], args[1], args.length == 2 ? "000000" : args[2].to_s)
         else
             raise(ArgumentError, "Wrong amount of arguments: #{args.length}")
@@ -19,16 +32,27 @@ class BMP
     end
 
 
-    def to_s()
-        "BMP image #{@width}x#{@height}. Size: #{@file_size}b"
+    def width
+        return nil if @pixels.nil? || @pixels[0].nil?
+        @pixels[0].length
+    end
+
+    def height
+        return nil if @pixels.nil?
+        @pixels.length
     end
 
 
-    def [](index_y, index_x)
+    def to_s
+        "BMP image #{width}x#{height}. Size: #{@file_size}b"
+    end
+
+
+    def [](index_x, index_y)
         @pixels[index_y][index_x]
     end
 
-    def []=(index_y, index_x, value)
+    def []=(index_x, index_y, value)
         @pixels[index_y][index_x] = value
     end
 
@@ -42,23 +66,56 @@ class BMP
     end
 
 
+    def resize!(w, h, power = 2)
+        raise(ArgumentError, "Wrong argument") unless util_check_unsigned_integer(w) &&
+                                                      util_check_unsigned_integer(h) &&
+                                                      power.is_a?(Numeric) && power >= 0
+
+        h_c = width.to_f  / w
+        v_c = height.to_f / h
+
+        new_pixels = Array.new(h) { Array.new(w) { nil } }
+        new_pixels.each_index { |line_index|
+            new_pixels[line_index].each_index { |pixel_index|
+                precision = 3
+
+                x_position = (pixel_index + 0.5) * h_c
+                x_index = x_position.round
+                x_fractional = (x_position - x_index).round(precision)
+
+                y_position = (line_index + 0.5) * v_c
+                y_index = y_position.round
+                y_fractional = (y_position - y_index).round(precision)
+
+                color11 = x_index < 1 || y_index < 1 ? nil : @pixels&.at(y_index - 1)&.at(x_index - 1);
+                color12 = y_index < 1 ? nil : @pixels&.at(y_index - 1)&.at(x_index);
+                color21 = x_index < 1 ? nil : @pixels&.at(y_index)&.at(x_index - 1);
+                color22 = @pixels&.at(y_index)&.at(x_index);
+                new_pixels[line_index][pixel_index] = util_blend_2d(color11, color12, color21, color22, (x_fractional + 1)/2, (y_fractional + 1)/2, power)
+            }
+        }
+
+        @pixels = new_pixels
+        self
+    end
+
+    def resize(w, h, power = 2)
+        BMP.new(self).resize!(w, h, power)
+    end
+
+
+    protected
+
+    attr_accessor :pixels, :if_first_line_at_top, :bitmap_offset
+
+
     private
 
+    # ##########################################################################
+    # Initialize
+    # ##########################################################################
 
     def initialize_from_file(path)
-        @width = nil
-        @height = nil
-        @pixels = nil
-
-        @if_first_line_at_top = nil
-
-        @header_size = 14
-        @info_size = nil
-        @bitcount = nil
-        @bitmap_offset = nil
-
-        @file_size = nil
-
         File.open(path, "rb") { |file|
             read_header(file)
             read_info(file)
@@ -66,21 +123,39 @@ class BMP
         }
     end
 
-    def initialize_new(width, height, default_color)
-        @width = width
-        @height = height
-        @pixels = Array.new(@height) { Array.new(@width) { default_color } }
+    def initialize_new(w, h, default_color)
+        @pixels = Array.new(h) { Array.new(w) { default_color } }
 
         @if_first_line_at_top = true
 
-        @header_size = 14
-        @info_size = 40
+        @info_version = 3
         @bitcount = 24
-        @bitmap_offset = @header_size + @info_size
+        @bitmap_offset = @header_size + @possible_info_sizes[@info_version - 3]
 
-        @file_size = @bitmap_offset + 4 * @width * @height
+        @file_size = @bitmap_offset + 4 * width * height
     end
 
+    def initialize_copy(other)
+        @pixels = Array.new(other.height) { Array.new(other.width) { nil } }
+
+        @pixels.each_index { |line_index|
+            @pixels[line_index].each_index { |pixel_index|
+                @pixels[line_index][pixel_index] = other.pixels[line_index][pixel_index]
+            }
+        }
+
+        @if_first_line_at_top = other.if_first_line_at_top
+
+        @info_version = other.info_version
+        @bitcount = other.bitcount
+        @bitmap_offset = other.bitmap_offset
+
+        @file_size = other.file_size
+    end
+
+    # ##########################################################################
+    # Saving
+    # ##########################################################################
 
     def write_header(file)
         file.pos = 0
@@ -99,9 +174,9 @@ class BMP
     def write_info(file)
         file.pos = @header_size
 
-        biSize = @info_size
-        biWidth = @width
-        biHeight = (@if_first_line_at_top ? -1 : 1) * @height
+        biSize = @possible_info_sizes[@info_version - 3]
+        biWidth = width
+        biHeight = (@if_first_line_at_top ? -1 : 1) * height
         biPlanes = 1
         biBitCount = @bitcount
         biCompression = 0
@@ -133,22 +208,9 @@ class BMP
     end
 
 
-    def util_read(file, size, directive, errorMessage)
-        str = file.read(size)
-        raise(ArgumentError, errorMessage) if str.nil? || str.length < size
-        return str.unpack(directive)
-    end
-
-    def util_form_color_str(r, g, b)
-        result = ""
-        [r, g, b].each { |elem|
-            elem = ("%x" % elem).upcase
-            elem = "0" + elem if elem.length < 2
-
-            result += elem
-        }
-        result
-    end
+    # ##########################################################################
+    # Reading
+    # ##########################################################################
 
     def read_header(file)
         file.pos = 0
@@ -165,15 +227,20 @@ class BMP
     def read_info(file)
         file.pos = @header_size
 
-        @info_size = util_read(file, 4, "L", "Can't open file as BMP image. Bad info")[0]
-        raise(ArgumentError, "Unable to work with BMP file of this version") if @info_size != 40
+        info_version_i = @possible_info_sizes.find_index(util_read(file, 4, "L", "Can't open file as BMP image. Bad info")[0])
+        raise(ArgumentError, "Can't open file as BMP image. Bad info. Unexcepted info size") if info_version_i.nil?
+        @info_version = 3 + info_version_i
+        raise(ArgumentError, "Unable to work with BMP file of this version") if @info_version != 3
 
         directive = "llSSLLllLL" # S = WORD, L = DWORD, l = LONG
-        arr = util_read(file, @info_size - 4, directive, "Can't open file as BMP image. Bad info")
+        arr = util_read(file, @possible_info_sizes[@info_version - 3] - 4, directive, "Can't open file as BMP image. Bad info")
 
-        @width = arr[0]
+        w = arr[0]
         @if_first_line_at_top = arr[1] < 0
-        @height = arr[1].abs
+        h = arr[1].abs
+
+        @pixels = Array.new(h) { Array.new(w) { nil } }
+
         raise(ArgumentError, "Can't open file as BMP image. Bad info. Unexcepted biPlanes value") if arr[2] != 1
         @bitcount = arr[3]
         raise(ArgumentError, "Unable to work with not 24 bitcount") if @bitcount != 24
@@ -188,8 +255,6 @@ class BMP
     def read_bitmap(file)
         file.pos = @bitmap_offset
 
-        @pixels = Array.new(@height) { Array.new(@width) { nil } }
-
         @pixels.each_index { |line_index|
             @pixels[line_index].each_index { |pixel_index|
                 directive = "CCC"
@@ -201,6 +266,67 @@ class BMP
             }
             file.read(@pixels[line_index].length % 4) # Line must be filled with 0 so length % 4 = 0
         }
+    end
+
+
+    # ##########################################################################
+    # Utility
+    # ##########################################################################
+
+    def util_read(file, size, directive, error_message)
+        str = file.read(size)
+        raise(ArgumentError, error_message) if str.nil? || str.length < size
+        return str.unpack(directive)
+    end
+
+    def util_form_color_str(r, g, b)
+        result = ""
+        [r, g, b].each { |elem|
+            elem = ("%x" % elem).upcase
+            elem = "0" + elem if elem.length < 2
+
+            result += elem
+        }
+        result
+    end
+
+    def util_check_color_str(str)
+        str.match?(/[0-1A-F]{6}/)
+    end
+
+    def util_check_unsigned_integer(n)
+        n.is_a?(Numeric) && n > 0 && n % 1 == 0
+    end
+
+    def util_blend_1d(color1, color2, i = 0, power = 2)
+        return nil if color1.nil? && color2.nil?
+        return color1 if color2.nil? || i == 0
+        return color2 if color1.nil? || i == 1
+        r1 = color1[0, 2].hex
+        g1 = color1[2, 2].hex
+        b1 = color1[4, 2].hex
+
+        r2 = color2[0, 2].hex
+        g2 = color2[2, 2].hex
+        b2 = color2[4, 2].hex
+
+        if power == 0
+            i = 0.5
+        else
+            i = ((2*i - 1).abs**(1/power) * (i < 0.5 ? -1 : 1)) / 2 + 0.5
+        end
+        r = r1 * (1 - i) + r2 * i
+        g = g1 * (1 - i) + g2 * i
+        b = b1 * (1 - i) + b2 * i
+
+        util_form_color_str(r, g, b)
+    end
+
+    def util_blend_2d(color11, color12, color21, color22, i_x = 0.5, i_y = 0.5, power = 2)
+        color_top  = i_y == 1 ? "888888" : util_blend_1d(color11, color12, i_x, power)
+        color_down = i_y == 0 ? "888888" : util_blend_1d(color21, color22, i_x, power)
+
+        util_blend_1d(color_top, color_down, i_y, power)
     end
 
 end
