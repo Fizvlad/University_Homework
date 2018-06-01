@@ -15,4 +15,7 @@ bmp[3, 3] = "0000FF"
 
 puts bmp
 
-bmp.save_as("/home/fizvlad/Dev/git/University_Homework/Ruby homework/HW_Images/img.bmp")
+bmp.save_as("img.bmp")
+
+bmp2 = BMP.new("img.bmp")
+puts bmp2
