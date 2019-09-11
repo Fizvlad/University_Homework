@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -73,22 +74,11 @@ int main(int argc, char **argv)
          << "Problem:" << endl
          << "\tn = " << n << endl << endl;
 
-    cout << "\tA:" << endl;
-    for (long i = 0; i < n; i++) {
-        for (long j = 0; j < n; j++) {
-            cout << "\t" << coefficients(i, j);
-        }
-        cout << endl;
-    }
-    cout << endl;
+    cout << "\tA:" << endl << coefficients << endl << endl;
 
     cout << "\tt_0 = " << t_0 << endl << endl;
 
-    cout << "\tY_0:" << endl;
-    for (long i = 0; i < n; i++) {
-        cout << "\t" << y_0(i) << endl;
-    }
-    cout << endl;
+    cout << "\tY_0:" << endl << y_0 << endl << endl;
 
     cout << "Working on solutions:" << endl;
     string solutions = reader.Get("PROBLEM", "solutions", "");
@@ -112,6 +102,12 @@ int main(int argc, char **argv)
         double interval_left = reader.GetReal(solution_name, "interval_left", 0.0);
         double interval_right = reader.GetReal(solution_name, "interval_right", 0.5);
         double step = reader.GetReal(solution_name, "step", 0.1);
+        string file_name = reader.Get(solution_name, "file", "");
+
+        fstream fs;
+        if (file_name != "") {
+            fs.open(file_name, fstream::out);
+        }
 
         cout << "\t\tSolution type: " << type << endl
              << "\t\tIn [" << interval_left << "; " << interval_right << "] with step " << step << endl;
@@ -121,25 +117,28 @@ int main(int argc, char **argv)
             // Precise solution
             // Getting eigen
             EigenSolver<Matrix> es(coefficients); // Will find solution right away;
-            cout << "\t\tEigenvalues:" << endl << es.eigenvalues() << endl;
-            cout << "\t\tMatrix of eigenvectors:" << endl << es.eigenvectors() << endl;
+            (file_name != "" ? fs : cout) << "\t\tEigenvalues:" << endl << es.eigenvalues() << endl;
+            (file_name != "" ? fs : cout) << "\t\tMatrix of eigenvectors:" << endl << es.eigenvectors() << endl;
 
             // Getting constants by solving linear system at t=t_0
             Matrix m(n, n);
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
-                    complex<double> temp = es.eigenvectors()(j, i) * exp(es.eigenvalues()(j) * t_0);
+                    complex<double> temp = es.eigenvectors()(i, j) * exp(es.eigenvalues()(j) * t_0);
                     if (temp.imag() != 0) {
                         cerr << "Attention: For some reason there is non-real value in constants. That must not be this way probably." << endl;
                     }
                     m(i, j) = temp.real();
                 }
             }
+            (file_name != "" ? fs : cout) << "\t\tSolving system with matrix:" << endl << m << endl;
+            (file_name != "" ? fs : cout) << "\t\t... and right side:" << endl << y_0 << endl;
             Vector constants_vector = m.colPivHouseholderQr().solve(y_0);
-            cout << "\t\tConstants vector:" << endl << constants_vector << endl;
+            (file_name != "" ? fs : cout) << "\t\tConstants vector:" << endl << constants_vector << endl;
 
+            // Solving at points
             double t = interval_left;
-            while (t <= interval_right) {
+            while (t <= interval_right + step/2) { // Adding step/2 delta
                 Vector value(n);
                 for (int i = 0; i < n; i++) {
                     value[i] = 0;
@@ -151,15 +150,40 @@ int main(int argc, char **argv)
                         value[i] += temp_3 * temp_2;
                     }
                 }
-                cout << "\t\tY(" << t << "):" << endl << value << endl;
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << value << endl;
                 t += step;
             }
 
             cout << "\t\tSolved." << endl;
         } else if (type == "Euler") {
 
-            // TODO
+            // Euler method
+            // Grow matrix W=E+A*h
+            Matrix w = Matrix::Identity(n, n) + coefficients * step;
+            (file_name != "" ? fs : cout) << "\t\tGrow matrix:" << endl << w << endl;
 
+            // Checking if approximation stable.
+            EigenSolver<Matrix> es(w); // Will find solution right away;
+            (file_name != "" ? fs : cout) << "\t\tEigenvalues of grow matrix:" << endl << es.eigenvalues() << endl;
+            bool if_stable = true;
+            for (long i = 0; i < n; i++) {
+                if (abs(es.eigenvalues()(i)) >= 1) {
+                    if_stable = false;
+                    break;
+                }
+            }
+            (file_name != "" ? fs : cout) << "\t\tApproximation is " << (if_stable ? "" : "not ") << "stable" << endl;
+
+            // Solving at points
+            Vector y_prev(n);
+            Vector y = y_0;
+            double t = interval_left;
+            while (t <= interval_right + step/2) {
+                y_prev = y;
+                y = w * y_prev;
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
+                t += step;
+            }
 
             cout << "\t\tSolved." << endl;
         } else if (type == "Euler_reversed") {
@@ -167,8 +191,33 @@ int main(int argc, char **argv)
             //cout << "\t\tSolved." << endl;
         } else if (type == "Adams_int_2") {
 
-            // TODO
+            // Adams interpolation (2nd extent) method
+            // Grow matrix: W= (E + 0.5Ah) * (E - 0.5Ah)^-1
+            Matrix w = (Matrix::Identity(n, n) + 0.5 * coefficients * step) * (Matrix::Identity(n, n) - 0.5 * coefficients * step).inverse();
+            (file_name != "" ? fs : cout) << "\t\tGrow matrix:" << endl << w << endl;
 
+            // Checking if approximation stable.
+            EigenSolver<Matrix> es(w); // Will find solution right away;
+            (file_name != "" ? fs : cout) << "\t\tEigenvalues of grow matrix:" << endl << es.eigenvalues() << endl;
+            bool if_stable = true;
+            for (long i = 0; i < n; i++) {
+                if (abs(es.eigenvalues()(i)) >= 1) {
+                    if_stable = false;
+                    break;
+                }
+            }
+            (file_name != "" ? fs : cout) << "\t\tApproximation is " << (if_stable ? "" : "not ") << "stable" << endl;
+
+            // Solving at points
+            Vector y_prev(n);
+            Vector y = y_0;
+            double t = interval_left;
+            while (t <= interval_right + step/2) {
+                y_prev = y;
+                y = w * y_prev;
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
+                t += step;
+            }
 
             cout << "\t\tSolved." << endl;
         } else if (type == "Adams_ext_2") {
