@@ -7,7 +7,9 @@
 #include "Eigen/Dense"
 
 using namespace std;
+
 using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 // Utility functions
 string coefficient_name(long i, long j) {
@@ -58,7 +60,7 @@ int main(int argc, char **argv)
 
     double t_0 = reader.GetReal("PROBLEM", "t_0", 0.0);
 
-    MatrixXd y_0(n, 1);
+    VectorXd y_0(n);
     for (long i = 0; i < n; i++) {
         y_0(i, 0) = reader.GetReal("PROBLEM", cauchy_data_name(i + 1), 0.0);
     }
