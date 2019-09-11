@@ -2,9 +2,12 @@
 #include <sstream>
 #include <string>
 
-#include "include/INIReader.h"
+#include "INIReader.h"
+
+#include "Eigen/Dense"
 
 using namespace std;
+using Eigen::MatrixXd;
 
 // Utility functions
 string coefficient_name(long i, long j) {
@@ -40,24 +43,24 @@ int main(int argc, char **argv)
     }
 
     // Loading configuration. Creating data.
-    long n = reader.GetInteger("PROBLEM", "n", 0);
+    const long n = reader.GetInteger("PROBLEM", "n", 0);
     if (n <= 0) {
         cerr << "n must be >=0" << endl;
         return 1;
     }
-    double **coefficients = new double*[n];
+
+    MatrixXd coefficients(n, n);
     for (long i = 0; i < n; i++) {
-        coefficients[i] = new double[n];
         for (long j = 0; j < n; j++) {
-            coefficients[i][j] = reader.GetReal("PROBLEM", coefficient_name(i + 1, j + 1), 0.0);
+            coefficients(i, j) = reader.GetReal("PROBLEM", coefficient_name(i + 1, j + 1), 0.0);
         }
     }
 
     double t_0 = reader.GetReal("PROBLEM", "t_0", 0.0);
 
-    double *y_0 = new double[n];
+    MatrixXd y_0(n, 1);
     for (long i = 0; i < n; i++) {
-        y_0[i] = reader.GetReal("PROBLEM", cauchy_data_name(i + 1), 0.0);
+        y_0(i, 0) = reader.GetReal("PROBLEM", cauchy_data_name(i + 1), 0.0);
     }
 
     cout << "Configuration loaded from " << configuration_path << ":" << endl
@@ -67,7 +70,7 @@ int main(int argc, char **argv)
     cout << "\tA:" << endl;
     for (long i = 0; i < n; i++) {
         for (long j = 0; j < n; j++) {
-            cout << "\t" << coefficients[i][j];
+            cout << "\t" << coefficients(i, j);
         }
         cout << endl;
     }
@@ -77,7 +80,7 @@ int main(int argc, char **argv)
 
     cout << "\tY_0:" << endl;
     for (long i = 0; i < n; i++) {
-        cout << "\t" << y_0[i] << endl;
+        cout << "\t" << y_0(i) << endl;
     }
     cout << endl;
 
@@ -128,10 +131,5 @@ int main(int argc, char **argv)
             cerr << "\t\tWarning unknown solution type. Skipping." << endl;
         }
     } while (space_position != string::npos);
-
-    // Deleting data
-    delete[] coefficients;
-    delete[] y_0;
-
     return 0;
 }
