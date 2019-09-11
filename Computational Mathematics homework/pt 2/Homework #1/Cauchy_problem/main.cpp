@@ -139,18 +139,18 @@ int main(int argc, char **argv)
             // Solving at points
             double t = interval_left;
             while (t <= interval_right + step/2) { // Adding step/2 delta
-                Vector value(n);
+                Vector y(n);
                 for (int i = 0; i < n; i++) {
-                    value[i] = 0;
+                    y[i] = 0;
                     for (int j = 0; j < n; j++) {
                         double temp_1 = exp(es.eigenvalues()(j).real() * t);
-                        double temp_2 = es.eigenvectors()(j, i).real() * temp_1;
+                        double temp_2 = es.eigenvectors()(i, j).real() * temp_1;
                         double temp_3 = constants_vector(j);
                         //cout << temp_1 << " " << temp_2 << " " << temp_3 << endl;
-                        value[i] += temp_3 * temp_2;
+                        y[i] += temp_3 * temp_2;
                     }
                 }
-                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << value << endl;
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
                 t += step;
             }
 
@@ -179,9 +179,9 @@ int main(int argc, char **argv)
             Vector y = y_0;
             double t = interval_left;
             while (t <= interval_right + step/2) {
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
                 y_prev = y;
                 y = w * y_prev;
-                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
                 t += step;
             }
 
@@ -213,9 +213,9 @@ int main(int argc, char **argv)
             Vector y = y_0;
             double t = interval_left;
             while (t <= interval_right + step/2) {
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
                 y_prev = y;
                 y = w * y_prev;
-                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
                 t += step;
             }
 
