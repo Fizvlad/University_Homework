@@ -1,15 +1,19 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
+#include <math.h>
 
 #include "INIReader.h"
 
 #include "Eigen/Dense"
+#include <Eigen/Eigenvalues>
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Matrix;
+typedef Eigen::Matrix<double, Eigen::Dynamic, 1> Vector;
+
+using Eigen::EigenSolver;
 
 using namespace std;
-
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
 
 // Utility functions
 string coefficient_name(long i, long j) {
@@ -51,7 +55,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    MatrixXd coefficients(n, n);
+    Matrix coefficients(n, n);
     for (long i = 0; i < n; i++) {
         for (long j = 0; j < n; j++) {
             coefficients(i, j) = reader.GetReal("PROBLEM", coefficient_name(i + 1, j + 1), 0.0);
@@ -60,7 +64,7 @@ int main(int argc, char **argv)
 
     double t_0 = reader.GetReal("PROBLEM", "t_0", 0.0);
 
-    VectorXd y_0(n);
+    Vector y_0(n);
     for (long i = 0; i < n; i++) {
         y_0(i, 0) = reader.GetReal("PROBLEM", cauchy_data_name(i + 1), 0.0);
     }
@@ -113,21 +117,62 @@ int main(int argc, char **argv)
              << "\t\tIn [" << interval_left << "; " << interval_right << "] with step " << step << endl;
 
         if (type == "Precise") {
-            // TODO
+
+            // Precise solution
+            // Getting eigen
+            EigenSolver<Matrix> es(coefficients); // Will find solution right away;
+            cout << "\t\tEigenvalues:" << endl << es.eigenvalues() << endl;
+            cout << "\t\tMatrix of eigenvectors:" << endl << es.eigenvectors() << endl;
+
+            // Getting constants by solving linear system at t=t_0
+            Matrix m(n, n);
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    complex<double> temp = es.eigenvectors()(j, i) * exp(es.eigenvalues()(j) * t_0);
+                    if (temp.imag() != 0) {
+                        cerr << "Attention: For some reason there is non-real value in constants. That must not be this way probably." << endl;
+                    }
+                    m(i, j) = temp.real();
+                }
+            }
+            Vector constants_vector = m.colPivHouseholderQr().solve(y_0);
+            cout << "\t\tConstants vector:" << endl << constants_vector << endl;
+
+            double t = interval_left;
+            while (t <= interval_right) {
+                Vector value(n);
+                for (int i = 0; i < n; i++) {
+                    value[i] = 0;
+                    for (int j = 0; j < n; j++) {
+                        double temp_1 = exp(es.eigenvalues()(j).real() * t);
+                        double temp_2 = es.eigenvectors()(j, i).real() * temp_1;
+                        double temp_3 = constants_vector(j);
+                        //cout << temp_1 << " " << temp_2 << " " << temp_3 << endl;
+                        value[i] += temp_3 * temp_2;
+                    }
+                }
+                cout << "\t\tY(" << t << "):" << endl << value << endl;
+                t += step;
+            }
+
             cout << "\t\tSolved." << endl;
         } else if (type == "Euler") {
+
             // TODO
+
+
             cout << "\t\tSolved." << endl;
         } else if (type == "Euler_reversed") {
             cerr << "This solution type is currently not supported. Skipping." << endl;
-            // TODO
             //cout << "\t\tSolved." << endl;
         } else if (type == "Adams_int_2") {
+
             // TODO
+
+
             cout << "\t\tSolved." << endl;
         } else if (type == "Adams_ext_2") {
             cerr << "This solution type is currently not supported. Skipping." << endl;
-            // TODO
             //cout << "\t\tSolved." << endl;
         } else {
             cerr << "\t\tWarning unknown solution type. Skipping." << endl;
