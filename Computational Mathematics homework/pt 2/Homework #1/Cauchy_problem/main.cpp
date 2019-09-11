@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     }
 
     // Loading configuration. Creating data.
-    long n = reader.GetInteger("Problem", "n", 0);
+    long n = reader.GetInteger("PROBLEM", "n", 0);
     if (n <= 0) {
         cerr << "n must be >=0" << endl;
         return 1;
@@ -49,17 +49,16 @@ int main(int argc, char **argv)
     for (long i = 0; i < n; i++) {
         coefficients[i] = new double[n];
         for (long j = 0; j < n; j++) {
-            coefficients[i][j] = reader.GetReal("Problem", coefficient_name(i + 1, j + 1), 0.0);
+            coefficients[i][j] = reader.GetReal("PROBLEM", coefficient_name(i + 1, j + 1), 0.0);
         }
     }
 
-    double t_0 = reader.GetReal("Problem", "t_0", 0.0);
+    double t_0 = reader.GetReal("PROBLEM", "t_0", 0.0);
 
     double *y_0 = new double[n];
     for (long i = 0; i < n; i++) {
-        y_0[i] = reader.GetReal("Problem", cauchy_data_name(i + 1), 0.0);
+        y_0[i] = reader.GetReal("PROBLEM", cauchy_data_name(i + 1), 0.0);
     }
-    // TODO: load Approximation parameters.
 
     cout << "Configuration loaded from " << configuration_path << ":" << endl
          << "Problem:" << endl
@@ -81,6 +80,54 @@ int main(int argc, char **argv)
         cout << "\t" << y_0[i] << endl;
     }
     cout << endl;
+
+    cout << "Working on solutions:" << endl;
+    string solutions = reader.Get("PROBLEM", "solutions", "");
+
+    long space_position_prev;
+    long space_position = -1;
+    do {
+        space_position_prev = space_position;
+        space_position = solutions.find(" ", space_position_prev + 1);
+
+        string solution_name;
+        if (space_position == string::npos) {
+            solution_name = solutions.substr(space_position_prev + 1, solutions.size() - space_position_prev);
+        } else {
+            solution_name = solutions.substr(space_position_prev + 1, space_position - space_position_prev - 1);
+        }
+
+        cout << "\tWorking on \"" << solution_name << "\":" << endl;
+
+        string type = reader.Get(solution_name, "type", "Precise");
+        double interval_left = reader.GetReal(solution_name, "interval_left", 0.0);
+        double interval_right = reader.GetReal(solution_name, "interval_right", 0.5);
+        double step = reader.GetReal(solution_name, "step", 0.1);
+
+        cout << "\t\tSolution type: " << type << endl
+             << "\t\tIn [" << interval_left << "; " << interval_right << "] with step " << step << endl;
+
+        if (type == "Precise") {
+            // TODO
+            cout << "\t\tSolved." << endl;
+        } else if (type == "Euler") {
+            // TODO
+            cout << "\t\tSolved." << endl;
+        } else if (type == "Euler_reversed") {
+            cerr << "This solution type is currently not supported. Skipping." << endl;
+            // TODO
+            //cout << "\t\tSolved." << endl;
+        } else if (type == "Adams_int_2") {
+            // TODO
+            cout << "\t\tSolved." << endl;
+        } else if (type == "Adams_ext_2") {
+            cerr << "This solution type is currently not supported. Skipping." << endl;
+            // TODO
+            //cout << "\t\tSolved." << endl;
+        } else {
+            cerr << "\t\tWarning unknown solution type. Skipping." << endl;
+        }
+    } while (space_position != string::npos);
 
     // Deleting data
     delete[] coefficients;
