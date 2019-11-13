@@ -223,6 +223,41 @@ int main(int argc, char **argv)
         } else if (type == "Adams_ext_2") {
             cerr << "This solution type is currently not supported. Skipping." << endl;
             //cout << "\t\tSolved." << endl;
+        } else if (type == "Runge_Kutta") {
+
+            // Runge-Kutta method (RK4)
+            // Grow matrix W=E + (A * h) + (A^2 * h^2 / 2) + (A^3 * h^3 / 6) + (A^4 * h^4 / 24)
+            Matrix component_1 = coefficients * step;
+            Matrix component_2 = component_1 * coefficients * step;
+            Matrix component_3 = component_2 * coefficients * step;
+            Matrix component_4 = component_3 *coefficients * step;
+            Matrix w = Matrix::Identity(n, n) + component_1 + component_2 / 2 + component_3 / 6 + component_4 / 24;
+            (file_name != "" ? fs : cout) << "\t\tGrow matrix:" << endl << w << endl;
+
+            // Checking if approximation stable.
+            EigenSolver<Matrix> es(w); // Will find solution right away;
+            (file_name != "" ? fs : cout) << "\t\tEigenvalues of grow matrix:" << endl << es.eigenvalues() << endl;
+            bool if_stable = true;
+            for (long i = 0; i < n; i++) {
+                if (abs(es.eigenvalues()(i)) >= 1) {
+                    if_stable = false;
+                    break;
+                }
+            }
+            (file_name != "" ? fs : cout) << "\t\tApproximation is " << (if_stable ? "" : "not ") << "stable" << endl;
+
+            // Solving at points
+            Vector y_prev(n);
+            Vector y = y_0;
+            double t = interval_left;
+            while (t <= interval_right + step/2) {
+                (file_name != "" ? fs : cout) << "\t\tY(" << t << "):" << endl << y << endl;
+                y_prev = y;
+                y = w * y_prev;
+                t += step;
+            }
+
+            cout << "\t\tSolved." << endl;
         } else {
             cerr << "\t\tWarning unknown solution type. Skipping." << endl;
         }
