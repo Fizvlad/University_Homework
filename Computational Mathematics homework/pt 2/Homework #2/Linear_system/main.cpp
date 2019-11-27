@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 
         cout << "\tWorking on \"" << solution_name << "\":" << endl;
 
-        string type = reader.Get(solution_name, "type", "Precise");
+        string type = reader.Get(solution_name, "type", "");
         string file_name = reader.Get(solution_name, "file", "");
 
         fstream fs;
