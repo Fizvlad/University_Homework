@@ -121,7 +121,7 @@ int main(int argc, char **argv)
                 for (long j = i; j < n; j++) {
                     double sum_l = 0;
                     double sum_u = 0;
-                    for (long k = 0; k < i - 1; k++) {
+                    for (long k = 0; k < i; k++) {
                         sum_l += l_matrix(j, k) * u_matrix(k, i);
                         sum_u += l_matrix(i, k) * u_matrix(k, j);
                     }
