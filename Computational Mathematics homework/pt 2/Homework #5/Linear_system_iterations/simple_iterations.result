@@ -1,0 +1,19 @@
+		H matrix:
+           0    -0.120031    0.0675946
+   -0.158064            0    -0.094594
+    0.112182    -0.119216 1.11022e-016
+		g vector:
+0.092421
+  0.6104
+ 1.04839
+		Eigenvalues of H matrix:
+  (0.222048,0)
+ (-0.140242,0)
+(-0.0818062,0)
+		Approximation will converge
+		Solved after 10 iterations.
+		Solution: 
+0.1
+0.5
+  1
+		Relative error: 5.10885e-008
